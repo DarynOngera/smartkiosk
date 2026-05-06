@@ -20,7 +20,7 @@ if config_env() == :prod do
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
-  config :smart_kiosk, SmartKiosk.Repo,
+  config :smart_kiosk_core, SmartKioskCore.Repo,
     # ssl: true,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
@@ -108,5 +108,5 @@ if config_env() == :prod do
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
 
-  config :smart_kiosk, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+  config :smart_kiosk_web, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 end

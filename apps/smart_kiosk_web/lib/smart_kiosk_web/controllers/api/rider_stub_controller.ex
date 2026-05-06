@@ -14,6 +14,8 @@ defmodule SmartKioskWeb.Api.RiderStubController do
   """
   use SmartKioskWeb, :controller
 
+  import Ecto.Query
+
   alias SmartKioskCore.Repo
   alias SmartKioskCore.Schemas.{Rider, Delivery}
   alias SmartKioskCore.Accounts
@@ -95,8 +97,6 @@ defmodule SmartKioskWeb.Api.RiderStubController do
   end
 
   # ── Private helpers ────────────────────────────────────────────────────────
-
-  import Ecto.Query
 
   defp get_rider_from_token(conn) do
     # Stub: uses the same session token as the web app.

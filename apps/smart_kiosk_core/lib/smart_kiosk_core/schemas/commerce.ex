@@ -140,7 +140,7 @@ defmodule SmartKioskCore.Schemas.AdCreative do
     field :active,    :boolean, default: true
 
     belongs_to :campaign, SmartKioskCore.Schemas.Campaign
-    has_many   :events,   SmartKioskCore.Schemas.AdEvent
+    has_many   :events,   SmartKioskCore.Schemas.AdEvent, foreign_key: :creative_id
 
     timestamps(type: :utc_datetime)
   end

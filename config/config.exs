@@ -10,8 +10,14 @@
 import Config
 
 # Configure Mix tasks and generators
-config :smart_kiosk,
-  ecto_repos: [SmartKiosk.Repo]
+config :smart_kiosk_core,
+  ecto_repos: [SmartKioskCore.Repo]
+
+# Oban background job processing
+config :smart_kiosk_core, Oban,
+  repo: SmartKioskCore.Repo,
+  plugins: [Oban.Plugins.Pruner],
+  queues: [default: 10, mailer: 5]
 
 # Configure the mailer
 #
@@ -20,11 +26,11 @@ config :smart_kiosk,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :smart_kiosk, SmartKiosk.Mailer, adapter: Swoosh.Adapters.Local
+config :smart_kiosk_web, SmartKioskWeb.Mailer, adapter: Swoosh.Adapters.Local
 
 config :smart_kiosk_web,
-  ecto_repos: [SmartKiosk.Repo],
-  generators: [context_app: :smart_kiosk]
+  ecto_repos: [SmartKioskCore.Repo],
+  generators: [context_app: :smart_kiosk_core]
 
 # Configures the endpoint
 config :smart_kiosk_web, SmartKioskWeb.Endpoint,

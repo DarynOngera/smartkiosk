@@ -32,7 +32,7 @@ defmodule SmartKioskWeb.ConnCase do
   end
 
   setup tags do
-    SmartKiosk.DataCase.setup_sandbox(tags)
+    SmartKioskCore.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

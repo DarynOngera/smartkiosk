@@ -5,7 +5,7 @@ import Config
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
-config :smart_kiosk, SmartKiosk.Repo,
+config :smart_kiosk_core, SmartKioskCore.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
@@ -20,11 +20,14 @@ config :smart_kiosk_web, SmartKioskWeb.Endpoint,
   secret_key_base: "jvMDS8GNUjBZJY4waFBdOm69JopyMSvV4fmzhSBd/uiYT4kojre/VJLmGT1kbwsy",
   server: false
 
+# Run Oban jobs inline during tests (no queue polling needed)
+config :smart_kiosk_core, Oban, testing: :inline
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 
 # In test we don't send emails
-config :smart_kiosk, SmartKiosk.Mailer, adapter: Swoosh.Adapters.Test
+config :smart_kiosk_web, SmartKioskWeb.Mailer, adapter: Swoosh.Adapters.Test
 
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false

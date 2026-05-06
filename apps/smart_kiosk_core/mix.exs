@@ -36,6 +36,12 @@ defmodule SmartKioskCore.MixProject do
       # Background jobs
       {:oban, "~> 2.17"},
 
+      # Auth
+      {:bcrypt_elixir, "~> 3.0"},
+
+      # PubSub
+      {:phoenix_pubsub, "~> 2.1"},
+
       # Utilities
       {:jason, "~> 1.4"},
       {:slugify, "~> 1.3"},

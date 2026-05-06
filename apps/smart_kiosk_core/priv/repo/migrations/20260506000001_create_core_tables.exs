@@ -5,8 +5,7 @@ defmodule SmartKioskCore.Repo.Migrations.CreateCoreTables do
     # ── Extensions ──────────────────────────────────────────────────────────────
     execute "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"", "SELECT 1"
     execute "CREATE EXTENSION IF NOT EXISTS \"citext\"",    "SELECT 1"
-    # PostGIS for Phase 3 (delivery zones). Enabling now is free.
-    execute "CREATE EXTENSION IF NOT EXISTS \"postgis\"",   "SELECT 1"
+    # PostGIS added in a later migration when Phase 3 delivery zones are implemented.
 
     # ── shops ───────────────────────────────────────────────────────────────────
     create table(:shops, primary_key: false) do
