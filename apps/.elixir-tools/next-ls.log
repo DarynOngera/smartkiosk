@@ -1,0 +1,540 @@
+
+10:49:31.034 [info] Loading 150 CA(s) from :otp store
+
+10:49:31.263 id=1 [debug] handled request client -> server initialize in 106ms
+
+10:49:31.271 [debug] sent notification server -> client window/logMessage
+
+10:49:31.272 [debug] handled notification client -> server textDocument/didOpen in 4ms
+
+10:49:31.276 [debug] NextLS v0.23.4 has initialized!
+
+10:49:31.276 [debug] sent notification server -> client window/logMessage
+
+10:49:31.276 [debug] Log file located at /home/ongera/projects/smart_kiosk_umbrella/apps/.elixir-tools/next-ls.log
+
+10:49:31.279 [debug] sent notification server -> client window/logMessage
+
+10:49:31.280 [info] [extension] Credo initializing with options %NextLS.InitOpts.Extensions.Credo{enable: true, cli_options: []}
+
+10:49:39.919 [debug] sent notification server -> client window/logMessage
+
+10:49:39.919 [debug] Booting runtimes...
+
+10:49:39.923 id=3 [debug] sent request server -> client window/workDoneProgress/create
+
+10:49:39.926 [debug] sent notification server -> client $/progress
+
+10:49:39.942 [debug] sent notification server -> client window/logMessage
+
+10:49:39.942 [info] Beginning DB migration...
+
+10:49:39.958 [debug] sent notification server -> client window/logMessage
+
+10:49:39.958 [info] Database is being upgraded from version 0 to 7.
+
+This will trigger a full recompilation in order to re-index your codebase.
+
+
+10:49:39.959 [debug] sent notification server -> client window/logMessage
+
+10:49:39.959 [info] Finished DB migration...
+
+10:49:39.959 [debug] sent notification server -> client window/logMessage
+
+10:49:39.959 [info] Booting runtime for smart_kiosk.
+
+- elixir: /home/ongera/.asdf/shims/elixir
+- zombie wrapper script: /home/ongera/.local/share/.burrito/next_ls_erts-15.2_0.23.4/lib/next_ls-0.23.4/priv/cmd
+- working_dir: /home/ongera/projects/smart_kiosk_umbrella/apps/smart_kiosk
+- command: /home/ongera/.asdf/shims/elixir --no-halt --sname nextls-runtime-1778053779959191136 --cookie HHYKTHK2JHVUZI3HDBMAF64GPJFPN4AV4Y7CQDE27SSFQKZPVAFQ==== -S mix loadpaths --no-compile
+
+Environment: 
+
+LSP=nextls
+NEXTLS_PARENT_PID=g1h3Im5leHQtbHMtMTc3ODA1Mzc3MTA0NjgwNDUyN0BwYXJyb3QAAADnAAAAAGn68ow=
+MIX_ENV=dev
+MIX_TARGET=host
+MIX_BUILD_ROOT=.elixir-tools/_build
+ROOTDIR=false
+BINDIR=false
+RELEASE_ROOT=false
+RELEASE_SYS_CONFIG=false
+PATH=/home/ongera/.asdf/shims:/home/ongera/.local/share/.burrito/next_ls_erts-15.2_0.23.4/bin:/home/ongera/.local/share/nvim/mason/bin:/home/ongera/.local/share/pnpm:/home/ongera/.asdf/shims:/home/ongera/Downloads/asdf-0.17.0/bin:/home/ongera/.local/bin:/snap/bin:/home/ongera/.local/bin:/snap/bin:/home/ongera/.local/bin:/snap/bin:/home/ongera/.local/bin:/snap/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/snap/bin
+
+
+10:49:39.959 [debug] handled notification client -> server initialized in 8693ms
+
+10:49:40.663 [debug] sent notification server -> client window/logMessage
+
+10:49:40.663 [debug] sent notification server -> client $/progress
+
+10:49:40.664 [debug] Unchecked dependencies for environment dev:
+* jason (Hex package)
+
+
+10:49:40.665 [debug] sent notification server -> client window/logMessage
+
+10:49:40.665 [error] Runtime for folder smart_kiosk failed to initialize
+
+10:49:40.665 [debug] sent notification server -> client window/logMessage
+
+10:49:40.665 [info] Booting runtime for smart_kiosk.
+
+- elixir: /home/ongera/.asdf/shims/elixir
+- zombie wrapper script: /home/ongera/.local/share/.burrito/next_ls_erts-15.2_0.23.4/lib/next_ls-0.23.4/priv/cmd
+- working_dir: /home/ongera/projects/smart_kiosk_umbrella/apps/smart_kiosk
+- command: /home/ongera/.asdf/shims/elixir --no-halt --sname nextls-runtime-1778053780665465955 --cookie HHYKTHK2JHVUZI3HDBMAF64GPJFPN4AV4Y7CQDE27SSFQKZPVAFQ==== -S mix loadpaths --no-compile
+
+Environment: 
+
+LSP=nextls
+NEXTLS_PARENT_PID=g1h3Im5leHQtbHMtMTc3ODA1Mzc3MTA0NjgwNDUyN0BwYXJyb3QAAADnAAAAAGn68ow=
+MIX_ENV=dev
+MIX_TARGET=host
+MIX_BUILD_ROOT=.elixir-tools/_build
+ROOTDIR=false
+BINDIR=false
+RELEASE_ROOT=false
+RELEASE_SYS_CONFIG=false
+PATH=/home/ongera/.asdf/shims:/home/ongera/.local/share/.burrito/next_ls_erts-15.2_0.23.4/bin:/home/ongera/.local/share/nvim/mason/bin:/home/ongera/.local/share/pnpm:/home/ongera/.asdf/shims:/home/ongera/Downloads/asdf-0.17.0/bin:/home/ongera/.local/bin:/snap/bin:/home/ongera/.local/bin:/snap/bin:/home/ongera/.local/bin:/snap/bin:/home/ongera/.local/bin:/snap/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/snap/bin
+
+
+10:49:40.666 [debug] sent notification server -> client window/logMessage
+
+10:49:40.666 [error] The runtime for smart_kiosk has crashed with reason: {:shutdown, :unchecked_dependencies}
+
+10:49:40.668 [debug] sent notification server -> client window/logMessage
+
+10:49:40.668 id=67 [debug] sent request server -> client window/showMessageRequest
+
+10:49:40.668 [info] The runtime for smart_kiosk has successfully shut down.
+
+10:49:45.068 [debug] sent notification server -> client window/logMessage
+
+10:49:45.068 [info] Running `mix deps.get` in directory /home/ongera/projects/smart_kiosk_umbrella/apps/smart_kiosk
+
+10:49:48.158 [debug] sent notification server -> client window/logMessage
+
+10:49:48.159 [info] Restarting runtime smart_kiosk for directory /home/ongera/projects/smart_kiosk_umbrella/apps/smart_kiosk
+
+10:49:48.159 [debug] sent notification server -> client window/logMessage
+
+10:49:48.159 [info] Resolving Hex dependencies...
+Resolution completed in 0.817s
+New:
+  db_connection 2.10.0
+  decimal 2.3.0
+  dns_cluster 0.2.0
+  ecto 3.13.6
+  ecto_sql 3.13.5
+  finch 0.21.0
+  hpax 1.0.3
+  idna 6.1.1
+  jason 1.4.5
+  mime 2.0.7
+  mint 1.7.1
+  nimble_options 1.1.1
+  nimble_pool 1.1.0
+  phoenix_pubsub 2.2.0
+  postgrex 0.22.1
+  req 0.5.17
+  swoosh 1.25.1
+  telemetry 1.4.1
+  unicode_util_compat 0.7.1
+* Getting dns_cluster (Hex package)
+* Getting phoenix_pubsub (Hex package)
+* Getting ecto_sql (Hex package)
+* Getting postgrex (Hex package)
+* Getting jason (Hex package)
+* Getting swoosh (Hex package)
+* Getting req (Hex package)
+* Getting finch (Hex package)
+* Getting mime (Hex package)
+* Getting mint (Hex package)
+* Getting nimble_options (Hex package)
+* Getting nimble_pool (Hex package)
+* Getting telemetry (Hex package)
+* Getting hpax (Hex package)
+* Getting idna (Hex package)
+* Getting unicode_util_compat (Hex package)
+* Getting db_connection (Hex package)
+* Getting decimal (Hex package)
+* Getting ecto (Hex package)
+
+
+10:49:48.160 [debug] sent notification server -> client window/logMessage
+
+10:49:48.160 [info] Beginning DB migration...
+
+10:49:48.160 [debug] sent notification server -> client window/logMessage
+
+10:49:48.160 [info] Database is on the latest version: 7
+
+10:49:48.160 [debug] sent notification server -> client window/logMessage
+
+10:49:48.160 [info] Finished DB migration...
+
+10:49:48.160 [debug] sent notification server -> client window/logMessage
+
+10:49:48.160 [info] Booting runtime for smart_kiosk.
+
+- elixir: /home/ongera/.asdf/shims/elixir
+- zombie wrapper script: /home/ongera/.local/share/.burrito/next_ls_erts-15.2_0.23.4/lib/next_ls-0.23.4/priv/cmd
+- working_dir: /home/ongera/projects/smart_kiosk_umbrella/apps/smart_kiosk
+- command: /home/ongera/.asdf/shims/elixir --no-halt --sname nextls-runtime-1778053788160492430 --cookie HHYKTHK2JHVUZI3HDBMAF64GPJFPN4AV4Y7CQDE27SSFQKZPVAFQ==== -S mix loadpaths --no-compile
+
+Environment: 
+
+LSP=nextls
+NEXTLS_PARENT_PID=g1h3Im5leHQtbHMtMTc3ODA1Mzc3MTA0NjgwNDUyN0BwYXJyb3QAAAD4AAAAAGn68ow=
+MIX_ENV=dev
+MIX_TARGET=host
+MIX_BUILD_ROOT=.elixir-tools/_build
+ROOTDIR=false
+BINDIR=false
+RELEASE_ROOT=false
+RELEASE_SYS_CONFIG=false
+PATH=/home/ongera/.asdf/shims:/home/ongera/.local/share/.burrito/next_ls_erts-15.2_0.23.4/bin:/home/ongera/.local/share/nvim/mason/bin:/home/ongera/.local/share/pnpm:/home/ongera/.asdf/shims:/home/ongera/Downloads/asdf-0.17.0/bin:/home/ongera/.local/bin:/snap/bin:/home/ongera/.local/bin:/snap/bin:/home/ongera/.local/bin:/snap/bin:/home/ongera/.local/bin:/snap/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/snap/bin
+
+
+10:49:49.180 [debug] sent notification server -> client window/logMessage
+
+10:49:49.180 [info] Connected to node nextls-runtime-1778053788160492430@parrot
+
+10:49:49.610 [debug] sent notification server -> client $/progress
+
+10:49:49.610 [debug] sent notification server -> client window/logMessage
+
+10:49:49.610 [debug] Runtime for folder smart_kiosk is ready...
+
+10:49:49.611 id=105 [debug] sent request server -> client window/workDoneProgress/create
+
+10:49:49.612 [debug] sent notification server -> client $/progress
+
+10:49:49.693 [debug] sent notification server -> client window/logMessage
+
+10:49:49.693 [info] ==> mime
+
+
+10:49:49.695 [debug] sent notification server -> client window/logMessage
+
+10:49:49.695 [info] Compiling 1 file (.ex)
+
+
+10:49:49.804 [debug] sent notification server -> client window/logMessage
+
+10:49:49.804 [info] Generated mime app
+
+
+10:49:49.835 [debug] sent notification server -> client window/logMessage
+
+10:49:49.835 [info] ==> nimble_options
+Compiling 3 files (.ex)
+
+
+10:49:50.135 [debug] sent notification server -> client window/logMessage
+
+10:49:50.135 [info] Generated nimble_options app
+
+
+10:49:50.149 [debug] sent notification server -> client window/logMessage
+
+10:49:50.149 [info] ==> hpax
+Compiling 4 files (.ex)
+
+
+10:49:50.534 [debug] sent notification server -> client window/logMessage
+
+10:49:50.535 [info] Generated hpax app
+
+
+10:49:50.571 [debug] sent notification server -> client window/logMessage
+
+10:49:50.571 [info] ==> mint
+Compiling 1 file (.erl)
+
+
+10:49:50.639 [debug] sent notification server -> client window/logMessage
+
+10:49:50.639 [info] Compiling 20 files (.ex)
+
+
+10:49:50.751 id=132 [debug] sent request server -> client window/workDoneProgress/create
+
+10:49:50.751 [debug] sent notification server -> client $/progress
+
+10:49:51.030 [debug] sent notification server -> client $/progress
+
+10:49:51.554 [debug] sent notification server -> client window/logMessage
+
+10:49:51.554 [info] Generated mint app
+
+
+10:49:51.577 [debug] sent notification server -> client window/logMessage
+
+10:49:51.577 [info] ==> decimal
+Compiling 4 files (.ex)
+
+
+10:49:52.077 [debug] sent notification server -> client window/logMessage
+
+10:49:52.077 [info] Generated decimal app
+
+
+10:49:52.098 [debug] sent notification server -> client window/logMessage
+
+10:49:52.098 [info] ==> jason
+
+
+10:49:52.098 [debug] sent notification server -> client window/logMessage
+
+10:49:52.098 [info] Compiling 10 files (.ex)
+
+
+10:49:52.155 id=1794 [debug] sent request server -> client window/workDoneProgress/create
+
+10:49:52.159 [debug] sent notification server -> client $/progress
+
+10:49:52.582 [debug] sent notification server -> client $/progress
+
+10:49:53.695 [debug] sent notification server -> client window/logMessage
+
+10:49:53.695 [info] Generated jason app
+
+
+10:49:54.141 [debug] sent notification server -> client window/logMessage
+
+10:49:54.141 [info] ==> smart_kiosk
+
+
+10:49:54.141 [debug] sent notification server -> client window/logMessage
+
+10:49:54.141 [info] ===> Analyzing applications...
+
+
+10:49:54.238 [debug] sent notification server -> client window/logMessage
+
+10:49:54.238 [info] ===> Compiling unicode_util_compat
+
+
+10:49:54.852 [debug] sent notification server -> client window/logMessage
+
+10:49:54.852 [info] ===> Analyzing applications...
+
+
+10:49:55.114 [debug] sent notification server -> client window/logMessage
+
+10:49:55.114 [info] ===> Compiling idna
+
+
+10:50:00.182 [debug] sent notification server -> client window/logMessage
+
+10:50:00.182 [info] ===> Analyzing applications...
+
+
+10:50:00.216 [debug] sent notification server -> client window/logMessage
+
+10:50:00.216 [info] ===> Compiling telemetry
+
+
+10:50:00.438 [debug] sent notification server -> client window/logMessage
+
+10:50:00.438 [info] ==> db_connection
+Compiling 18 files (.ex)
+
+
+10:50:00.516 id=164 [debug] sent request server -> client window/workDoneProgress/create
+
+10:50:00.516 [debug] sent notification server -> client $/progress
+
+10:50:00.999 [debug] sent notification server -> client $/progress
+
+10:50:01.158 [debug] sent notification server -> client window/logMessage
+
+10:50:01.159 [info] Generated db_connection app
+
+
+10:50:01.207 [debug] sent notification server -> client window/logMessage
+
+10:50:01.208 [info] ==> ecto
+Compiling 56 files (.ex)
+
+
+10:50:01.518 id=196 [debug] sent request server -> client window/workDoneProgress/create
+
+10:50:01.520 [debug] sent notification server -> client $/progress
+
+10:50:03.065 [debug] sent notification server -> client $/progress
+
+10:50:04.391 [debug] sent notification server -> client window/logMessage
+
+10:50:04.391 [info] Generated ecto app
+
+
+10:50:04.452 [debug] sent notification server -> client window/logMessage
+
+10:50:04.452 [info] ==> phoenix_pubsub
+Compiling 12 files (.ex)
+
+
+10:50:04.555 id=1826 [debug] sent request server -> client window/workDoneProgress/create
+
+10:50:04.555 [debug] sent notification server -> client $/progress
+
+10:50:04.773 [debug] sent notification server -> client $/progress
+
+10:50:05.005 [debug] sent notification server -> client window/logMessage
+
+10:50:05.005 [info] Generated phoenix_pubsub app
+
+
+10:50:05.021 [debug] sent notification server -> client window/logMessage
+
+10:50:05.021 [info] ==> dns_cluster
+
+
+10:50:05.021 [debug] sent notification server -> client window/logMessage
+
+10:50:05.021 [info] Compiling 1 file (.ex)
+
+
+10:50:05.104 [debug] sent notification server -> client window/logMessage
+
+10:50:05.104 [info] Generated dns_cluster app
+
+
+10:50:05.121 [debug] sent notification server -> client window/logMessage
+
+10:50:05.121 [info] ==> postgrex
+Compiling 70 files (.ex)
+
+
+10:50:05.239 id=228 [debug] sent request server -> client window/workDoneProgress/create
+
+10:50:05.239 [debug] sent notification server -> client $/progress
+
+10:50:06.215 [debug] sent notification server -> client $/progress
+
+10:50:09.936 [debug] sent notification server -> client window/logMessage
+
+10:50:09.936 [info] Generated postgrex app
+
+
+10:50:10.007 [debug] sent notification server -> client window/logMessage
+
+10:50:10.007 [info] ==> ecto_sql
+Compiling 25 files (.ex)
+
+
+10:50:10.162 id=1858 [debug] sent request server -> client window/workDoneProgress/create
+
+10:50:10.163 [debug] sent notification server -> client $/progress
+
+10:50:10.796 [debug] sent notification server -> client $/progress
+
+10:50:11.019 [debug] sent notification server -> client window/logMessage
+
+10:50:11.019 [info] Generated ecto_sql app
+
+
+10:50:11.055 [debug] sent notification server -> client window/logMessage
+
+10:50:11.055 [info] ==> nimble_pool
+
+
+10:50:11.055 [debug] sent notification server -> client window/logMessage
+
+10:50:11.055 [info] Compiling 2 files (.ex)
+
+
+10:50:11.085 id=1890 [debug] sent request server -> client window/workDoneProgress/create
+
+10:50:11.086 [debug] sent notification server -> client $/progress
+
+10:50:11.189 [debug] sent notification server -> client $/progress
+
+10:50:11.314 [debug] sent notification server -> client window/logMessage
+
+10:50:11.314 [info] Generated nimble_pool app
+
+
+10:50:11.334 [debug] sent notification server -> client window/logMessage
+
+10:50:11.334 [info] ==> finch
+Compiling 14 files (.ex)
+
+
+10:50:11.383 id=1922 [debug] sent request server -> client window/workDoneProgress/create
+
+10:50:11.385 [debug] sent notification server -> client $/progress
+
+10:50:11.723 [debug] sent notification server -> client $/progress
+
+10:50:11.912 [debug] sent notification server -> client window/logMessage
+
+10:50:11.912 [info] Generated finch app
+
+
+10:50:11.950 [debug] sent notification server -> client window/logMessage
+
+10:50:11.951 [info] ==> req
+
+
+10:50:11.951 [debug] sent notification server -> client window/logMessage
+
+10:50:11.951 [info] Compiling 19 files (.ex)
+
+
+10:50:12.008 id=1954 [debug] sent request server -> client window/workDoneProgress/create
+
+10:50:12.010 [debug] sent notification server -> client $/progress
+
+10:50:12.428 [debug] sent notification server -> client $/progress
+
+10:50:12.827 [debug] sent notification server -> client window/logMessage
+
+10:50:12.827 [info] Generated req app
+
+
+10:50:12.871 [debug] sent notification server -> client window/logMessage
+
+10:50:12.871 [info] ==> swoosh
+
+
+10:50:12.871 [debug] sent notification server -> client window/logMessage
+
+10:50:12.871 [info] Compiling 59 files (.ex)
+
+
+10:50:13.027 id=1986 [debug] sent request server -> client window/workDoneProgress/create
+
+10:50:13.028 [debug] sent notification server -> client $/progress
+
+10:50:13.627 [debug] sent notification server -> client window/logMessage
+
+10:50:13.627 [info] Generated swoosh app
+
+
+10:50:13.682 [debug] sent notification server -> client window/logMessage
+
+10:50:13.682 [info] ==> smart_kiosk
+
+
+10:50:13.682 [debug] sent notification server -> client window/logMessage
+
+10:50:13.682 [info] Compiling 4 files (.ex)
+
+
+10:50:13.832 [debug] sent notification server -> client window/logMessage
+
+10:50:13.832 [info] Generated smart_kiosk app
+
+
+10:50:13.836 [debug] sent notification server -> client $/progress
+
+10:50:13.836 [debug] sent notification server -> client window/logMessage
+
+10:50:13.836 [info] Compiled smart_kiosk!
+
+10:50:14.008 [debug] sent notification server -> client $/progress

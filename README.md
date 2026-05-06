@@ -1,0 +1,1 @@
+# SmartKiosk.Umbrella
