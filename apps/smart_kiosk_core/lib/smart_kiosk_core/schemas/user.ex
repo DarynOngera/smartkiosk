@@ -21,22 +21,25 @@ defmodule SmartKioskCore.Schemas.User do
   @roles ~w(platform_admin owner manager staff rider)a
 
   schema "users" do
-    field :email,            :string
-    field :hashed_password,  :string, redact: true
-    field :full_name,        :string
-    field :phone,            :string
-    field :role,             Ecto.Enum, values: @roles, default: :staff
-    field :confirmed_at,     :utc_datetime
-    field :avatar_url,       :string
+    field(:email, :string)
+    field(:hashed_password, :string, redact: true)
+    field(:full_name, :string)
+    field(:phone, :string)
+    field(:role, Ecto.Enum, values: @roles, default: :staff)
+    field(:confirmed_at, :utc_datetime)
+    field(:avatar_url, :string)
+
+    # Virtual field for accepting plain-text passwords in changesets
+    field(:password, :string, virtual: true)
 
     # Nullable for platform_admin
-    belongs_to :shop, SmartKioskCore.Schemas.Shop
+    belongs_to(:shop, SmartKioskCore.Schemas.Shop)
 
     # Optional rider profile
-    has_one :rider_profile, SmartKioskCore.Schemas.Rider
+    has_one(:rider_profile, SmartKioskCore.Schemas.Rider)
 
     # phx.gen.auth token table (generated separately)
-    has_many :tokens, SmartKioskCore.Schemas.UserToken
+    has_many(:tokens, SmartKioskCore.Schemas.UserToken)
 
     timestamps(type: :utc_datetime)
   end
@@ -92,7 +95,9 @@ defmodule SmartKioskCore.Schemas.User do
 
   defp maybe_validate_unique_email(changeset, opts) do
     if Keyword.get(opts, :validate_email, true) do
-      changeset |> unsafe_validate_unique(:email, SmartKioskCore.Repo) |> unique_constraint(:email)
+      changeset
+      |> unsafe_validate_unique(:email, SmartKioskCore.Repo)
+      |> unique_constraint(:email)
     else
       changeset
     end
@@ -127,8 +132,10 @@ defmodule SmartKioskCore.Schemas.User do
     cond do
       role == :platform_admin && shop_id != nil ->
         add_error(changeset, :shop_id, "platform admins must not belong to a shop")
+
       role != :platform_admin && shop_id == nil ->
         add_error(changeset, :shop_id, "non-admin users must belong to a shop")
+
       true ->
         changeset
     end
