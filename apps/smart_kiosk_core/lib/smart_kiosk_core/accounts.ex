@@ -47,15 +47,18 @@ defmodule SmartKioskCore.Accounts do
   transaction, then creates the initial subscription record.
   """
   def register_shop_owner(shop_attrs, user_attrs) do
-    Repo.transaction(fn ->
-      with {:ok, shop} <- create_shop(shop_attrs),
-           {:ok, user} <- create_user(Map.merge(user_attrs, %{shop_id: shop.id, role: "owner"})),
-           {:ok, _sub} <- create_initial_subscription(shop) do
-        {shop, user}
-      else
-        {:error, changeset} -> Repo.rollback(changeset)
-      end
-    end)
+    case Repo.transaction(fn ->
+           with {:ok, shop} <- create_shop(shop_attrs),
+                {:ok, user} <- create_user(Map.merge(user_attrs, %{shop_id: shop.id, role: "owner"})),
+                {:ok, _sub} <- create_initial_subscription(shop) do
+             {shop, user}
+           else
+             {:error, changeset} -> Repo.rollback(changeset)
+           end
+         end) do
+      {:ok, {shop, user}} -> {:ok, shop, user}
+      {:error, changeset} -> {:error, changeset}
+    end
   end
 
   @doc "Registers a staff/manager user under an existing shop."
@@ -211,4 +214,5 @@ defmodule SmartKioskCore.Accounts do
     from(u in User, where: u.shop_id == ^shop_id, order_by: [asc: u.role, asc: u.full_name])
     |> Repo.all()
   end
+
 end
