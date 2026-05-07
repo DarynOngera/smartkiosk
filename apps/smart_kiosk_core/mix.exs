@@ -42,6 +42,9 @@ defmodule SmartKioskCore.MixProject do
       # PubSub
       {:phoenix_pubsub, "~> 2.1"},
 
+      # Authorization
+      {:canada, "~> 2.0"},
+
       # Utilities
       {:jason, "~> 1.4"},
       {:slugify, "~> 1.3"},
