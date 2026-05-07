@@ -41,6 +41,10 @@ defmodule SmartKioskCore.Schemas.User do
     # phx.gen.auth token table (generated separately)
     has_many(:tokens, SmartKioskCore.Schemas.UserToken)
 
+    # Dynamic RBAC — roles assigned via associative table
+    has_many(:user_roles, SmartKioskCore.Schemas.UserRole)
+    has_many(:roles, through: [:user_roles, :role])
+
     timestamps(type: :utc_datetime)
   end
 
