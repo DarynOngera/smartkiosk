@@ -22,3 +22,17 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 smart_kiosk_core-*.tar
 
+./
+
+# Ignore local config and secret files so personal configs don't get pushed
+# Keep the repo-level config/*.exs tracked, but ignore local overrides and secrets
+# Examples: config/dev.secret.exs, config/runtime.exs.local, .env
+config/dev.secret.exs
+config/*.secret.exs
+config/runtime.exs.local
+.env
+dev.secret.exs
+
+# Ignore VS Code workspace settings
+.vscode/
+
