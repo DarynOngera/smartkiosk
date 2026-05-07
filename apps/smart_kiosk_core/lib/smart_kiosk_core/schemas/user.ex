@@ -47,7 +47,7 @@ defmodule SmartKioskCore.Schemas.User do
   @doc "Registration changeset — used on initial sign-up."
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :full_name, :phone, :role, :shop_id])
+    |> cast(attrs, [:email, :password, :full_name, :phone])
     |> validate_email(opts)
     |> validate_password(opts)
     |> validate_required([:full_name])
