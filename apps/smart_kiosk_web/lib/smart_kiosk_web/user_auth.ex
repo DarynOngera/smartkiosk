@@ -61,19 +61,21 @@ defmodule SmartKioskWeb.UserAuth do
     end
   end
 
-  @doc "Requires the user to have the :platform_admin role."
+  @doc "Requires the user to have the platform:manage_shops permission."
   def require_platform_admin(conn, _opts) do
-    case conn.assigns[:current_user] do
-      %{role: :platform_admin} ->
-        conn
+    user = conn.assigns[:current_user]
 
-      nil ->
+    cond do
+      is_nil(user) ->
         conn
         |> put_flash(:error, "You must sign in to access this page.")
         |> redirect(to: ~p"/login")
         |> halt()
 
-      _non_admin ->
+      Canada.Can.can?(user, :manage_shops, nil) ->
+        conn
+
+      true ->
         conn
         |> put_status(:forbidden)
         |> put_view(html: SmartKioskWeb.ErrorHTML)

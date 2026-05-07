@@ -1,5 +1,6 @@
 alias SmartKioskCore.Repo
 alias SmartKioskCore.Schemas.{Category, User, Shop, Subscription}
+alias SmartKioskCore.Schemas.{Role, Permission, RolePermission, UserRole}
 
 IO.puts("Seeding SmartKiosk...")
 
@@ -154,5 +155,165 @@ if Mix.env() == :dev do
     IO.puts("  Demo login: grace@example.com / DemoPassword123!")
   end
 end
+
+# ── System Roles ──────────────────────────────────────────────────────────────
+IO.puts("Seeding roles...")
+
+system_roles = [
+  %{name: "Platform Admin", slug: "platform_admin", scope: "platform",
+    description: "SmartKiosk operations team — full platform access", is_system: true},
+  %{name: "Owner",   slug: "owner",   scope: "shop",
+    description: "Shop owner with full control of their shop", is_system: true},
+  %{name: "Manager", slug: "manager", scope: "shop",
+    description: "Delegated shop management, all operational permissions", is_system: true},
+  %{name: "Staff",   slug: "staff",   scope: "shop",
+    description: "Cashier / stock clerk with limited access", is_system: true},
+  %{name: "Rider",   slug: "rider",   scope: "shop",
+    description: "Delivery rider — delivery task access only", is_system: true}
+]
+
+roles_by_slug =
+  Map.new(system_roles, fn attrs ->
+    role =
+      case Repo.get_by(Role, slug: attrs.slug) do
+        nil ->
+          {:ok, r} = %Role{} |> Role.changeset(attrs) |> Repo.insert()
+          IO.puts("  Created role: #{r.name}")
+          r
+        existing ->
+          IO.puts("  Role exists: #{existing.name}")
+          existing
+      end
+
+    {attrs.slug, role}
+  end)
+
+# ── Permissions ────────────────────────────────────────────────────────────────
+IO.puts("Seeding permissions...")
+
+all_permissions = [
+  # Platform
+  %{resource: "platform", action: "read",          description: "View platform-level data"},
+  %{resource: "platform", action: "manage_shops",  description: "Create, suspend, and delete shops"},
+  %{resource: "platform", action: "manage_users",  description: "Manage platform-level user accounts"},
+  # Shop
+  %{resource: "shop", action: "manage_settings", description: "Edit shop profile, plan, and config"},
+  %{resource: "shop", action: "manage_staff",    description: "Invite, edit, and remove shop staff"},
+  # Orders
+  %{resource: "orders", action: "read",   description: "View orders"},
+  %{resource: "orders", action: "write",  description: "Create and update orders"},
+  %{resource: "orders", action: "cancel", description: "Cancel orders"},
+  # Inventory
+  %{resource: "inventory", action: "read",  description: "View products and stock levels"},
+  %{resource: "inventory", action: "write", description: "Add, edit, and adjust stock"},
+  # Customers
+  %{resource: "customers", action: "read",  description: "View customer records"},
+  %{resource: "customers", action: "write", description: "Add and edit customer records"},
+  # POS
+  %{resource: "pos", action: "use", description: "Operate the point-of-sale terminal"},
+  # Analytics
+  %{resource: "analytics", action: "read", description: "View shop analytics and reports"},
+  # Campaigns
+  %{resource: "campaigns", action: "read",  description: "View advertising campaigns"},
+  %{resource: "campaigns", action: "write", description: "Create and edit campaigns"},
+  # Deliveries
+  %{resource: "deliveries", action: "read",   description: "View delivery tasks"},
+  %{resource: "deliveries", action: "manage", description: "Assign riders and update delivery status"},
+  # Transactions
+  %{resource: "transactions", action: "read", description: "View financial transactions"}
+]
+
+permissions_by_slug =
+  Map.new(all_permissions, fn attrs ->
+    perm =
+      case Repo.get_by(Permission, resource: attrs.resource, action: attrs.action) do
+        nil ->
+          {:ok, p} = %Permission{} |> Permission.changeset(attrs) |> Repo.insert()
+          p
+        existing ->
+          existing
+      end
+
+    {"#{attrs.resource}:#{attrs.action}", perm}
+  end)
+
+IO.puts("  #{map_size(permissions_by_slug)} permissions ready")
+
+# ── Role → Permission Matrix ───────────────────────────────────────────────────
+IO.puts("Assigning permissions to roles...")
+
+role_permissions_matrix = %{
+  "platform_admin" => ~w(
+    platform:read platform:manage_shops platform:manage_users
+  ),
+  "owner" => ~w(
+    shop:manage_settings shop:manage_staff
+    orders:read orders:write orders:cancel
+    inventory:read inventory:write
+    customers:read customers:write
+    pos:use analytics:read
+    campaigns:read campaigns:write
+    deliveries:read deliveries:manage
+    transactions:read
+  ),
+  "manager" => ~w(
+    shop:manage_staff
+    orders:read orders:write orders:cancel
+    inventory:read inventory:write
+    customers:read customers:write
+    pos:use analytics:read
+    campaigns:read campaigns:write
+    deliveries:read deliveries:manage
+    transactions:read
+  ),
+  "staff" => ~w(
+    orders:read orders:write
+    inventory:read
+    customers:read
+    pos:use
+    deliveries:read
+  ),
+  "rider" => ~w(
+    deliveries:read deliveries:manage
+  )
+}
+
+Enum.each(role_permissions_matrix, fn {role_slug, permission_slugs} ->
+  role = roles_by_slug[role_slug]
+
+  Enum.each(permission_slugs, fn perm_slug ->
+    permission = permissions_by_slug[perm_slug]
+
+    unless Repo.get_by(RolePermission, role_id: role.id, permission_id: permission.id) do
+      %RolePermission{}
+      |> RolePermission.changeset(%{role_id: role.id, permission_id: permission.id})
+      |> Repo.insert!()
+    end
+  end)
+
+  IO.puts("  #{role_slug}: #{length(permission_slugs)} permissions assigned")
+end)
+
+# ── Migrate existing user.role → user_roles ───────────────────────────────────
+IO.puts("Migrating existing users to user_roles...")
+
+Repo.all(User)
+|> Enum.each(fn user ->
+  role_slug = to_string(user.role)
+  role = roles_by_slug[role_slug]
+
+  unless role do
+    IO.puts("  WARNING: unknown role #{inspect(role_slug)} for user #{user.email} — skipping")
+    nil
+  else
+    attrs = %{user_id: user.id, role_id: role.id, shop_id: user.shop_id}
+
+    %UserRole{}
+    |> UserRole.changeset(attrs)
+    |> Repo.insert(on_conflict: :nothing)
+
+    IO.puts("  Migrated #{user.email} → #{role_slug}")
+  end
+end)
 
 IO.puts("Seeding complete.")

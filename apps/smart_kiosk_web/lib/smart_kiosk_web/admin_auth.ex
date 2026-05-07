@@ -22,19 +22,19 @@ defmodule SmartKioskWeb.AdminAuth do
 
   use SmartKioskWeb, :verified_routes
 
-  @doc "Halts with 403-equivalent redirect unless the user is a platform_admin."
+  @doc "Halts with 403-equivalent redirect unless the user has platform:manage_shops permission."
   def on_mount(:default, _params, _session, socket) do
-    case socket.assigns.current_user do
-      %{role: :platform_admin} ->
-        {:cont, socket}
+    user = socket.assigns.current_user
 
-      _ ->
-        socket =
-          socket
-          |> put_flash(:error, "You are not authorised to access this area.")
-          |> redirect(to: ~p"/")
+    if user && Canada.Can.can?(user, :manage_shops, nil) do
+      {:cont, socket}
+    else
+      socket =
+        socket
+        |> put_flash(:error, "You are not authorised to access this area.")
+        |> redirect(to: ~p"/")
 
-        {:halt, socket}
+      {:halt, socket}
     end
   end
 

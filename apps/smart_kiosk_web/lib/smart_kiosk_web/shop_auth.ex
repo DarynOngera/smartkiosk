@@ -17,12 +17,16 @@ defmodule SmartKioskWeb.ShopAuth do
   use SmartKioskWeb, :verified_routes
 
   alias SmartKioskCore.Accounts
+  alias SmartKioskCore.Authorization
 
   @doc """
-  Loads `current_shop` from the already-assigned `current_user`.
+  Loads `current_shop` and `permissions` from the already-assigned `current_user`.
 
   Halts with a redirect to `/` if the user has no associated shop
   (e.g. a platform_admin accidentally hitting a merchant route).
+
+  On success, assigns `:current_shop` and `:permissions` (a `MapSet` of
+  `"resource:action"` strings) to the socket for use in templates and LiveViews.
   """
   def on_mount(:default, _params, _session, socket) do
     user = socket.assigns.current_user
@@ -37,7 +41,12 @@ defmodule SmartKioskWeb.ShopAuth do
         {:halt, socket}
 
       shop ->
-        {:cont, assign(socket, :current_shop, shop)}
+        permissions = Authorization.list_permissions(user, shop)
+
+        {:cont,
+         socket
+         |> assign(:current_shop, shop)
+         |> assign(:permissions, permissions)}
     end
   end
 
