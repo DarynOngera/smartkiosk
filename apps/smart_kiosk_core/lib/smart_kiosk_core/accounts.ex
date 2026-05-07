@@ -14,6 +14,12 @@ defmodule SmartKioskCore.Accounts do
 
   # ── User queries ─────────────────────────────────────────────────────────────
 
+
+  @doc "Gets all users."
+  def list_users do
+    Repo.all(User) |> Repo.preload(:shop)
+  end
+
   @doc "Gets a user by email."
   def get_user_by_email(email) when is_binary(email) do
     Repo.get_by(User, email: email)
