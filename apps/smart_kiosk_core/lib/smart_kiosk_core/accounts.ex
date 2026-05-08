@@ -55,6 +55,30 @@ defmodule SmartKioskCore.Accounts do
   end
 
   @doc """
+  Returns a changeset for the shop owner registration form.
+  Includes both user and shop fields for validation.
+  """
+  def change_registration(attrs \\ %{}) do
+    types = %{
+      full_name: :string,
+      email: :string,
+      password: :string,
+      phone: :string,
+      shop_category: :string,
+      address: :string,
+      city: :string
+    }
+
+    {%{}, types}
+    |> Ecto.Changeset.cast(attrs, Map.keys(types))
+    |> Ecto.Changeset.validate_required([:full_name, :email, :password, :phone, :shop_category])
+    |> Ecto.Changeset.validate_length(:password, min: 12, max: 72)
+    |> Ecto.Changeset.validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
+    |> Ecto.Changeset.validate_format(:phone, ~r/^[+]?[\d\s\-\(\)]+$/, message: "must be a valid phone number")
+    |> Ecto.Changeset.validate_inclusion(:shop_category, Enum.map(Shop.categories(), &to_string/1))
+  end
+
+  @doc """
   Registers a new platform user (role: `:customer`, no shop).
   """
   def register_user(attrs) do
@@ -85,6 +109,47 @@ defmodule SmartKioskCore.Accounts do
 
     case Repo.transaction(multi) do
       {:ok, %{shop: shop, user: user}} -> {:ok, shop, user}
+      {:error, _step, changeset, _changes} -> {:error, changeset}
+    end
+  end
+
+  @doc """
+  Registers a new shop owner and creates their shop in a single transaction.
+
+  Accepts:
+    - shop_attrs: %{name: "...", phone: "...", category: "..."}
+    - user_attrs: %{full_name: "...", email: "...", password: "...", phone: "..."}
+
+  Returns {:ok, shop, user} or {:error, changeset}.
+  """
+  def register_shop_owner(shop_attrs, user_attrs) do
+    multi =
+      Ecto.Multi.new()
+      |> Ecto.Multi.insert(:user, fn _changes ->
+        %User{role: :owner}
+        |> User.registration_changeset(user_attrs)
+      end)
+      |> Ecto.Multi.insert(:shop, fn %{user: user} ->
+        %Shop{owner_id: user.id}
+        |> Shop.changeset(shop_attrs)
+      end)
+      |> Ecto.Multi.run(:updated_user, fn repo, %{user: user, shop: shop} ->
+        user
+        |> User.assign_to_shop_changeset(shop, :owner)
+        |> repo.update()
+      end)
+      |> Ecto.Multi.insert(:subscription, fn %{shop: shop} ->
+        %SmartKioskCore.Schemas.Subscription{}
+        |> SmartKioskCore.Schemas.Subscription.changeset(%{
+          shop_id: shop.id,
+          plan: :kiosk,
+          status: :trialing,
+          trial_ends_at: DateTime.add(DateTime.utc_now(), 30, :day) |> DateTime.truncate(:second)
+        })
+      end)
+
+    case Repo.transaction(multi) do
+      {:ok, %{shop: shop, updated_user: user}} -> {:ok, shop, user}
       {:error, _step, changeset, _changes} -> {:error, changeset}
     end
   end
@@ -124,6 +189,11 @@ defmodule SmartKioskCore.Accounts do
     Repo.all(Shop)
   end
 
+  #get shop by the id
+  def get_shop_by_name(name) when is_binary(name) do
+     Repo.get_by(Shop, name: name) 
+     end
+
   @doc "Gets the shop for a given user."
   def get_shop_for_user(%User{shop_id: nil}), do: nil
   def get_shop_for_user(%User{shop_id: shop_id}), do: Repo.get(Shop, shop_id)
@@ -131,16 +201,16 @@ defmodule SmartKioskCore.Accounts do
   @doc "Gets a shop by slug (used for public storefront URLs)."
   def get_shop_by_slug(slug), do: Repo.get_by(Shop, slug: slug, status: :active)
 
-  defp create_initial_subscription(shop) do
-    %SmartKioskCore.Schemas.Subscription{}
-    |> SmartKioskCore.Schemas.Subscription.changeset(%{
-      shop_id: shop.id,
-      plan: :kiosk,
-      status: :trialing,
-      trial_ends_at: DateTime.add(DateTime.utc_now(), 30, :day) |> DateTime.truncate(:second)
-    })
-    |> Repo.insert()
-  end
+  # defp create_initial_subscription(shop) do
+  #   %SmartKioskCore.Schemas.Subscription{}
+  #   |> SmartKioskCore.Schemas.Subscription.changeset(%{
+  #     shop_id: shop.id,
+  #     plan: :kiosk,
+  #     status: :trialing,
+  #     trial_ends_at: DateTime.add(DateTime.utc_now(), 30, :day) |> DateTime.truncate(:second)
+  #   })
+  #   |> Repo.insert()
+  # end
 
   # ── Session tokens ────────────────────────────────────────────────────────────
 

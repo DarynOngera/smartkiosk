@@ -104,7 +104,31 @@ defmodule SmartKioskWeb.UserRegistrationLive do
                 <.error :for={error <- @form[:phone].errors}>{error}</.error>
               </div>
 
-              <%!-- (Shops are created separately) --%>
+              <%!-- Shop Category --%>
+              <div class="form-control">
+                <label class="label" for="shop_category">
+                  <span class="label-text font-medium">Shop Category</span>
+                </label>
+                <label class={[
+                  "input input-bordered flex items-center gap-2",
+                  @form[:shop_category].errors != [] && "input-error",
+                  @form[:shop_category].errors == [] && @form[:shop_category].value && "input-success"
+                ]}>
+                  <.icon name="hero-tag" class="w-4 h-4 text-base-content/50" />
+                  <select
+                    id="shop_category"
+                    name={@form[:shop_category].name}
+                    required
+                    class="grow bg-transparent border-none focus:outline-none"
+                  >
+                    <option value="" disabled selected={is_nil(@form[:shop_category].value)}>Select a category</option>
+                    <%= for {cat, label} <- @category_options do %>
+                      <option value={cat} selected={@form[:shop_category].value == cat}>{label}</option>
+                    <% end %>
+                  </select>
+                </label>
+                <.error :for={error <- @form[:shop_category].errors}>{error}</.error>
+              </div>
 
               <%!-- Password --%>
               <div class="form-control">
@@ -160,29 +184,47 @@ defmodule SmartKioskWeb.UserRegistrationLive do
   end
 
   def mount(_params, _session, socket) do
-    changeset = Accounts.change_user_registration(%User{})
-    {:ok, assign(socket, form: to_form(changeset, as: :registration))}
+    changeset = Accounts.change_registration(%{})
+
+    category_options =
+      SmartKioskCore.Schemas.Shop.category_labels()
+      |> Enum.map(fn {k, v} -> {to_string(k), v} end)
+
+    {:ok, assign(socket, form: to_form(changeset, as: :registration), category_options: category_options)}
   end
 
   def handle_event("validate", params, socket) do
     registration_params = normalize_registration_params(params)
-    changeset = Accounts.change_user_registration(%User{}, registration_params)
+    changeset = Accounts.change_registration(registration_params)
     {:noreply, assign(socket, form: to_form(changeset, as: :registration, action: :validate))}
   end
 
   def handle_event("save", params, socket) do
     registration_params = normalize_registration_params(params)
 
+    shop_attrs = %{
+      "name" => registration_params["full_name"] <> "'s Shop",
+      "phone" => registration_params["phone"],
+      "category" => registration_params["shop_category"],
+      "address" => registration_params["address"] || "Nairobi",
+      "city" => registration_params["city"] || "Nairobi",
+      "country" => "KE"
+    }
+
     user_attrs = Map.take(registration_params, ["full_name", "email", "password", "phone"])
 
-    case Accounts.register_user(user_attrs) do
-      {:ok, _user} ->
+    case Accounts.register_shop_owner(shop_attrs, user_attrs) do
+      {:ok, _shop, _user} ->
         {:noreply,
          socket
          |> put_flash(:info, "Account created successfully! Please check your email to confirm.")
          |> redirect(to: ~p"/login")}
 
-      {:error, %Ecto.Changeset{} = changeset} ->
+      {:error, %Ecto.Changeset{} = error_changeset} ->
+        changeset =
+          registration_params
+          |> Accounts.change_registration()
+          |> merge_registration_errors(error_changeset)
         {:noreply, assign(socket, form: to_form(changeset, as: :registration, action: :insert))}
     end
   end
@@ -190,4 +232,19 @@ defmodule SmartKioskWeb.UserRegistrationLive do
   defp normalize_registration_params(params) when is_map(params) do
     params["registration"] || %{}
   end
+
+  defp merge_registration_errors(registration_changeset, %Ecto.Changeset{} = error_changeset) do
+    Enum.reduce(error_changeset.errors, registration_changeset, fn {field, {message, opts}}, changeset ->
+      mapped_field = map_error_field(field)
+      Ecto.Changeset.add_error(changeset, mapped_field, message, opts)
+    end)
+  end
+
+  defp map_error_field(:email), do: :email
+  defp map_error_field(:full_name), do: :full_name
+  defp map_error_field(:password), do: :password
+  defp map_error_field(:name), do: :full_name
+  defp map_error_field(:category), do: :shop_category
+  defp map_error_field(:phone), do: :phone
+  defp map_error_field(_), do: :base
 end
