@@ -45,6 +45,9 @@ defmodule SmartKioskCore.Schemas.User do
     # phx.gen.auth token table (generated separately)
     has_many(:tokens, SmartKioskCore.Schemas.UserToken)
 
+    # Customer profiles — one per shop the user has ordered from
+    has_many(:customer_profiles, SmartKioskCore.Schemas.Customer)
+
     # Dynamic RBAC — roles assigned via associative table
     has_many(:user_roles, SmartKioskCore.Schemas.UserRole)
     has_many(:roles, through: [:user_roles, :role])

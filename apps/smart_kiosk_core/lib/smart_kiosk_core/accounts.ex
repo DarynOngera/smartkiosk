@@ -248,4 +248,5 @@ defmodule SmartKioskCore.Accounts do
     from(u in User, where: u.shop_id == ^shop_id, order_by: [asc: u.role, asc: u.full_name])
     |> Repo.all()
   end
+
 end
