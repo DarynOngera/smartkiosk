@@ -48,11 +48,13 @@ defmodule SmartKioskCore.Schemas.Category do
     |> validate_attribute_templates()
   end
 
+  # Generate slug from name
   defp put_slug(%Ecto.Changeset{valid?: true, changes: %{name: name}} = cs) do
     put_change(cs, :slug, Slug.slugify(name))
   end
   defp put_slug(cs), do: cs
 
+  # Validate attribute templates structure
   defp validate_attribute_templates(changeset) do
     templates = get_change(changeset, :attribute_templates, [])
 

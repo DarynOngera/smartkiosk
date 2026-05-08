@@ -90,6 +90,10 @@ defmodule SmartKioskCore.Accounts do
     |> Repo.update()
   end
 
+  def list_shops do
+    Repo.all(Shop)
+  end
+
   @doc "Gets the shop for a given user."
   def get_shop_for_user(%User{shop_id: nil}), do: nil
   def get_shop_for_user(%User{shop_id: shop_id}), do: Repo.get(Shop, shop_id)
