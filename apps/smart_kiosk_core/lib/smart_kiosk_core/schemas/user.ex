@@ -4,6 +4,7 @@ defmodule SmartKioskCore.Schemas.User do
 
   Roles:
     :platform_admin  — SmartKiosk ops team. shop_id is nil.
+    :customer        — Regular platform user (buyer). shop_id is nil.
     :owner           — Shop owner. Full control of their shop.
     :manager         — Delegated shop management.
     :staff           — Cashier / stock clerk. Limited access.
@@ -18,22 +19,25 @@ defmodule SmartKioskCore.Schemas.User do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @roles ~w(platform_admin owner manager staff rider)a
+  @roles ~w(platform_admin customer owner manager staff rider)a
 
   schema "users" do
     field(:email, :string)
     field(:hashed_password, :string, redact: true)
     field(:full_name, :string)
     field(:phone, :string)
-    field(:role, Ecto.Enum, values: @roles, default: :staff)
-    field(:confirmed_at, :utc_datetime)
-    field(:avatar_url, :string)
+    field(:role, Ecto.Enum, values: @roles, default: :customer)
+  field(:confirmed_at, :utc_datetime)
+  field(:avatar_url, :string)
+
 
     # Virtual field for accepting plain-text passwords in changesets
     field(:password, :string, virtual: true)
 
-    # Nullable for platform_admin
+    # Nullable for platform_admin/customer/rider
     belongs_to(:shop, SmartKioskCore.Schemas.Shop)
+
+  has_many(:owned_shops, SmartKioskCore.Schemas.Shop, foreign_key: :owner_id)
 
     # Optional rider profile
     has_one(:rider_profile, SmartKioskCore.Schemas.Rider)
@@ -55,6 +59,19 @@ defmodule SmartKioskCore.Schemas.User do
     |> validate_email(opts)
     |> validate_password(opts)
     |> validate_required([:full_name])
+    |> validate_role_shop_consistency()
+  end
+
+  @doc """
+  Assigns a user to a shop and updates their role.
+
+  This is used when an existing platform user creates a shop and becomes the owner,
+  or when promoting/demoting users within a shop.
+  """
+  def assign_to_shop_changeset(%__MODULE__{} = user, %SmartKioskCore.Schemas.Shop{} = shop, role)
+      when role in [:owner, :manager, :staff] do
+    user
+    |> change(shop_id: shop.id, role: role)
     |> validate_role_shop_consistency()
   end
 
@@ -134,11 +151,11 @@ defmodule SmartKioskCore.Schemas.User do
     shop_id = get_field(changeset, :shop_id)
 
     cond do
-      role == :platform_admin && shop_id != nil ->
-        add_error(changeset, :shop_id, "platform admins must not belong to a shop")
+      role in [:platform_admin, :customer, :rider] && shop_id != nil ->
+        add_error(changeset, :shop_id, "this user role must not belong to a shop")
 
-      role != :platform_admin && shop_id == nil ->
-        add_error(changeset, :shop_id, "non-admin users must belong to a shop")
+      role in [:owner, :manager, :staff] && shop_id == nil ->
+        add_error(changeset, :shop_id, "this user role must belong to a shop")
 
       true ->
         changeset

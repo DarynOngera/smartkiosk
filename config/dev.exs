@@ -2,8 +2,8 @@ import Config
 
 # Configure your database
 config :smart_kiosk_core, SmartKioskCore.Repo,
-  username: "",
-  password: "",
+  username: "dtech",
+  password: "dtechpsql",
   hostname: "localhost",
   database: "smart_kiosk_dev",
   stacktrace: true,
