@@ -28,6 +28,7 @@ defmodule SmartKioskCore.Schemas.Shop do
     field :status,         Ecto.Enum, values: @statuses, default: :pending_review
     field :logo_url,       :string
     field :description,    :string
+    field :owner_id,       :binary_id
     field :settings,       :map, default: %{}
 
     has_many :users,         SmartKioskCore.Schemas.User

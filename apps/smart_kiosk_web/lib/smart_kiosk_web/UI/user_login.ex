@@ -1,54 +1,100 @@
 defmodule SmartKioskWeb.UserLoginLive do
+  @moduledoc """
+  Modern styled login page with daisyUI/Tailwind.
+  """
   use SmartKioskWeb, :live_view
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-md w-full space-y-8">
-        <div>
-          <img class="mx-auto h-12 w-auto" src={~p"/images/logo.svg"} alt="SmartKiosk Logo" />
-          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
+    <Layouts.app flash={@flash}>
+      <div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
+        <div class="card bg-base-100 shadow-xl w-full max-w-md">
+          <div class="card-body space-y-6">
+            <%!-- Logo & Header --%>
+            <div class="text-center space-y-2">
+              <div class="avatar placeholder mx-auto">
+                <div class="bg-primary text-primary-content w-16 rounded-xl">
+                  <span class="text-2xl font-bold">SK</span>
+                </div>
+              </div>
+              <h2 class="card-title justify-center text-2xl font-bold">Welcome back</h2>
+              <p class="text-base-content/70">Sign in to your SmartKiosk account</p>
+            </div>
+
+            <%!-- Login Form --%>
+            <form class="space-y-4" action={~p"/login"} method="POST" id="login-form">
+              <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
+
+              <%!-- Email Input --%>
+              <div class="form-control">
+                <label class="label" for="email">
+                  <span class="label-text font-medium">Email</span>
+                </label>
+                <label class="input input-bordered flex items-center gap-2 has-[:focus]:input-primary">
+                  <.icon name="hero-envelope" class="w-4 h-4 text-base-content/50" />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    autocomplete="email"
+                    required
+                    class="grow bg-transparent border-none focus:outline-none"
+                  />
+                </label>
+              </div>
+
+              <%!-- Password Input --%>
+              <div class="form-control">
+                <label class="label" for="password">
+                  <span class="label-text font-medium">Password</span>
+                </label>
+                <label class="input input-bordered flex items-center gap-2 has-[:focus]:input-primary">
+                  <.icon name="hero-lock-closed" class="w-4 h-4 text-base-content/50" />
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="••••••••"
+                    autocomplete="current-password"
+                    required
+                    class="grow bg-transparent border-none focus:outline-none"
+                  />
+                </label>
+              </div>
+
+              <%!-- Remember Me & Forgot Password --%>
+              <div class="flex items-center justify-between text-sm">
+                <label class="label cursor-pointer gap-2">
+                  <input type="checkbox" name="remember_me" class="checkbox checkbox-primary checkbox-sm" />
+                  <span class="label-text">Remember me</span>
+                </label>
+                <a href={~p"/reset-password"} class="link link-primary text-sm">
+                  Forgot password?
+                </a>
+              </div>
+
+              <%!-- Submit Button --%>
+              <button type="submit" class="btn btn-primary w-full">
+                <.icon name="hero-arrow-right-end-on-rectangle" class="w-5 h-5" />
+                Sign in
+              </button>
+            </form>
+
+            <%!-- Divider --%>
+            <div class="divider text-sm">or</div>
+
+            <%!-- Sign Up Link --%>
+            <div class="text-center text-sm">
+              <span class="text-base-content/70">Don't have an account?</span>
+              <a href={~p"/register"} class="link link-primary font-medium ml-1">
+                Create one now
+              </a>
+            </div>
+          </div>
         </div>
-
-        <form class="mt-8 space-y-6" action={~p"/login"} method="POST">
-          <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
-
-          <div class="-space-y-px rounded-md shadow-sm">
-            <div>
-              <label for="email-address" class="sr-only">Email address</label>
-              <input id="email-address" name="email" type="email" autocomplete="email" required
-                class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address" />
-            </div>
-
-            <div>
-              <label for="password" class="sr-only">Password</label>
-              <input id="password" name="password" type="password" autocomplete="current-password" required
-                class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password" />
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <input id="remember_me" name="remember_me" type="checkbox"
-                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
-              <label for="remember_me" class="ml-2 block text-sm text-gray-900"> Remember me </label>
-            </div>
-
-            <div class="text-sm">
-              <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500"> Forgot your password? </a>
-            </div>
-          </div>
-
-          <div>
-            <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              Sign in
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
+    </Layouts.app>
     """
   end
 end
