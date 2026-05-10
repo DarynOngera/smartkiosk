@@ -32,7 +32,7 @@ defmodule SmartKioskCore.Catalogue do
 
   def get_attribute_templates(%Category{} = cat) do
     parent = Repo.get(Category, cat.parent_id)
-    (parent && parent.attribute_templates || []) ++ cat.attribute_templates
+    ((parent && parent.attribute_templates) || []) ++ cat.attribute_templates
   end
 
   @doc "Creates a category. Platform admin only."
@@ -69,7 +69,7 @@ defmodule SmartKioskCore.Catalogue do
     |> filter_by_category(opts[:category_id])
     |> filter_by_search(opts[:search])
     |> filter_low_stock(opts[:low_stock])
-    |> order_by([p], [asc: p.name])
+    |> order_by([p], asc: p.name)
     |> limit(^Keyword.get(opts, :limit, 50))
     |> offset(^Keyword.get(opts, :offset, 0))
     |> preload([:category, :images])
@@ -174,6 +174,7 @@ defmodule SmartKioskCore.Catalogue do
       from(i in ProductImage, where: i.id == ^id)
       |> Repo.update_all(set: [position: pos])
     end)
+
     :ok
   end
 
@@ -187,6 +188,7 @@ defmodule SmartKioskCore.Catalogue do
 
   defp filter_by_search(query, nil), do: query
   defp filter_by_search(query, ""), do: query
+
   defp filter_by_search(query, search) do
     term = "%#{search}%"
     where(query, [p], ilike(p.name, ^term) or ilike(p.sku, ^term) or ilike(p.barcode, ^term))
@@ -195,6 +197,7 @@ defmodule SmartKioskCore.Catalogue do
   defp filter_low_stock(query, true) do
     where(query, [p], p.stock_qty <= p.low_stock_threshold)
   end
+
   defp filter_low_stock(query, _), do: query
 
   defp maybe_broadcast_low_stock({:ok, %Product{} = product}) do
@@ -206,5 +209,6 @@ defmodule SmartKioskCore.Catalogue do
       )
     end
   end
+
   defp maybe_broadcast_low_stock(_), do: :ok
 end

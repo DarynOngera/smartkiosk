@@ -1,7 +1,7 @@
-defmodule SmartKioskCore.Schemas.OrderItem do
+defmodule SmartKioskCore.Schemas.CartItem do
   @moduledoc """
-  A line item on an order. Prices are snapshotted from the product at the
-  time the order is placed — never joined back to the live product price.
+  An item in a user's shopping cart. Prices are snapshotted from the product
+  at the time the item is added to the cart.
   """
   use Ecto.Schema
   import Ecto.Changeset
@@ -9,7 +9,7 @@ defmodule SmartKioskCore.Schemas.OrderItem do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  schema "order_items" do
+  schema "cart_items" do
     field(:quantity, :integer)
     field(:unit_price, :decimal)
     field(:line_total, :decimal)
@@ -17,28 +17,34 @@ defmodule SmartKioskCore.Schemas.OrderItem do
     # product_name snapshot — survives product rename/deletion
     field(:product_name, :string)
 
-    belongs_to(:order, SmartKioskCore.Schemas.Order)
+    # session_id for guest users (when not logged in)
+    field(:session_id, :string)
+
+    belongs_to(:user, SmartKioskCore.Schemas.User)
+    belongs_to(:shop, SmartKioskCore.Schemas.Shop)
     belongs_to(:product, SmartKioskCore.Schemas.Product)
 
     timestamps(type: :utc_datetime)
   end
 
-  @required ~w(order_id product_id quantity unit_price product_name)a
+  @required ~w(shop_id product_id quantity unit_price product_name)a
+  @optional ~w(user_id session_id)a
 
   def changeset(item, attrs) do
     item
-    |> cast(attrs, @required)
+    |> cast(attrs, @required ++ @optional)
     |> validate_required(@required)
     |> validate_number(:quantity, greater_than: 0)
     |> validate_number(:unit_price, greater_than_or_equal_to: 0)
     |> compute_line_total()
-    |> foreign_key_constraint(:order_id)
+    |> foreign_key_constraint(:user_id)
+    |> foreign_key_constraint(:shop_id)
     |> foreign_key_constraint(:product_id)
   end
 
   defp compute_line_total(cs) do
-    qty = get_change(cs, :quantity)
-    price = get_change(cs, :unit_price)
+    qty = get_field(cs, :quantity)
+    price = get_field(cs, :unit_price)
 
     if qty && price do
       put_change(cs, :line_total, Decimal.mult(Decimal.new(qty), price))

@@ -14,7 +14,6 @@ defmodule SmartKioskCore.Accounts do
 
   # ── User queries ─────────────────────────────────────────────────────────────
 
-
   @doc "Gets all users."
   def list_users do
     Repo.all(User) |> Repo.preload(:shop)
@@ -73,9 +72,16 @@ defmodule SmartKioskCore.Accounts do
     |> Ecto.Changeset.cast(attrs, Map.keys(types))
     |> Ecto.Changeset.validate_required([:full_name, :email, :password, :phone, :shop_category])
     |> Ecto.Changeset.validate_length(:password, min: 12, max: 72)
-    |> Ecto.Changeset.validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
-    |> Ecto.Changeset.validate_format(:phone, ~r/^[+]?[\d\s\-\(\)]+$/, message: "must be a valid phone number")
-    |> Ecto.Changeset.validate_inclusion(:shop_category, Enum.map(Shop.categories(), &to_string/1))
+    |> Ecto.Changeset.validate_format(:email, ~r/^[^\s]+@[^\s]+$/,
+      message: "must have the @ sign and no spaces"
+    )
+    |> Ecto.Changeset.validate_format(:phone, ~r/^[+]?[\d\s\-\(\)]+$/,
+      message: "must be a valid phone number"
+    )
+    |> Ecto.Changeset.validate_inclusion(
+      :shop_category,
+      Enum.map(Shop.categories(), &to_string/1)
+    )
   end
 
   @doc """
@@ -101,7 +107,8 @@ defmodule SmartKioskCore.Accounts do
         %SmartKioskCore.Schemas.Subscription{}
         |> SmartKioskCore.Schemas.Subscription.changeset(%{
           shop_id: shop.id,
-          plan: :kiosk,
+          # Respect the shop's chosen plan; fall back to :kiosk if missing
+          plan: shop.plan || :kiosk,
           status: :trialing,
           trial_ends_at: DateTime.add(DateTime.utc_now(), 30, :day) |> DateTime.truncate(:second)
         })
@@ -142,7 +149,7 @@ defmodule SmartKioskCore.Accounts do
         %SmartKioskCore.Schemas.Subscription{}
         |> SmartKioskCore.Schemas.Subscription.changeset(%{
           shop_id: shop.id,
-          plan: :kiosk,
+          plan: shop.plan || :kiosk,
           status: :trialing,
           trial_ends_at: DateTime.add(DateTime.utc_now(), 30, :day) |> DateTime.truncate(:second)
         })
@@ -159,8 +166,6 @@ defmodule SmartKioskCore.Accounts do
     create_user(%User{shop_id: shop.id, role: :staff}, attrs)
   end
 
-  defp create_user(attrs) when is_map(attrs), do: create_user(%User{}, attrs)
-
   defp create_user(%User{} = user, attrs) do
     user
     |> User.registration_changeset(attrs)
@@ -168,14 +173,6 @@ defmodule SmartKioskCore.Accounts do
   end
 
   # ── Shop operations ───────────────────────────────────────────────────────────
-#=================question mark on this=======================
-  @doc "Creates a shop (no user side-effects)."
-  # def create_shop(attrs) when is_map(attrs) do
-  #   %Shop{}
-  #   |> Shop.changeset(attrs)
-  #   |> Repo.insert()
-  # end
-#=================================================================
 
   @doc "Updates shop profile details."
   def update_shop(%Shop{} = shop, attrs) do
@@ -184,15 +181,15 @@ defmodule SmartKioskCore.Accounts do
     |> Repo.update()
   end
 
-  #list shops
+  # list shops
   def list_shops do
     Repo.all(Shop)
   end
 
-  #get shop by the id
+  # get shop by the id
   def get_shop_by_name(name) when is_binary(name) do
-     Repo.get_by(Shop, name: name) 
-     end
+    Repo.get_by(Shop, name: name)
+  end
 
   @doc "Gets the shop for a given user."
   def get_shop_for_user(%User{shop_id: nil}), do: nil
@@ -229,7 +226,7 @@ defmodule SmartKioskCore.Accounts do
 
   @doc "Deletes a session token (log out)."
   def delete_user_session_token(token) do
-    Repo.delete_all(from t in UserToken, where: t.token == ^token and t.context == "session")
+    Repo.delete_all(from(t in UserToken, where: t.token == ^token and t.context == "session"))
     :ok
   end
 
@@ -243,6 +240,7 @@ defmodule SmartKioskCore.Accounts do
     else
       {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
       Repo.insert!(user_token)
+
       SmartKioskCore.UserNotifier.deliver_confirmation_instructions(
         user,
         confirmation_url_fun.(encoded_token)
@@ -264,8 +262,12 @@ defmodule SmartKioskCore.Accounts do
   defp confirm_user_multi(user) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.confirm_changeset(user))
-    |> Ecto.Multi.delete_all(:tokens, from(t in UserToken,
-         where: t.user_id == ^user.id and t.context == "confirm"))
+    |> Ecto.Multi.delete_all(
+      :tokens,
+      from(t in UserToken,
+        where: t.user_id == ^user.id and t.context == "confirm"
+      )
+    )
   end
 
   # ── Password reset ────────────────────────────────────────────────────────────
@@ -275,6 +277,7 @@ defmodule SmartKioskCore.Accounts do
       when is_function(reset_url_fun, 1) do
     {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
     Repo.insert!(user_token)
+
     SmartKioskCore.UserNotifier.deliver_reset_password_instructions(
       user,
       reset_url_fun.(encoded_token)
@@ -295,8 +298,12 @@ defmodule SmartKioskCore.Accounts do
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
-    |> Ecto.Multi.delete_all(:tokens, from(t in UserToken,
-         where: t.user_id == ^user.id and t.context != "session"))
+    |> Ecto.Multi.delete_all(
+      :tokens,
+      from(t in UserToken,
+        where: t.user_id == ^user.id and t.context != "session"
+      )
+    )
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
@@ -318,5 +325,4 @@ defmodule SmartKioskCore.Accounts do
     from(u in User, where: u.shop_id == ^shop_id, order_by: [asc: u.role, asc: u.full_name])
     |> Repo.all()
   end
-
 end

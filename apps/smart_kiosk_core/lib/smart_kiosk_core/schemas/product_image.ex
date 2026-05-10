@@ -6,11 +6,11 @@ defmodule SmartKioskCore.Schemas.ProductImage do
   @foreign_key_type :binary_id
 
   schema "product_images" do
-    field :url,        :string
-    field :alt_text,   :string
-    field :position,   :integer, default: 0
+    field(:url, :string)
+    field(:alt_text, :string)
+    field(:position, :integer, default: 0)
 
-    belongs_to :product, SmartKioskCore.Schemas.Product
+    belongs_to(:product, SmartKioskCore.Schemas.Product)
 
     timestamps(type: :utc_datetime)
   end
@@ -22,5 +22,3 @@ defmodule SmartKioskCore.Schemas.ProductImage do
     |> foreign_key_constraint(:product_id)
   end
 end
-
-

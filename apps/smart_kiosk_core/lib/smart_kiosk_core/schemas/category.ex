@@ -24,23 +24,32 @@ defmodule SmartKioskCore.Schemas.Category do
   @foreign_key_type :binary_id
 
   schema "categories" do
-    field :name,                :string
-    field :slug,                :string
-    field :icon,                :string   # Tabler icon name e.g. "ti-pill"
-    field :description,         :string
-    field :attribute_templates, {:array, :map}, default: []
-    field :position,            :integer, default: 0
+    field(:name, :string)
+    field(:slug, :string)
+    # Tabler icon name e.g. "ti-pill"
+    field(:icon, :string)
+    field(:description, :string)
+    field(:attribute_templates, {:array, :map}, default: [])
+    field(:position, :integer, default: 0)
 
-    belongs_to :parent, __MODULE__, foreign_key: :parent_id
-    has_many   :children, __MODULE__, foreign_key: :parent_id
-    has_many   :products, SmartKioskCore.Schemas.Product
+    belongs_to(:parent, __MODULE__, foreign_key: :parent_id)
+    has_many(:children, __MODULE__, foreign_key: :parent_id)
+    has_many(:products, SmartKioskCore.Schemas.Product)
 
     timestamps(type: :utc_datetime)
   end
 
   def changeset(category, attrs) do
     category
-    |> cast(attrs, [:name, :slug, :icon, :description, :attribute_templates, :position, :parent_id])
+    |> cast(attrs, [
+      :name,
+      :slug,
+      :icon,
+      :description,
+      :attribute_templates,
+      :position,
+      :parent_id
+    ])
     |> validate_required([:name])
     |> validate_length(:name, min: 2, max: 80)
     |> put_slug()
@@ -52,6 +61,7 @@ defmodule SmartKioskCore.Schemas.Category do
   defp put_slug(%Ecto.Changeset{valid?: true, changes: %{name: name}} = cs) do
     put_change(cs, :slug, Slug.slugify(name))
   end
+
   defp put_slug(cs), do: cs
 
   # Validate attribute templates structure
@@ -70,7 +80,11 @@ defmodule SmartKioskCore.Schemas.Category do
     if valid? do
       changeset
     else
-      add_error(changeset, :attribute_templates, "each template must have key, label, and a valid type")
+      add_error(
+        changeset,
+        :attribute_templates,
+        "each template must have key, label, and a valid type"
+      )
     end
   end
 end

@@ -40,7 +40,8 @@ defmodule SmartKioskWeb.Api.RiderStubController do
       Phoenix.PubSub.broadcast(
         SmartKiosk.PubSub,
         "rider:#{rider.id}:location",
-        {:location_update, %{lat: updated.current_lat, lng: updated.current_lng, status: updated.status}}
+        {:location_update,
+         %{lat: updated.current_lat, lng: updated.current_lng, status: updated.status}}
       )
 
       json(conn, %{ok: true, status: updated.status})
@@ -58,7 +59,8 @@ defmodule SmartKioskWeb.Api.RiderStubController do
     with {:ok, rider} <- get_rider_from_token(conn) do
       tasks =
         from(d in Delivery,
-          where: d.rider_id == ^rider.id and d.status in [:pending_pickup, :picked_up, :in_transit],
+          where:
+            d.rider_id == ^rider.id and d.status in [:pending_pickup, :picked_up, :in_transit],
           preload: [order: [:shop, items: :product]]
         )
         |> Repo.all()
@@ -108,7 +110,9 @@ defmodule SmartKioskWeb.Api.RiderStubController do
       |> String.replace_prefix("Bearer ", "")
 
     case Accounts.get_user_by_session_token(token) do
-      nil -> {:error, :unauthorized}
+      nil ->
+        {:error, :unauthorized}
+
       user ->
         case Repo.get_by(Rider, user_id: user.id) do
           nil -> {:error, :unauthorized}
@@ -127,13 +131,20 @@ defmodule SmartKioskWeb.Api.RiderStubController do
     %{
       id: d.id,
       status: d.status,
-      pickup: %{lat: d.pickup_lat, lng: d.pickup_lng,
-                address: d.order && d.order.shop && d.order.shop.address},
-      dropoff: %{lat: d.dropoff_lat, lng: d.dropoff_lng,
-                 address: d.order && d.order.delivery_address},
-      items: Enum.map(d.order && d.order.items || [], fn i ->
-        %{name: i.product_name, qty: i.quantity}
-      end)
+      pickup: %{
+        lat: d.pickup_lat,
+        lng: d.pickup_lng,
+        address: d.order && d.order.shop && d.order.shop.address
+      },
+      dropoff: %{
+        lat: d.dropoff_lat,
+        lng: d.dropoff_lng,
+        address: d.order && d.order.delivery_address
+      },
+      items:
+        Enum.map((d.order && d.order.items) || [], fn i ->
+          %{name: i.product_name, qty: i.quantity}
+        end)
     }
   end
 

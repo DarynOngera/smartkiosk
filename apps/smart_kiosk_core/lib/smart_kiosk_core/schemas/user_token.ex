@@ -22,11 +22,11 @@ defmodule SmartKioskCore.Schemas.UserToken do
   @change_email_validity_in_days 7
 
   schema "users_tokens" do
-    field :token,      :binary
-    field :context,    :string
-    field :sent_to,    :string
+    field(:token, :binary)
+    field(:context, :string)
+    field(:sent_to, :string)
 
-    belongs_to :user, User
+    belongs_to(:user, User)
 
     timestamps(type: :utc_datetime, updated_at: false)
   end
@@ -40,11 +40,12 @@ defmodule SmartKioskCore.Schemas.UserToken do
   @doc "Queries the token and user by session token, respecting expiry."
   def verify_session_token_query(token) do
     query =
-      from t in __MODULE__,
+      from(t in __MODULE__,
         join: u in assoc(t, :user),
         where: t.token == ^token and t.context == "session",
         where: t.inserted_at > ago(@session_validity_in_days, "day"),
         select: u
+      )
 
     {:ok, query}
   end
@@ -74,12 +75,13 @@ defmodule SmartKioskCore.Schemas.UserToken do
         hashed = :crypto.hash(@hash_algorithm, decoded)
 
         query =
-          from t in __MODULE__,
+          from(t in __MODULE__,
             join: u in assoc(t, :user),
             where: t.token == ^hashed,
             where: t.context == ^context,
             where: t.inserted_at > ago(@confirm_validity_in_days, "day"),
             select: u
+          )
 
         {:ok, query}
 
@@ -95,12 +97,13 @@ defmodule SmartKioskCore.Schemas.UserToken do
         hashed = :crypto.hash(@hash_algorithm, decoded)
 
         query =
-          from t in __MODULE__,
+          from(t in __MODULE__,
             join: u in assoc(t, :user),
             where: t.token == ^hashed,
             where: t.context == "reset_password",
             where: t.inserted_at > ago(@reset_password_validity_in_minutes, "minute"),
             select: u
+          )
 
         {:ok, query}
 
@@ -116,12 +119,13 @@ defmodule SmartKioskCore.Schemas.UserToken do
         hashed = :crypto.hash(@hash_algorithm, decoded)
 
         query =
-          from t in __MODULE__,
+          from(t in __MODULE__,
             join: u in assoc(t, :user),
             where: t.token == ^hashed,
             where: t.context == ^context,
             where: t.inserted_at > ago(@change_email_validity_in_days, "day"),
             select: {u, t.sent_to}
+          )
 
         {:ok, query}
 

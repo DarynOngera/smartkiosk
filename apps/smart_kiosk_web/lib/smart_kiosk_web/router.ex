@@ -30,11 +30,15 @@ defmodule SmartKioskWeb.Router do
   scope "/", SmartKioskWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live_session :public,
+      on_mount: [{SmartKioskWeb.UserAuth, :current_user}] do
+      live "/", HomeLive, :index
+      live "/cart", CartLive, :index
 
-    # Shop public storefront (accessed by consumers)
-    live "/shop/:slug",          StorefrontLive.Index, :index
-    live "/shop/:slug/product/:id", StorefrontLive.Show, :show
+      # Shop public storefront (accessed by consumers)
+      live "/shop/:slug", StorefrontLive.Index, :index
+      live "/shop/:slug/product/:id", StorefrontLive.Show, :show
+    end
   end
 
   # ── Auth routes (phx.gen.auth) ────────────────────────────────────────────────
@@ -44,44 +48,49 @@ defmodule SmartKioskWeb.Router do
     live_session :redirect_if_authenticated,
       on_mount: [{SmartKioskWeb.UserAuth, :redirect_if_user_is_authenticated}] do
       live "/register", UserRegistrationLive, :new
-      live "/login",    UserLoginLive, :new
-      live "/reset-password",         UserForgotPasswordLive, :new
-      live "/reset-password/:token",  UserResetPasswordLive, :edit
+      live "/login", UserLoginLive, :new
+      live "/reset-password", UserForgotPasswordLive, :new
+      live "/reset-password/:token", UserResetPasswordLive, :edit
     end
 
     post "/login", UserSessionController, :create
   end
 
+  # ── Dashboard (Unified) ──────────────────────────────────────────────────────
   scope "/", SmartKioskWeb do
     pipe_through [:browser, :require_auth]
 
     live_session :require_authenticated,
-      on_mount: [{SmartKioskWeb.UserAuth, :ensure_authenticated}] do
-      live "/users/settings",                UserSettingsLive, :edit
+      on_mount: [{SmartKioskWeb.UserAuth, :ensure_authenticated}, SmartKioskWeb.ShopAuth] do
+      live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm-email/:token", UserSettingsLive, :confirm_email
+      live "/dashboard", UI.DashboardLive, :index
+      live "/create-shop", UI.CreateShopLive, :new
     end
 
     delete "/logout", UserSessionController, :delete
   end
 
-  # ── Merchant dashboard ────────────────────────────────────────────────────────
-  scope "/dashboard", SmartKioskWeb.Dashboard do
+  # ── Merchant dashboard (Strict) ──────────────────────────────────────────────
+  scope "/", SmartKioskWeb.UI do
     pipe_through [:browser, :require_auth]
 
-    live_session :dashboard,
-      on_mount: [{SmartKioskWeb.UserAuth, :ensure_authenticated},
-                 SmartKioskWeb.ShopAuth] do
-      live "/",                  DashboardLive,         :index
-      live "/inventory",         InventoryLive.Index,   :index
-      live "/inventory/new",     InventoryLive.New,     :new
-      live "/inventory/:id/edit", InventoryLive.Edit,   :edit
-      live "/orders",            OrdersLive.Index,      :index
-      live "/orders/:id",        OrdersLive.Show,       :show
-      live "/pos",               PosLive.Index,         :index
-      live "/customers",         CustomersLive.Index,   :index
-      live "/analytics",         AnalyticsLive.Index,   :index
-      live "/campaigns",         CampaignsLive.Index,   :index
-      live "/settings",          SettingsLive.Index,    :index
+    live_session :dashboard_merchant,
+      on_mount: [
+        {SmartKioskWeb.UserAuth, :ensure_authenticated},
+        SmartKioskWeb.ShopAuth,
+        {SmartKioskWeb.ShopAuth, :require_shop}
+      ] do
+      live "/inventory", InventoryLive.Index, :index
+      live "/inventory/new", InventoryLive.New, :new
+      live "/inventory/:id/edit", InventoryLive.Edit, :edit
+      live "/orders", OrdersLive.Index, :index
+      live "/orders/:id", OrdersLive.Show, :show
+      live "/pos", POSLive.Index, :index
+      live "/customers", CustomersLive.Index, :index
+      live "/analytics", AnalyticsLive.Index, :index
+      live "/campaigns", CampaignsLive.Index, :index
+      live "/settings", SettingsLive.Index, :index
     end
   end
 
@@ -90,12 +99,11 @@ defmodule SmartKioskWeb.Router do
     pipe_through [:browser, :require_auth, :require_admin]
 
     live_session :admin,
-      on_mount: [{SmartKioskWeb.UserAuth, :ensure_authenticated},
-                 SmartKioskWeb.AdminAuth] do
-      live "/",        AdminDashboardLive, :index
-      live "/shops",   AdminShopsLive.Index,   :index
-      live "/shops/:id", AdminShopsLive.Show,  :show
-      live "/users",   AdminUsersLive.Index,   :index
+      on_mount: [{SmartKioskWeb.UserAuth, :ensure_authenticated}, SmartKioskWeb.AdminAuth] do
+      live "/", AdminDashboardLive, :index
+      live "/shops", AdminShopsLive.Index, :index
+      live "/shops/:id", AdminShopsLive.Show, :show
+      live "/users", AdminUsersLive.Index, :index
     end
   end
 
@@ -109,8 +117,8 @@ defmodule SmartKioskWeb.Router do
   # ── Rider stub (Phase 1 — real app deferred) ─────────────────────────────────
   scope "/api/rider", SmartKioskWeb.Api do
     pipe_through :api
-    post "/location",  RiderStubController, :update_location
-    get  "/tasks",     RiderStubController, :list_tasks
+    post "/location", RiderStubController, :update_location
+    get "/tasks", RiderStubController, :list_tasks
     post "/tasks/:id/status", RiderStubController, :update_task_status
   end
 
