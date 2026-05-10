@@ -6,15 +6,16 @@ defmodule SmartKioskCore.Schemas.Role do
   @foreign_key_type :binary_id
 
   schema "roles" do
-    field :name,        :string
-    field :slug,        :string
-    field :scope,       :string   # "platform" | "shop"
-    field :description, :string
-    field :is_system,   :boolean, default: false
+    field(:name, :string)
+    field(:slug, :string)
+    # "platform" | "shop"
+    field(:scope, :string)
+    field(:description, :string)
+    field(:is_system, :boolean, default: false)
 
-    has_many :role_permissions, SmartKioskCore.Schemas.RolePermission
-    has_many :permissions, through: [:role_permissions, :permission]
-    has_many :user_roles,  SmartKioskCore.Schemas.UserRole
+    has_many(:role_permissions, SmartKioskCore.Schemas.RolePermission)
+    has_many(:permissions, through: [:role_permissions, :permission])
+    has_many(:user_roles, SmartKioskCore.Schemas.UserRole)
 
     timestamps(type: :utc_datetime)
   end

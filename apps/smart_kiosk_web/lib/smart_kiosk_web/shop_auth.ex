@@ -20,25 +20,24 @@ defmodule SmartKioskWeb.ShopAuth do
   alias SmartKioskCore.Authorization
 
   @doc """
-  Loads `current_shop` and `permissions` from the already-assigned `current_user`.
+  LiveView mount hooks for shop-related authentication and context.
 
-  Halts with a redirect to `/` if the user has no associated shop
-  (e.g. a platform_admin accidentally hitting a merchant route).
+  ## Hooks
 
-  On success, assigns `:current_shop` and `:permissions` (a `MapSet` of
-  `"resource:action"` strings) to the socket for use in templates and LiveViews.
+    * `:default` (or no atom) - Loads `current_shop` and `permissions` for the user.
+    * `:require_shop` - Ensures the user has an associated shop; redirects otherwise.
   """
+  def on_mount(name, params, session, socket)
+
   def on_mount(:default, _params, _session, socket) do
     user = socket.assigns.current_user
 
     case Accounts.get_shop_for_user(user) do
       nil ->
-        socket =
-          socket
-          |> put_flash(:error, "No shop associated with your account.")
-          |> redirect(to: ~p"/")
-
-        {:halt, socket}
+        {:cont,
+         socket
+         |> assign(:current_shop, nil)
+         |> assign(:permissions, MapSet.new())}
 
       shop ->
         permissions = Authorization.list_permissions(user, shop)
@@ -47,6 +46,19 @@ defmodule SmartKioskWeb.ShopAuth do
          socket
          |> assign(:current_shop, shop)
          |> assign(:permissions, permissions)}
+    end
+  end
+
+  def on_mount(:require_shop, _params, _session, socket) do
+    if socket.assigns[:current_shop] do
+      {:cont, socket}
+    else
+      socket =
+        socket
+        |> put_flash(:error, "You must have a shop to access this page.")
+        |> redirect(to: ~p"/dashboard")
+
+      {:halt, socket}
     end
   end
 

@@ -76,16 +76,20 @@ defmodule SmartKioskCore.Orders do
       delivery_fee = delivery_attrs[:fee] || Decimal.new("0")
 
       # 2. Create order
-      order_attrs = %{
-        shop_id: shop.id,
-        customer_id: customer_id,
-        channel: channel,
-        notes: notes,
-        subtotal: subtotal,
-        delivery_fee: delivery_fee,
-        status: :pending
-      }
-      |> Map.merge(delivery_attrs |> Map.take([:delivery_address, :delivery_lat, :delivery_lng]))
+      order_attrs =
+        %{
+          shop_id: shop.id,
+          customer_id: customer_id,
+          channel: channel,
+          notes: notes,
+          subtotal: subtotal,
+          delivery_fee: delivery_fee,
+          status: :pending
+        }
+        |> Map.merge(
+          delivery_attrs
+          |> Map.take([:delivery_address, :delivery_lat, :delivery_lng])
+        )
 
       {:ok, order} =
         %Order{}
@@ -127,18 +131,19 @@ defmodule SmartKioskCore.Orders do
         %Shop{id: order.shop_id},
         {:order_updated, updated}
       )
+
       {:ok, updated}
     end
   end
 
   @valid_transitions %{
-    pending:    [:confirmed, :cancelled],
-    confirmed:  [:preparing, :cancelled],
-    preparing:  [:ready, :cancelled],
-    ready:      [:dispatched, :delivered],
+    pending: [:confirmed, :cancelled],
+    confirmed: [:preparing, :cancelled],
+    preparing: [:ready, :cancelled],
+    ready: [:dispatched, :delivered],
     dispatched: [:delivered],
-    delivered:  [],
-    cancelled:  []
+    delivered: [],
+    cancelled: []
   }
 
   defp validate_transition(current, next) do
@@ -157,6 +162,7 @@ defmodule SmartKioskCore.Orders do
         %Customer{}
         |> Customer.changeset(Map.put(attrs, :shop_id, shop.id))
         |> Repo.insert()
+
       customer ->
         {:ok, customer}
     end

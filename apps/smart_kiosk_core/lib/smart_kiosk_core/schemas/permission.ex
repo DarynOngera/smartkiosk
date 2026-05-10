@@ -6,11 +6,11 @@ defmodule SmartKioskCore.Schemas.Permission do
   @foreign_key_type :binary_id
 
   schema "permissions" do
-    field :resource,    :string
-    field :action,      :string
-    field :description, :string
+    field(:resource, :string)
+    field(:action, :string)
+    field(:description, :string)
 
-    has_many :role_permissions, SmartKioskCore.Schemas.RolePermission
+    has_many(:role_permissions, SmartKioskCore.Schemas.RolePermission)
 
     timestamps(type: :utc_datetime)
   end

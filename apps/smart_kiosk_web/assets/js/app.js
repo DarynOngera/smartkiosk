@@ -25,10 +25,48 @@ import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
+// Theme Toggle Hook
+const ThemeToggle = {
+  mounted() {
+    this.el.addEventListener("click", () => this.toggleTheme())
+    this.updateIcon()
+  },
+
+  toggleTheme() {
+    const html = document.documentElement
+    const currentTheme = html.getAttribute("data-theme") || "light"
+    const newTheme = currentTheme === "light" ? "dark" : "light"
+
+    html.setAttribute("data-theme", newTheme)
+    localStorage.setItem("theme", newTheme)
+    this.updateIcon()
+  },
+
+  updateIcon() {
+    const html = document.documentElement
+    const currentTheme = html.getAttribute("data-theme") || "light"
+    const sunIcon = this.el.querySelector(".sun-icon")
+    const moonIcon = this.el.querySelector(".moon-icon")
+
+    if (currentTheme === "dark") {
+      sunIcon.classList.remove("hidden")
+      moonIcon.classList.add("hidden")
+    } else {
+      sunIcon.classList.add("hidden")
+      moonIcon.classList.remove("hidden")
+    }
+  }
+}
+
+// Initialize theme on page load
+const savedTheme = localStorage.getItem("theme") || "light"
+document.documentElement.setAttribute("data-theme", savedTheme)
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {},
+  hooks: {ThemeToggle},
 })
 
 // Show progress bar on live navigation and form submits

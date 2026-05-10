@@ -38,7 +38,9 @@ defmodule SmartKioskWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, formats: [:html, :json], layouts: [html: {SmartKioskWeb.Layouts, :root}]
+      use Phoenix.Controller,
+        formats: [:html, :json],
+        layouts: [html: {SmartKioskWeb.Layouts, :root}]
 
       use Gettext, backend: SmartKioskWeb.Gettext
 

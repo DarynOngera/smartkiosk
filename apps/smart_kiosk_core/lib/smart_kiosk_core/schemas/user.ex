@@ -27,9 +27,8 @@ defmodule SmartKioskCore.Schemas.User do
     field(:full_name, :string)
     field(:phone, :string)
     field(:role, Ecto.Enum, values: @roles, default: :customer)
-  field(:confirmed_at, :utc_datetime)
-  field(:avatar_url, :string)
-
+    field(:confirmed_at, :utc_datetime)
+    field(:avatar_url, :string)
 
     # Virtual field for accepting plain-text passwords in changesets
     field(:password, :string, virtual: true)
@@ -37,7 +36,7 @@ defmodule SmartKioskCore.Schemas.User do
     # Nullable for platform_admin/customer/rider
     belongs_to(:shop, SmartKioskCore.Schemas.Shop)
 
-  has_many(:owned_shops, SmartKioskCore.Schemas.Shop, foreign_key: :owner_id)
+    has_many(:owned_shops, SmartKioskCore.Schemas.Shop, foreign_key: :owner_id)
 
     # Optional rider profile
     has_one(:rider_profile, SmartKioskCore.Schemas.Rider)

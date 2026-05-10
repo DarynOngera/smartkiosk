@@ -10,14 +10,14 @@ defmodule SmartKioskCore.Schemas.Customer do
   @foreign_key_type :binary_id
 
   schema "customers" do
-    field :name,  :string
-    field :phone, :string
-    field :email, :string
-    field :notes, :string
+    field(:name, :string)
+    field(:phone, :string)
+    field(:email, :string)
+    field(:notes, :string)
 
-    belongs_to :shop,   SmartKioskCore.Schemas.Shop
-    belongs_to :user,   SmartKioskCore.Schemas.User
-    has_many   :orders, SmartKioskCore.Schemas.Order
+    belongs_to(:shop, SmartKioskCore.Schemas.Shop)
+    belongs_to(:user, SmartKioskCore.Schemas.User)
+    has_many(:orders, SmartKioskCore.Schemas.Order)
 
     timestamps(type: :utc_datetime)
   end
@@ -36,5 +36,3 @@ defmodule SmartKioskCore.Schemas.Customer do
     |> foreign_key_constraint(:user_id)
   end
 end
-
-

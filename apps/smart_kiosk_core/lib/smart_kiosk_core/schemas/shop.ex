@@ -21,31 +21,31 @@ defmodule SmartKioskCore.Schemas.Shop do
   )a
 
   schema "shops" do
-    field :name,           :string
-    field :slug,           :string
-    field :phone,          :string
-    field :email,          :string
-    field :address,        :string
-    field :city,           :string
-    field :country,        :string, default: "KE"
-    field :lat,            :float
-    field :lng,            :float
-    field :plan,           Ecto.Enum, values: @plans, default: :kiosk
-    field :status,         Ecto.Enum, values: @statuses, default: :pending_review
-    field :category,       Ecto.Enum, values: @categories, default: :general_shop
-    field :logo_url,       :string
-    field :description,    :string
-    field :owner_id,       :binary_id
-    field :settings,       :map, default: %{}
+    field(:name, :string)
+    field(:slug, :string)
+    field(:phone, :string)
+    field(:email, :string)
+    field(:address, :string)
+    field(:city, :string)
+    field(:country, :string, default: "KE")
+    field(:lat, :float)
+    field(:lng, :float)
+    field(:plan, Ecto.Enum, values: @plans, default: :kiosk)
+    field(:status, Ecto.Enum, values: @statuses, default: :pending_review)
+    field(:category, Ecto.Enum, values: @categories, default: :general_shop)
+    field(:logo_url, :string)
+    field(:description, :string)
+    field(:owner_id, :binary_id)
+    field(:settings, :map, default: %{})
 
-    has_many :users,         SmartKioskCore.Schemas.User
-    has_many :products,      SmartKioskCore.Schemas.Product
-    has_many :orders,        SmartKioskCore.Schemas.Order
-    has_many :customers,     SmartKioskCore.Schemas.Customer
-    has_many :transactions,  SmartKioskCore.Schemas.Transaction
-    has_many :campaigns,     SmartKioskCore.Schemas.Campaign
-    has_many :invoices,      SmartKioskCore.Schemas.Invoice
-    has_one  :subscription,  SmartKioskCore.Schemas.Subscription
+    has_many(:users, SmartKioskCore.Schemas.User)
+    has_many(:products, SmartKioskCore.Schemas.Product)
+    has_many(:orders, SmartKioskCore.Schemas.Order)
+    has_many(:customers, SmartKioskCore.Schemas.Customer)
+    has_many(:transactions, SmartKioskCore.Schemas.Transaction)
+    has_many(:campaigns, SmartKioskCore.Schemas.Campaign)
+    has_many(:invoices, SmartKioskCore.Schemas.Invoice)
+    has_one(:subscription, SmartKioskCore.Schemas.Subscription)
 
     timestamps(type: :utc_datetime)
   end
@@ -99,5 +99,6 @@ defmodule SmartKioskCore.Schemas.Shop do
   defp put_slug(%Ecto.Changeset{valid?: true, changes: %{name: name}} = changeset) do
     put_change(changeset, :slug, Slug.slugify(name))
   end
+
   defp put_slug(changeset), do: changeset
 end
