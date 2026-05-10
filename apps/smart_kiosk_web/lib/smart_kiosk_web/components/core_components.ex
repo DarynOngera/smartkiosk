@@ -67,8 +67,8 @@ defmodule SmartKioskWeb.CoreComponents do
         <.icon :if={@kind == :info} name="hero-information-circle" class="size-5 shrink-0" />
         <.icon :if={@kind == :error} name="hero-exclamation-circle" class="size-5 shrink-0" />
         <div>
-          <p :if={@title} class="font-semibold">{@title}</p>
-          <p>{msg}</p>
+          <p :if={@title} class="font-semibold"><%= @title %></p>
+          <p class="break-words"><%= msg %></p>
         </div>
         <div class="flex-1" />
         <button type="button" class="group self-start cursor-pointer" aria-label={gettext("close")}>
@@ -104,13 +104,13 @@ defmodule SmartKioskWeb.CoreComponents do
     if rest[:href] || rest[:navigate] || rest[:patch] do
       ~H"""
       <.link class={@class} {@rest}>
-        {render_slot(@inner_block)}
+        <%= render_slot(@inner_block) %>
       </.link>
       """
     else
       ~H"""
       <button class={@class} {@rest}>
-        {render_slot(@inner_block)}
+        <%= render_slot(@inner_block) %>
       </button>
       """
     end
@@ -223,10 +223,10 @@ defmodule SmartKioskWeb.CoreComponents do
             checked={@checked}
             class={@class || "checkbox checkbox-sm"}
             {@rest}
-          />{@label}
+          /><%= @label %>
         </span>
       </label>
-      <.error :for={msg <- @errors}>{msg}</.error>
+      <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
   end
@@ -235,7 +235,7 @@ defmodule SmartKioskWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="label mb-1"><%= @label %></span>
         <select
           id={@id}
           name={@name}
@@ -243,11 +243,11 @@ defmodule SmartKioskWeb.CoreComponents do
           multiple={@multiple}
           {@rest}
         >
-          <option :if={@prompt} value="">{@prompt}</option>
-          {Phoenix.HTML.Form.options_for_select(@options, @value)}
-        </select>
-      </label>
-      <.error :for={msg <- @errors}>{msg}</.error>
+          <option :if={@prompt} value=""><%= @prompt %></option>
+          <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
+          </select>
+          </label>
+      <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
   end
@@ -256,7 +256,7 @@ defmodule SmartKioskWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="label mb-1"><%= @label %></span>
         <textarea
           id={@id}
           name={@name}
@@ -265,9 +265,9 @@ defmodule SmartKioskWeb.CoreComponents do
             @errors != [] && (@error_class || "textarea-error")
           ]}
           {@rest}
-        >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
+        ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
       </label>
-      <.error :for={msg <- @errors}>{msg}</.error>
+      <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
   end
@@ -277,7 +277,7 @@ defmodule SmartKioskWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="label mb-1 block"><%= @label %></span>
         <input
           type={@type}
           name={@name}
@@ -290,7 +290,7 @@ defmodule SmartKioskWeb.CoreComponents do
           {@rest}
         />
       </label>
-      <.error :for={msg <- @errors}>{msg}</.error>
+      <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
   end
@@ -300,7 +300,7 @@ defmodule SmartKioskWeb.CoreComponents do
     ~H"""
     <p class="mt-1.5 flex gap-2 items-center text-sm text-error">
       <.icon name="hero-exclamation-circle" class="size-5" />
-      {render_slot(@inner_block)}
+      <%= render_slot(@inner_block) %>
     </p>
     """
   end
@@ -317,13 +317,13 @@ defmodule SmartKioskWeb.CoreComponents do
     <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
       <div>
         <h1 class="text-lg font-semibold leading-8">
-          {render_slot(@inner_block)}
+          <%= render_slot(@inner_block) %>
         </h1>
         <p :if={@subtitle != []} class="text-sm text-base-content/70">
-          {render_slot(@subtitle)}
+          <%= render_slot(@subtitle) %>
         </p>
       </div>
-      <div class="flex-none">{render_slot(@actions)}</div>
+      <div class="flex-none"><%= render_slot(@actions) %></div>
     </header>
     """
   end
@@ -363,7 +363,7 @@ defmodule SmartKioskWeb.CoreComponents do
     <table class="table table-zebra">
       <thead>
         <tr>
-          <th :for={col <- @col}>{col[:label]}</th>
+          <th :for={col <- @col}><%= col[:label] %></th>
           <th :if={@action != []}>
             <span class="sr-only">{gettext("Actions")}</span>
           </th>
@@ -376,12 +376,12 @@ defmodule SmartKioskWeb.CoreComponents do
             phx-click={@row_click && @row_click.(row)}
             class={@row_click && "hover:cursor-pointer"}
           >
-            {render_slot(col, @row_item.(row))}
+            <%= render_slot(col, @row_item.(row)) %>
           </td>
           <td :if={@action != []} class="w-0 font-semibold">
             <div class="flex gap-4">
               <%= for action <- @action do %>
-                {render_slot(action, @row_item.(row))}
+                <%= render_slot(action, @row_item.(row)) %>
               <% end %>
             </div>
           </td>
@@ -410,8 +410,8 @@ defmodule SmartKioskWeb.CoreComponents do
     <ul class="list">
       <li :for={item <- @item} class="list-row">
         <div class="list-col-grow">
-          <div class="font-bold">{item.title}</div>
-          <div>{render_slot(item)}</div>
+          <div class="font-bold"><%= item.title %></div>
+          <div><%= render_slot(item) %></div>
         </div>
       </li>
     </ul>

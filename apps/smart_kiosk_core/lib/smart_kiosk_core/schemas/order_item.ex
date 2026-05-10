@@ -10,15 +10,15 @@ defmodule SmartKioskCore.Schemas.OrderItem do
   @foreign_key_type :binary_id
 
   schema "order_items" do
-    field :quantity,    :integer
-    field :unit_price,  :decimal
-    field :line_total,  :decimal
+    field(:quantity, :integer)
+    field(:unit_price, :decimal)
+    field(:line_total, :decimal)
 
     # product_name snapshot — survives product rename/deletion
-    field :product_name, :string
+    field(:product_name, :string)
 
-    belongs_to :order,   SmartKioskCore.Schemas.Order
-    belongs_to :product, SmartKioskCore.Schemas.Product
+    belongs_to(:order, SmartKioskCore.Schemas.Order)
+    belongs_to(:product, SmartKioskCore.Schemas.Product)
 
     timestamps(type: :utc_datetime)
   end
@@ -37,7 +37,7 @@ defmodule SmartKioskCore.Schemas.OrderItem do
   end
 
   defp compute_line_total(cs) do
-    qty   = get_change(cs, :quantity)
+    qty = get_change(cs, :quantity)
     price = get_change(cs, :unit_price)
 
     if qty && price do
@@ -47,4 +47,3 @@ defmodule SmartKioskCore.Schemas.OrderItem do
     end
   end
 end
-

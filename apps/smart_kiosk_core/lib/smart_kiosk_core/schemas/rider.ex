@@ -14,14 +14,15 @@ defmodule SmartKioskCore.Schemas.Rider do
   @statuses ~w(offline available on_delivery)a
 
   schema "riders" do
-    field :status,      Ecto.Enum, values: @statuses, default: :offline
-    field :current_lat, :float
-    field :current_lng, :float
-    field :vehicle,     :string   # motorbike | bicycle | foot
-    field :rating,      :decimal, default: Decimal.new("5.0")
+    field(:status, Ecto.Enum, values: @statuses, default: :offline)
+    field(:current_lat, :float)
+    field(:current_lng, :float)
+    # motorbike | bicycle | foot
+    field(:vehicle, :string)
+    field(:rating, :decimal, default: Decimal.new("5.0"))
 
-    belongs_to :user,      SmartKioskCore.Schemas.User
-    has_many   :deliveries, SmartKioskCore.Schemas.Delivery
+    belongs_to(:user, SmartKioskCore.Schemas.User)
+    has_many(:deliveries, SmartKioskCore.Schemas.Delivery)
 
     timestamps(type: :utc_datetime)
   end

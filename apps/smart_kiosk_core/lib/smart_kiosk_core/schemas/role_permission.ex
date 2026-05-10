@@ -6,8 +6,8 @@ defmodule SmartKioskCore.Schemas.RolePermission do
   @foreign_key_type :binary_id
 
   schema "role_permissions" do
-    belongs_to :role,       SmartKioskCore.Schemas.Role
-    belongs_to :permission, SmartKioskCore.Schemas.Permission
+    belongs_to(:role, SmartKioskCore.Schemas.Role)
+    belongs_to(:permission, SmartKioskCore.Schemas.Permission)
 
     timestamps(type: :utc_datetime)
   end

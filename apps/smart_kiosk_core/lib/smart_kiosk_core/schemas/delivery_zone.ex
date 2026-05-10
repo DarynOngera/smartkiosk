@@ -11,12 +11,13 @@ defmodule SmartKioskCore.Schemas.DeliveryZone do
   @foreign_key_type :binary_id
 
   schema "delivery_zones" do
-    field :name,      :string
-    field :boundary,  :map    # GeoJSON Polygon
-    field :base_fee,  :decimal
-    field :active,    :boolean, default: true
+    field(:name, :string)
+    # GeoJSON Polygon
+    field(:boundary, :map)
+    field(:base_fee, :decimal)
+    field(:active, :boolean, default: true)
 
-    has_many :deliveries, SmartKioskCore.Schemas.Delivery
+    has_many(:deliveries, SmartKioskCore.Schemas.Delivery)
 
     timestamps(type: :utc_datetime)
   end

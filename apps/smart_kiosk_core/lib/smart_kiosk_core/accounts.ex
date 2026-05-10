@@ -14,7 +14,6 @@ defmodule SmartKioskCore.Accounts do
 
   # ── User queries ─────────────────────────────────────────────────────────────
 
-
   @doc "Gets all users."
   def list_users do
     Repo.all(User) |> Repo.preload(:shop)
@@ -43,45 +42,137 @@ defmodule SmartKioskCore.Accounts do
   # ── User registration ─────────────────────────────────────────────────────────
 
   @doc """
-  Registers a new shop owner. Creates the shop and the owner user in a
-  transaction, then creates the initial subscription record.
+  Returns a changeset for the platform user registration form.
+
+  This is used for LiveView validations and therefore does not hash passwords
+  or hit the database to validate unique email on every keystroke.
   """
-  def register_shop_owner(shop_attrs, user_attrs) do
-    case Repo.transaction(fn ->
-           with {:ok, shop} <- create_shop(shop_attrs),
-                {:ok, user} <- create_user(Map.merge(user_attrs, %{shop_id: shop.id, role: "owner"})),
-                {:ok, _sub} <- create_initial_subscription(shop) do
-             {shop, user}
-           else
-             {:error, changeset} -> Repo.rollback(changeset)
-           end
-         end) do
-      {:ok, {shop, user}} -> {:ok, shop, user}
-      {:error, changeset} -> {:error, changeset}
-    end
+  def change_user_registration(%User{} = user, attrs \\ %{}) do
+    user
+    |> User.registration_changeset(attrs, hash_password: false, validate_email: false)
+    |> Ecto.Changeset.unique_constraint(:email)
   end
 
-  @doc "Registers a staff/manager user under an existing shop."
-  def register_shop_user(shop, attrs) do
-    attrs
-    |> Map.put(:shop_id, shop.id)
-    |> then(&User.registration_changeset(%User{}, &1))
+  @doc """
+  Returns a changeset for the shop owner registration form.
+  Includes both user and shop fields for validation.
+  """
+  def change_registration(attrs \\ %{}) do
+    types = %{
+      full_name: :string,
+      email: :string,
+      password: :string,
+      phone: :string,
+      shop_category: :string,
+      address: :string,
+      city: :string
+    }
+
+    {%{}, types}
+    |> Ecto.Changeset.cast(attrs, Map.keys(types))
+    |> Ecto.Changeset.validate_required([:full_name, :email, :password, :phone, :shop_category])
+    |> Ecto.Changeset.validate_length(:password, min: 12, max: 72)
+    |> Ecto.Changeset.validate_format(:email, ~r/^[^\s]+@[^\s]+$/,
+      message: "must have the @ sign and no spaces"
+    )
+    |> Ecto.Changeset.validate_format(:phone, ~r/^[+]?[\d\s\-\(\)]+$/,
+      message: "must be a valid phone number"
+    )
+    |> Ecto.Changeset.validate_inclusion(
+      :shop_category,
+      Enum.map(Shop.categories(), &to_string/1)
+    )
+  end
+
+  @doc """
+  Registers a new platform user (role: `:customer`, no shop).
+  """
+  def register_user(attrs) do
+    %User{role: :customer}
+    |> User.registration_changeset(attrs)
     |> Repo.insert()
   end
 
-  defp create_user(attrs) do
-    %User{}
+  @doc "Creates a shop and assigns the given user as owner in a single transaction."
+  def create_shop_for_user(%User{} = user, shop_attrs) do
+    multi =
+      Ecto.Multi.new()
+      |> Ecto.Multi.insert(:shop, Shop.changeset(%Shop{owner_id: user.id}, shop_attrs))
+      |> Ecto.Multi.run(:user, fn repo, %{shop: shop} ->
+        user
+        |> User.assign_to_shop_changeset(shop, :owner)
+        |> repo.update()
+      end)
+      |> Ecto.Multi.insert(:subscription, fn %{shop: shop} ->
+        %SmartKioskCore.Schemas.Subscription{}
+        |> SmartKioskCore.Schemas.Subscription.changeset(%{
+          shop_id: shop.id,
+          # Respect the shop's chosen plan; fall back to :kiosk if missing
+          plan: shop.plan || :kiosk,
+          status: :trialing,
+          trial_ends_at: DateTime.add(DateTime.utc_now(), 30, :day) |> DateTime.truncate(:second)
+        })
+      end)
+
+    case Repo.transaction(multi) do
+      {:ok, %{shop: shop, user: user}} -> {:ok, shop, user}
+      {:error, _step, changeset, _changes} -> {:error, changeset}
+    end
+  end
+
+  @doc """
+  Registers a new shop owner and creates their shop in a single transaction.
+
+  Accepts:
+    - shop_attrs: %{name: "...", phone: "...", category: "..."}
+    - user_attrs: %{full_name: "...", email: "...", password: "...", phone: "..."}
+
+  Returns {:ok, shop, user} or {:error, changeset}.
+  """
+  def register_shop_owner(shop_attrs, user_attrs) do
+    multi =
+      Ecto.Multi.new()
+      |> Ecto.Multi.insert(:user, fn _changes ->
+        %User{role: :owner}
+        |> User.registration_changeset(user_attrs)
+      end)
+      |> Ecto.Multi.insert(:shop, fn %{user: user} ->
+        %Shop{owner_id: user.id}
+        |> Shop.changeset(shop_attrs)
+      end)
+      |> Ecto.Multi.run(:updated_user, fn repo, %{user: user, shop: shop} ->
+        user
+        |> User.assign_to_shop_changeset(shop, :owner)
+        |> repo.update()
+      end)
+      |> Ecto.Multi.insert(:subscription, fn %{shop: shop} ->
+        %SmartKioskCore.Schemas.Subscription{}
+        |> SmartKioskCore.Schemas.Subscription.changeset(%{
+          shop_id: shop.id,
+          plan: shop.plan || :kiosk,
+          status: :trialing,
+          trial_ends_at: DateTime.add(DateTime.utc_now(), 30, :day) |> DateTime.truncate(:second)
+        })
+      end)
+
+    case Repo.transaction(multi) do
+      {:ok, %{shop: shop, updated_user: user}} -> {:ok, shop, user}
+      {:error, _step, changeset, _changes} -> {:error, changeset}
+    end
+  end
+
+  @doc "Registers a staff user under an existing shop."
+  def register_shop_user(shop, attrs) do
+    create_user(%User{shop_id: shop.id, role: :staff}, attrs)
+  end
+
+  defp create_user(%User{} = user, attrs) do
+    user
     |> User.registration_changeset(attrs)
     |> Repo.insert()
   end
 
   # ── Shop operations ───────────────────────────────────────────────────────────
-
-  defp create_shop(attrs) do
-    %Shop{}
-    |> Shop.changeset(attrs)
-    |> Repo.insert()
-  end
 
   @doc "Updates shop profile details."
   def update_shop(%Shop{} = shop, attrs) do
@@ -90,8 +181,14 @@ defmodule SmartKioskCore.Accounts do
     |> Repo.update()
   end
 
+  # list shops
   def list_shops do
     Repo.all(Shop)
+  end
+
+  # get shop by the id
+  def get_shop_by_name(name) when is_binary(name) do
+    Repo.get_by(Shop, name: name)
   end
 
   @doc "Gets the shop for a given user."
@@ -101,16 +198,16 @@ defmodule SmartKioskCore.Accounts do
   @doc "Gets a shop by slug (used for public storefront URLs)."
   def get_shop_by_slug(slug), do: Repo.get_by(Shop, slug: slug, status: :active)
 
-  defp create_initial_subscription(shop) do
-    %SmartKioskCore.Schemas.Subscription{}
-    |> SmartKioskCore.Schemas.Subscription.changeset(%{
-      shop_id: shop.id,
-      plan: :kiosk,
-      status: :trialing,
-      trial_ends_at: DateTime.add(DateTime.utc_now(), 30, :day) |> DateTime.truncate(:second)
-    })
-    |> Repo.insert()
-  end
+  # defp create_initial_subscription(shop) do
+  #   %SmartKioskCore.Schemas.Subscription{}
+  #   |> SmartKioskCore.Schemas.Subscription.changeset(%{
+  #     shop_id: shop.id,
+  #     plan: :kiosk,
+  #     status: :trialing,
+  #     trial_ends_at: DateTime.add(DateTime.utc_now(), 30, :day) |> DateTime.truncate(:second)
+  #   })
+  #   |> Repo.insert()
+  # end
 
   # ── Session tokens ────────────────────────────────────────────────────────────
 
@@ -129,7 +226,7 @@ defmodule SmartKioskCore.Accounts do
 
   @doc "Deletes a session token (log out)."
   def delete_user_session_token(token) do
-    Repo.delete_all(from t in UserToken, where: t.token == ^token and t.context == "session")
+    Repo.delete_all(from(t in UserToken, where: t.token == ^token and t.context == "session"))
     :ok
   end
 
@@ -143,6 +240,7 @@ defmodule SmartKioskCore.Accounts do
     else
       {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
       Repo.insert!(user_token)
+
       SmartKioskCore.UserNotifier.deliver_confirmation_instructions(
         user,
         confirmation_url_fun.(encoded_token)
@@ -164,8 +262,12 @@ defmodule SmartKioskCore.Accounts do
   defp confirm_user_multi(user) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.confirm_changeset(user))
-    |> Ecto.Multi.delete_all(:tokens, from(t in UserToken,
-         where: t.user_id == ^user.id and t.context == "confirm"))
+    |> Ecto.Multi.delete_all(
+      :tokens,
+      from(t in UserToken,
+        where: t.user_id == ^user.id and t.context == "confirm"
+      )
+    )
   end
 
   # ── Password reset ────────────────────────────────────────────────────────────
@@ -175,6 +277,7 @@ defmodule SmartKioskCore.Accounts do
       when is_function(reset_url_fun, 1) do
     {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
     Repo.insert!(user_token)
+
     SmartKioskCore.UserNotifier.deliver_reset_password_instructions(
       user,
       reset_url_fun.(encoded_token)
@@ -195,8 +298,12 @@ defmodule SmartKioskCore.Accounts do
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
-    |> Ecto.Multi.delete_all(:tokens, from(t in UserToken,
-         where: t.user_id == ^user.id and t.context != "session"))
+    |> Ecto.Multi.delete_all(
+      :tokens,
+      from(t in UserToken,
+        where: t.user_id == ^user.id and t.context != "session"
+      )
+    )
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
@@ -218,5 +325,4 @@ defmodule SmartKioskCore.Accounts do
     from(u in User, where: u.shop_id == ^shop_id, order_by: [asc: u.role, asc: u.full_name])
     |> Repo.all()
   end
-
 end

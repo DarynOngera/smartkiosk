@@ -40,8 +40,10 @@ defmodule SmartKioskCore.Authorization do
     {resource, action} = split_slug(permission_slug)
 
     from(ur in UserRole,
-      join: rp in RolePermission, on: rp.role_id == ur.role_id,
-      join: p in Permission, on: p.id == rp.permission_id,
+      join: rp in RolePermission,
+      on: rp.role_id == ur.role_id,
+      join: p in Permission,
+      on: p.id == rp.permission_id,
       where: ur.user_id == ^user_id,
       where: is_nil(ur.shop_id),
       where: p.resource == ^resource and p.action == ^action,
@@ -56,12 +58,15 @@ defmodule SmartKioskCore.Authorization do
   grants the given permission slug within the given shop.
   """
   @spec can?(User.t(), String.t(), Shop.t()) :: boolean()
-  def can?(%User{id: user_id}, permission_slug, %Shop{id: shop_id}) when is_binary(permission_slug) do
+  def can?(%User{id: user_id}, permission_slug, %Shop{id: shop_id})
+      when is_binary(permission_slug) do
     {resource, action} = split_slug(permission_slug)
 
     from(ur in UserRole,
-      join: rp in RolePermission, on: rp.role_id == ur.role_id,
-      join: p in Permission, on: p.id == rp.permission_id,
+      join: rp in RolePermission,
+      on: rp.role_id == ur.role_id,
+      join: p in Permission,
+      on: p.id == rp.permission_id,
       where: ur.user_id == ^user_id,
       where: ur.shop_id == ^shop_id or is_nil(ur.shop_id),
       where: p.resource == ^resource and p.action == ^action,
@@ -85,8 +90,10 @@ defmodule SmartKioskCore.Authorization do
   @spec list_permissions(User.t(), Shop.t() | nil) :: MapSet.t(String.t())
   def list_permissions(%User{id: user_id}, %Shop{id: shop_id}) do
     from(ur in UserRole,
-      join: rp in RolePermission, on: rp.role_id == ur.role_id,
-      join: p in Permission, on: p.id == rp.permission_id,
+      join: rp in RolePermission,
+      on: rp.role_id == ur.role_id,
+      join: p in Permission,
+      on: p.id == rp.permission_id,
       where: ur.user_id == ^user_id,
       where: ur.shop_id == ^shop_id or is_nil(ur.shop_id),
       select: {p.resource, p.action}
@@ -97,8 +104,10 @@ defmodule SmartKioskCore.Authorization do
 
   def list_permissions(%User{id: user_id}, nil) do
     from(ur in UserRole,
-      join: rp in RolePermission, on: rp.role_id == ur.role_id,
-      join: p in Permission, on: p.id == rp.permission_id,
+      join: rp in RolePermission,
+      on: rp.role_id == ur.role_id,
+      join: p in Permission,
+      on: p.id == rp.permission_id,
       where: ur.user_id == ^user_id,
       where: is_nil(ur.shop_id),
       select: {p.resource, p.action}

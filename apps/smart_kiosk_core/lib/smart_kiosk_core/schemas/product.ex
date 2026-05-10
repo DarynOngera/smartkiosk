@@ -17,23 +17,23 @@ defmodule SmartKioskCore.Schemas.Product do
   @statuses ~w(active draft archived out_of_stock)a
 
   schema "products" do
-    field :name,                :string
-    field :description,         :string
-    field :sku,                 :string
-    field :barcode,             :string
-    field :price,               :decimal
-    field :cost_price,          :decimal
-    field :stock_qty,           :integer, default: 0
-    field :low_stock_threshold, :integer, default: 5
-    field :attributes,          :map, default: %{}
-    field :status,              Ecto.Enum, values: @statuses, default: :draft
-    field :is_featured,         :boolean, default: false
+    field(:name, :string)
+    field(:description, :string)
+    field(:sku, :string)
+    field(:barcode, :string)
+    field(:price, :decimal)
+    field(:cost_price, :decimal)
+    field(:stock_qty, :integer, default: 0)
+    field(:low_stock_threshold, :integer, default: 5)
+    field(:attributes, :map, default: %{})
+    field(:status, Ecto.Enum, values: @statuses, default: :draft)
+    field(:is_featured, :boolean, default: false)
 
-    belongs_to :shop,     SmartKioskCore.Schemas.Shop
-    belongs_to :category, SmartKioskCore.Schemas.Category
+    belongs_to(:shop, SmartKioskCore.Schemas.Shop)
+    belongs_to(:category, SmartKioskCore.Schemas.Category)
 
-    has_many :images,      SmartKioskCore.Schemas.ProductImage
-    has_many :order_items, SmartKioskCore.Schemas.OrderItem
+    has_many(:images, SmartKioskCore.Schemas.ProductImage)
+    has_many(:order_items, SmartKioskCore.Schemas.OrderItem)
 
     timestamps(type: :utc_datetime)
   end

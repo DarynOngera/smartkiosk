@@ -13,19 +13,19 @@ defmodule SmartKioskCore.Schemas.Delivery do
   @statuses ~w(pending_pickup picked_up in_transit delivered failed)a
 
   schema "deliveries" do
-    field :status,        Ecto.Enum, values: @statuses, default: :pending_pickup
-    field :pickup_lat,    :float
-    field :pickup_lng,    :float
-    field :dropoff_lat,   :float
-    field :dropoff_lng,   :float
-    field :distance_km,   :decimal
-    field :notes,         :string
-    field :picked_up_at,  :utc_datetime
-    field :delivered_at,  :utc_datetime
+    field(:status, Ecto.Enum, values: @statuses, default: :pending_pickup)
+    field(:pickup_lat, :float)
+    field(:pickup_lng, :float)
+    field(:dropoff_lat, :float)
+    field(:dropoff_lng, :float)
+    field(:distance_km, :decimal)
+    field(:notes, :string)
+    field(:picked_up_at, :utc_datetime)
+    field(:delivered_at, :utc_datetime)
 
-    belongs_to :order,         SmartKioskCore.Schemas.Order
-    belongs_to :rider,         SmartKioskCore.Schemas.Rider
-    belongs_to :delivery_zone, SmartKioskCore.Schemas.DeliveryZone
+    belongs_to(:order, SmartKioskCore.Schemas.Order)
+    belongs_to(:rider, SmartKioskCore.Schemas.Rider)
+    belongs_to(:delivery_zone, SmartKioskCore.Schemas.DeliveryZone)
 
     timestamps(type: :utc_datetime)
   end
@@ -76,23 +76,24 @@ defmodule SmartKioskCore.Schemas.Campaign do
   @foreign_key_type :binary_id
 
   @target_types ~w(geo category keyword)a
-  @statuses     ~w(draft active paused ended budget_exhausted)a
+  @statuses ~w(draft active paused ended budget_exhausted)a
 
   schema "campaigns" do
-    field :name,        :string
-    field :status,      Ecto.Enum, values: @statuses, default: :draft
-    field :target_type, Ecto.Enum, values: @target_types
-    field :targeting,   :map, default: %{}
-    field :budget,      :decimal
-    field :spent,       :decimal, default: Decimal.new("0")
-    field :cpc,         :decimal    # cost per click, in KES
-    field :starts_at,   :utc_datetime
-    field :ends_at,     :utc_datetime
+    field(:name, :string)
+    field(:status, Ecto.Enum, values: @statuses, default: :draft)
+    field(:target_type, Ecto.Enum, values: @target_types)
+    field(:targeting, :map, default: %{})
+    field(:budget, :decimal)
+    field(:spent, :decimal, default: Decimal.new("0"))
+    # cost per click, in KES
+    field(:cpc, :decimal)
+    field(:starts_at, :utc_datetime)
+    field(:ends_at, :utc_datetime)
 
-    belongs_to :shop, SmartKioskCore.Schemas.Shop
+    belongs_to(:shop, SmartKioskCore.Schemas.Shop)
 
-    has_many :creatives, SmartKioskCore.Schemas.AdCreative
-    has_many :events,    SmartKioskCore.Schemas.AdEvent
+    has_many(:creatives, SmartKioskCore.Schemas.AdCreative)
+    has_many(:events, SmartKioskCore.Schemas.AdEvent)
 
     timestamps(type: :utc_datetime)
   end
@@ -113,7 +114,7 @@ defmodule SmartKioskCore.Schemas.Campaign do
 
   defp validate_date_range(cs) do
     starts = get_field(cs, :starts_at)
-    ends   = get_field(cs, :ends_at)
+    ends = get_field(cs, :ends_at)
 
     if starts && ends && DateTime.compare(ends, starts) != :gt do
       add_error(cs, :ends_at, "must be after start date")
@@ -132,15 +133,16 @@ defmodule SmartKioskCore.Schemas.AdCreative do
   @foreign_key_type :binary_id
 
   schema "ad_creatives" do
-    field :headline,  :string
-    field :body,      :string
-    field :image_url, :string
-    field :cta,       :string    # e.g. "Shop Now", "Order Today"
-    field :link_url,  :string
-    field :active,    :boolean, default: true
+    field(:headline, :string)
+    field(:body, :string)
+    field(:image_url, :string)
+    # e.g. "Shop Now", "Order Today"
+    field(:cta, :string)
+    field(:link_url, :string)
+    field(:active, :boolean, default: true)
 
-    belongs_to :campaign, SmartKioskCore.Schemas.Campaign
-    has_many   :events,   SmartKioskCore.Schemas.AdEvent, foreign_key: :creative_id
+    belongs_to(:campaign, SmartKioskCore.Schemas.Campaign)
+    has_many(:events, SmartKioskCore.Schemas.AdEvent, foreign_key: :creative_id)
 
     timestamps(type: :utc_datetime)
   end
@@ -171,13 +173,15 @@ defmodule SmartKioskCore.Schemas.AdEvent do
   @event_types ~w(impression click)a
 
   schema "ad_events" do
-    field :event_type, Ecto.Enum, values: @event_types
-    field :session_id, :string    # anonymous visitor session
-    field :ip_hash,    :string    # hashed for privacy
+    field(:event_type, Ecto.Enum, values: @event_types)
+    # anonymous visitor session
+    field(:session_id, :string)
+    # hashed for privacy
+    field(:ip_hash, :string)
 
-    belongs_to :campaign, SmartKioskCore.Schemas.Campaign
-    belongs_to :creative, SmartKioskCore.Schemas.AdCreative
-    belongs_to :shop,     SmartKioskCore.Schemas.Shop
+    belongs_to(:campaign, SmartKioskCore.Schemas.Campaign)
+    belongs_to(:creative, SmartKioskCore.Schemas.AdCreative)
+    belongs_to(:shop, SmartKioskCore.Schemas.Shop)
 
     # No updated_at — this is an append-only log
     timestamps(type: :utc_datetime, updated_at: false)
@@ -206,27 +210,34 @@ defmodule SmartKioskCore.Schemas.Subscription do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @plans    ~w(kiosk duka biashara enterprise)a
+  @plans ~w(kiosk duka biashara enterprise)a
   @statuses ~w(trialing active past_due cancelled)a
 
   schema "subscriptions" do
-    field :plan,                  Ecto.Enum, values: @plans, default: :kiosk
-    field :status,                Ecto.Enum, values: @statuses, default: :trialing
-    field :current_period_start,  :utc_datetime
-    field :current_period_end,    :utc_datetime
-    field :trial_ends_at,         :utc_datetime
-    field :cancelled_at,          :utc_datetime
+    field(:plan, Ecto.Enum, values: @plans, default: :kiosk)
+    field(:status, Ecto.Enum, values: @statuses, default: :trialing)
+    field(:current_period_start, :utc_datetime)
+    field(:current_period_end, :utc_datetime)
+    field(:trial_ends_at, :utc_datetime)
+    field(:cancelled_at, :utc_datetime)
 
-    belongs_to :shop,     SmartKioskCore.Schemas.Shop
-    has_many   :invoices, SmartKioskCore.Schemas.Invoice
+    belongs_to(:shop, SmartKioskCore.Schemas.Shop)
+    has_many(:invoices, SmartKioskCore.Schemas.Invoice)
 
     timestamps(type: :utc_datetime)
   end
 
   def changeset(sub, attrs) do
     sub
-    |> cast(attrs, [:plan, :status, :current_period_start, :current_period_end,
-                    :trial_ends_at, :cancelled_at, :shop_id])
+    |> cast(attrs, [
+      :plan,
+      :status,
+      :current_period_start,
+      :current_period_end,
+      :trial_ends_at,
+      :cancelled_at,
+      :shop_id
+    ])
     |> validate_required([:shop_id, :plan])
     |> foreign_key_constraint(:shop_id)
     |> unique_constraint(:shop_id, message: "shop already has a subscription")
@@ -247,14 +258,14 @@ defmodule SmartKioskCore.Schemas.Invoice do
   @statuses ~w(draft open paid void uncollectible)a
 
   schema "invoices" do
-    field :amount,   :decimal
-    field :currency, :string, default: "KES"
-    field :status,   Ecto.Enum, values: @statuses, default: :draft
-    field :due_at,   :utc_datetime
-    field :paid_at,  :utc_datetime
+    field(:amount, :decimal)
+    field(:currency, :string, default: "KES")
+    field(:status, Ecto.Enum, values: @statuses, default: :draft)
+    field(:due_at, :utc_datetime)
+    field(:paid_at, :utc_datetime)
 
-    belongs_to :shop,         SmartKioskCore.Schemas.Shop
-    belongs_to :subscription, SmartKioskCore.Schemas.Subscription
+    belongs_to(:shop, SmartKioskCore.Schemas.Shop)
+    belongs_to(:subscription, SmartKioskCore.Schemas.Subscription)
 
     timestamps(type: :utc_datetime)
   end

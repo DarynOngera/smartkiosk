@@ -1,4 +1,5 @@
 alias SmartKioskCore.Repo
+import Ecto.Query
 alias SmartKioskCore.Schemas.{Category, User, Shop, Subscription}
 alias SmartKioskCore.Schemas.{Role, Permission, RolePermission, UserRole}
 
@@ -317,3 +318,109 @@ Repo.all(User)
 end)
 
 IO.puts("Seeding complete.")
+
+# ── Update existing shop categories ───────────────────────────────────────────
+IO.puts("Updating shop categories...")
+
+alias SmartKioskCore.Catalogue
+alias SmartKioskCore.Schemas.Product
+
+shop_categories = %{
+  "Mama Grace Shop" => "general_shop",
+  "Test Owner's Shop" => "electronics",
+  "Test2 Owner's Shop" => "restaurant"
+}
+
+Enum.each(shop_categories, fn {shop_name, category} ->
+  case Repo.get_by(Shop, name: shop_name) do
+    nil ->
+      IO.puts("  Shop not found: #{shop_name}")
+    shop ->
+      shop
+      |> Shop.changeset(%{category: category})
+      |> Repo.update!()
+      IO.puts("  Updated #{shop_name} → #{category}")
+  end
+end)
+
+# ── Seed products for existing shops ───────────────────────────────────────────
+IO.puts("Seeding products for existing shops...")
+
+products_by_shop = %{
+  "Mama Grace Shop" => [
+    %{name: "Rice (5kg)", sku: "RICE-5KG", price: 350, stock_qty: 100},
+    %{name: "Sugar (2kg)", sku: "SUGAR-2KG", price: 240, stock_qty: 80},
+    %{name: "Cooking Oil (1L)", sku: "OIL-1L", price: 180, stock_qty: 50},
+    %{name: "Bread (400g)", sku: "BREAD-400G", price: 55, stock_qty: 30},
+    %{name: "Milk (500ml)", sku: "MILK-500ML", price: 60, stock_qty: 40},
+    %{name: "Wheat Flour (2kg)", sku: "FLOUR-2KG", price: 150, stock_qty: 60},
+    %{name: "Soap (Omo 1kg)", sku: "OMO-1KG", price: 120, stock_qty: 25},
+    %{name: "Toothpaste (Colgate)", sku: "COLGATE", price: 85, stock_qty: 20},
+    %{name: "Tea Leaves (100g)", sku: "TEA-100G", price: 45, stock_qty: 50},
+    %{name: "Salt (1kg)", sku: "SALT-1KG", price: 25, stock_qty: 100}
+  ],
+  "Test Owner's Shop" => [
+    %{name: "Phone Charger (Type-C)", sku: "CHARGER-TC", price: 450, stock_qty: 15},
+    %{name: "USB Cable (1m)", sku: "USB-1M", price: 150, stock_qty: 30},
+    %{name: "Power Bank (10000mAh)", sku: "POWERBANK-10K", price: 1200, stock_qty: 10},
+    %{name: "Earphones (Wired)", sku: "EARPHONES", price: 200, stock_qty: 25},
+    %{name: "Screen Protector (Universal)", sku: "SCREEN-GUARD", price: 100, stock_qty: 50},
+    %{name: "Memory Card (64GB)", sku: "SD-64GB", price: 600, stock_qty: 20},
+    %{name: "Phone Case (Generic)", sku: "CASE-GENERIC", price: 250, stock_qty: 40},
+    %{name: "HDMI Cable (2m)", sku: "HDMI-2M", price: 350, stock_qty: 15},
+    %{name: "Mouse (Wired)", sku: "MOUSE", price: 300, stock_qty: 20},
+    %{name: "Keyboard (USB)", sku: "KEYBOARD", price: 800, stock_qty: 12}
+  ],
+  "Test2 Owner's Shop" => [
+    %{name: "Ugali (Served)", sku: "UGALI", price: 80, stock_qty: 100},
+    %{name: "Chapati", sku: "CHAPATI", price: 30, stock_qty: 150},
+    %{name: "Pilau Rice", sku: "PILAU", price: 150, stock_qty: 80},
+    %{name: "Beef Stew", sku: "BEEF-STEW", price: 180, stock_qty: 50},
+    %{name: "Chicken (1/4)", sku: "CHICKEN-QUARTER", price: 250, stock_qty: 40},
+    %{name: "Soda (500ml)", sku: "SODA-500ML", price: 60, stock_qty: 60},
+    %{name: "Water (500ml)", sku: "WATER-500ML", price: 30, stock_qty: 100},
+    %{name: "Mandazi", sku: "MANDAZI", price: 20, stock_qty: 200},
+    %{name: "Samosa", sku: "SAMOSA", price: 50, stock_qty: 80},
+    %{name: "Tea (Chai)", sku: "CHAI", price: 40, stock_qty: 100}
+  ]
+}
+
+Enum.each(products_by_shop, fn {shop_name, products} ->
+  case Repo.get_by(Shop, name: shop_name) do
+    nil ->
+      IO.puts("  Shop not found: #{shop_name}")
+    shop ->
+      # Get a default category for products (Groceries & FMCG)
+      default_category = Repo.get_by(Category, slug: "groceries-fmcg") ||
+                          Repo.one(from(c in Category, limit: 1))
+
+      if is_nil(default_category) do
+        IO.puts("  No category found for #{shop_name}, skipping products")
+      else
+        Enum.each(products, fn product_attrs ->
+          attrs = Map.merge(product_attrs, %{
+            shop_id: shop.id,
+            category_id: default_category.id,
+            status: :active,
+            tax_rate: Decimal.new("16.00")
+          })
+
+          case Repo.get_by(Product, shop_id: shop.id, sku: attrs.sku) do
+            nil ->
+              case %Product{}
+                   |> Product.changeset(attrs)
+                   |> Repo.insert() do
+                {:ok, product} ->
+                  IO.puts("  Created #{product.name} in #{shop_name}")
+                {:error, changeset} ->
+                  IO.puts("  Error creating #{attrs.name}: #{inspect(changeset.errors)}")
+              end
+            existing ->
+              IO.puts("  Product exists: #{existing.name} in #{shop_name}")
+          end
+        end)
+      end
+  end
+end)
+
+IO.puts("Product seeding complete.")

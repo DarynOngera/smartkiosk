@@ -16,26 +16,26 @@ defmodule SmartKioskCore.Schemas.Order do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @statuses  ~w(pending confirmed preparing ready dispatched delivered cancelled)a
-  @channels  ~w(pos online)a
+  @statuses ~w(pending confirmed preparing ready dispatched delivered cancelled)a
+  @channels ~w(pos online)a
 
   schema "orders" do
-    field :status,           Ecto.Enum, values: @statuses, default: :pending
-    field :channel,          Ecto.Enum, values: @channels, default: :online
-    field :subtotal,         :decimal
-    field :delivery_fee,     :decimal, default: Decimal.new("0")
-    field :total,            :decimal
-    field :notes,            :string
-    field :delivery_address, :string
-    field :delivery_lat,     :float
-    field :delivery_lng,     :float
+    field(:status, Ecto.Enum, values: @statuses, default: :pending)
+    field(:channel, Ecto.Enum, values: @channels, default: :online)
+    field(:subtotal, :decimal)
+    field(:delivery_fee, :decimal, default: Decimal.new("0"))
+    field(:total, :decimal)
+    field(:notes, :string)
+    field(:delivery_address, :string)
+    field(:delivery_lat, :float)
+    field(:delivery_lng, :float)
 
-    belongs_to :shop,     SmartKioskCore.Schemas.Shop
-    belongs_to :customer, SmartKioskCore.Schemas.Customer
+    belongs_to(:shop, SmartKioskCore.Schemas.Shop)
+    belongs_to(:customer, SmartKioskCore.Schemas.Customer)
 
-    has_many :items,        SmartKioskCore.Schemas.OrderItem
-    has_one  :delivery,     SmartKioskCore.Schemas.Delivery
-    has_many :transactions, SmartKioskCore.Schemas.Transaction
+    has_many(:items, SmartKioskCore.Schemas.OrderItem)
+    has_one(:delivery, SmartKioskCore.Schemas.Delivery)
+    has_many(:transactions, SmartKioskCore.Schemas.Transaction)
 
     timestamps(type: :utc_datetime)
   end
@@ -60,7 +60,7 @@ defmodule SmartKioskCore.Schemas.Order do
   end
 
   defp compute_total(%Ecto.Changeset{} = cs) do
-    subtotal     = get_field(cs, :subtotal)     || Decimal.new("0")
+    subtotal = get_field(cs, :subtotal) || Decimal.new("0")
     delivery_fee = get_field(cs, :delivery_fee) || Decimal.new("0")
 
     if subtotal do
@@ -70,4 +70,3 @@ defmodule SmartKioskCore.Schemas.Order do
     end
   end
 end
-
