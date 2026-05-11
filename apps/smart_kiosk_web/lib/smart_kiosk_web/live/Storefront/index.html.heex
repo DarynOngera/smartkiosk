@@ -1,21 +1,43 @@
-<div class="min-h-screen bg-[#0B0F1A] text-white">
-  <%!-- Shop Header --%>
-  <header class="bg-gradient-to-r from-violet-900/50 to-[#0B0F1A] border-b border-white/10">
-    <div class="max-w-7xl mx-auto px-6 py-12">
-      <div class="flex items-center gap-6">
-        <div class="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center">
-          <.icon name="hero-storefront" class="w-10 h-10 text-violet-400" />
-        </div>
-        <div>
-          <h1 class="text-4xl font-bold mb-2"><%= @shop.name %></h1>
-          <p class="text-slate-400 text-lg max-w-2xl"><%= @shop.description %></p>
-          <div class="flex items-center gap-4 mt-3 text-sm text-slate-500">
-            <span class="flex items-center gap-1">
-              <.icon name="hero-map-pin" class="w-4 h-4" /> <%= @shop.city %>
-            </span>
-            <span class="flex items-center gap-1">
-              <.icon name="hero-phone" class="w-4 h-4" /> <%= @shop.phone %>
-            </span>
+<div class="min-h-screen bg-[#0B0F1A] text-white p-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-10">
+      <h1 class="text-4xl font-bold"><%= @shop.name %></h1>
+      <p class="text-slate-400"><%= @shop.description %></p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <%= for product <- @products do %>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-4 hover:border-violet-500/50 transition-all">
+          <div class="w-full h-40 bg-slate-800 rounded-xl mb-4 overflow-hidden">
+            <%= if product.images != [] do %>
+              <img
+                src={List.first(product.images).url}
+                alt={product.name}
+                class="w-full h-full object-cover"
+              />
+            <% else %>
+              <div class="flex items-center justify-center h-full text-slate-600">
+                <.icon name="hero-shopping-bag" class="w-10 h-10" />
+              </div>
+            <% end %>
+          </div>
+          <h3 class="font-semibold text-lg"><%= product.name %></h3>
+          <p class="text-violet-400 font-bold mb-4">KES <%= product.price %></p>
+
+          <div class="flex gap-2">
+            <.link
+              navigate={~p"/shop/#{@shop.slug}/product/#{product.id}"}
+              class="flex-1 text-center py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-semibold transition"
+            >
+              View
+            </.link>
+            <button
+              phx-click="add_to_cart"
+              phx-value-product_id={product.id}
+              class="flex-1 py-2 bg-violet-500 hover:bg-violet-400 rounded-lg text-sm font-semibold transition"
+            >
+              Add
+            </button>
           </div>
         </div>
       </div>

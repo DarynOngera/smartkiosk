@@ -243,11 +243,11 @@ defmodule SmartKioskWeb.CoreComponents do
           multiple={@multiple}
           {@rest}
         >
-          <option :if={@prompt} value="">{@prompt}</option>
-          {Phoenix.HTML.Form.options_for_select(@options, @value)}
+          <option :if={@prompt} value=""><%= @prompt %></option>
+          <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
         </select>
       </label>
-      <.error :for={msg <- @errors}>{msg}</.error>
+      <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
   end
@@ -425,12 +425,6 @@ defmodule SmartKioskWeb.CoreComponents do
   By default, the outline style is used, but solid and mini may
   be applied by using the `-solid` and `-mini` suffix.
 
-  You can customize the size and colors of the icons by setting
-  width, height, and background color classes.
-
-  Icons are extracted from the `deps/heroicons` directory and bundled within
-  your compiled app.css by the plugin in `assets/vendor/heroicons.js`.
-
   ## Examples
 
       <.icon name="hero-x-mark" />
@@ -440,10 +434,50 @@ defmodule SmartKioskWeb.CoreComponents do
   attr :class, :any, default: "size-4"
 
   def icon(%{name: "hero-" <> _} = assigns) do
-    ~H"""
-    <span class={[@name, @class]} />
-    """
+    {icon_name, style_assigns} = heroicon(assigns.name)
+    icon_atom = String.to_atom(icon_name)
+    heroicon_assigns =
+      %{
+        __changed__: nil,
+        class: assigns.class
+      }
+      |> Map.merge(style_assigns)
+
+    if function_exported?(Heroicons, icon_atom, 1) do
+      apply(Heroicons, icon_atom, [heroicon_assigns])
+    else
+      Heroicons.question_mark_circle(heroicon_assigns)
+    end
   end
+
+  defp heroicon("hero-" <> name) do
+    {base_name, style_assigns} =
+      cond do
+        String.ends_with?(name, "-solid") ->
+          {String.trim_trailing(name, "-solid"), %{solid: true}}
+
+        String.ends_with?(name, "-mini") ->
+          {String.trim_trailing(name, "-mini"), %{mini: true}}
+
+        String.ends_with?(name, "-micro") ->
+          {String.trim_trailing(name, "-micro"), %{micro: true}}
+
+        true ->
+          {name, %{}}
+      end
+
+    normalized_name =
+      base_name
+      |> heroicon_alias()
+      |> String.replace("-", "_")
+
+    {normalized_name, style_assigns}
+  end
+
+  defp heroicon_alias("storefront"), do: "building-storefront"
+  defp heroicon_alias("receipt"), do: "document-text"
+  defp heroicon_alias("cup"), do: "beaker"
+  defp heroicon_alias(name), do: name
 
   ## JS Commands
 

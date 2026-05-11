@@ -6,6 +6,7 @@ defmodule SmartKioskCore.Application do
   def start(_type, _args) do
     children = [
       SmartKioskCore.Repo,
+      {Phoenix.PubSub, name: SmartKiosk.PubSub},
       {Oban, Application.fetch_env!(:smart_kiosk_core, Oban)}
     ]
 

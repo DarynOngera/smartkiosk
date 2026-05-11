@@ -103,9 +103,9 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
           <div phx-click="toggle_mobile_menu" class="fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
         <% end %>
 
-        <%!-- Mobile Cart Backdrop --%>
-        <%= if @cart_open do %>
-          <div phx-click="toggle_cart" class="fixed inset-0 bg-black/50 z-50 lg:hidden"></div>
+        <%!-- Mobile Cart Overlay --%>
+        <%= if @mobile_cart_open do %>
+          <div phx-click="toggle_mobile_cart" class="fixed inset-0 bg-black/50 z-50 lg:hidden"></div>
         <% end %>
 
         <%!-- Left Sidebar Navigation --%>
@@ -237,15 +237,34 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                   else: String.capitalize(@active_tab) %>
               </h1>
             </div>
-            <div class="flex items-center gap-4">
-              <button class="btn btn-outline border-white/10 text-white hidden sm:block">
-                Scan Barcode
-              </button>
-              <button phx-click="toggle_cart" class="lg:hidden p-3 bg-violet-600 rounded-xl relative">
-                <.icon name="hero-shopping-cart" class="w-5 h-5" />
-                <span class="absolute -top-1 -right-1 bg-red-500 text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">
-                  <%= length(@cart) %>
-                </span>
+            <div class="flex items-center gap-3">
+              <%= if @active_tab == "products" do %>
+                <.form for={%{}} as={:search} phx-change="search" class="relative hidden sm:block">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <.icon name="hero-magnifying-glass" class="w-5 h-5 text-slate-500" />
+                  </div>
+                  <input
+                    type="text"
+                    name="query"
+                    value={@search_query}
+                    placeholder="Search products..."
+                    class="bg-slate-900/50 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all w-48 md:w-64"
+                  />
+                </.form>
+                <button class="btn btn-outline border-white/10 text-white hidden sm:block">
+                  Scan Barcode
+                </button>
+              <% end %>
+              <button
+                phx-click="toggle_mobile_cart"
+                class="lg:hidden p-2 text-slate-400 hover:text-white relative"
+              >
+                <.icon name="hero-shopping-cart" class="w-6 h-6" />
+                <%= if length(@cart) > 0 do %>
+                  <span class="absolute -top-1 -right-1 w-5 h-5 bg-violet-500 rounded-full text-xs font-bold flex items-center justify-center">
+                    <%= length(@cart) %>
+                  </span>
+                <% end %>
               </button>
             </div>
           </header>
@@ -336,9 +355,85 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
             <% end %>
           </div>
 
-          <div class="p-6 border-t border-white/10 space-y-4">
-            <div class="flex justify-between font-bold text-lg">
-              <span>Total</span><span>KES <%= :erlang.float_to_binary(@cart_total, decimals: 2) %></span>
+              <%!-- Payment Details --%>
+              <div>
+                <label class="text-sm text-slate-400 mb-3 block">Amount Due</label>
+                <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <p class="text-3xl font-bold text-violet-400">
+                    KES <%= :erlang.float_to_binary(@cart_total, decimals: 2) %>
+                  </p>
+                </div>
+              </div>
+
+              <%!-- Order Summary --%>
+              <div class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
+                <h3 class="font-semibold mb-3">Order Summary</h3>
+                <%= for item <- @cart do %>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-slate-400"><%= item.product.name %> x<%= item.quantity %></span>
+                    <span>
+                      KES <%= :erlang.float_to_binary(
+                        Decimal.to_float(item.product.price) * item.quantity, decimals: 2) %>
+                    </span>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+
+            <div class="p-6 border-t border-white/10 space-y-4">
+              <button class="w-full py-4 bg-violet-600 rounded-xl font-bold hover:bg-violet-500 flex items-center justify-center gap-2">
+                <.icon name="hero-check" class="w-5 h-5" /> Complete Payment
+              </button>
+            </div>
+          <% else %>
+            <%!-- Cart View --%>
+            <div class="p-6 border-b border-white/10 flex justify-between items-center">
+              <h2 class="text-xl font-bold">Cart (<%= length(@cart) %>)</h2>
+              <button phx-click="clear_cart" class="text-red-400 text-sm hover:text-red-300">
+                Clear
+              </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 space-y-4">
+              <%= for item <- @cart do %>
+                <div class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-semibold truncate"><%= item.product.name %></p>
+                    <p class="text-slate-400 text-sm">KES <%= item.product.price %></p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button
+                      phx-click="update_quantity"
+                      phx-value-product_id={item.product.id}
+                      phx-value-delta="-1"
+                      class="w-8 h-8 bg-slate-800 rounded-lg"
+                    >
+                      -
+                    </button>
+                    <span class="w-8 text-center"><%= item.quantity %></span>
+                    <button
+                      phx-click="update_quantity"
+                      phx-value-product_id={item.product.id}
+                      phx-value-delta="1"
+                      class="w-8 h-8 bg-violet-600 rounded-lg"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+
+            <div class="p-6 border-t border-white/10 space-y-4">
+              <div class="flex justify-between font-bold text-lg">
+                <span>Total</span><span>KES <%= :erlang.float_to_binary(@cart_total, decimals: 2) %></span>
+              </div>
+              <button
+                phx-click="show_payment"
+                class="w-full py-4 bg-violet-600 rounded-xl font-bold hover:bg-violet-500"
+              >
+                Proceed to Payment
+              </button>
             </div>
             <button class="w-full py-4 bg-violet-600 rounded-xl font-bold hover:bg-violet-500">
               Proceed to Payment
