@@ -4,7 +4,6 @@ defmodule SmartKioskWeb.Layouts do
   used by your application.
   """
   use SmartKioskWeb, :html
-  import SmartKioskWeb.Navbar
 
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
@@ -49,6 +48,8 @@ defmodule SmartKioskWeb.Layouts do
       <.flash_group flash={@flash} />
       <%= render_slot(@inner_block) %>
     </main>
+
+    <.flash_group flash={@flash} />
     """
   end
 

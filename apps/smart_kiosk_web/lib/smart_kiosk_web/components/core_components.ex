@@ -223,10 +223,10 @@ defmodule SmartKioskWeb.CoreComponents do
             checked={@checked}
             class={@class || "checkbox checkbox-sm"}
             {@rest}
-          /><%= @label %>
+          />{@label}
         </span>
       </label>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -235,7 +235,7 @@ defmodule SmartKioskWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1"><%= @label %></span>
+        <span :if={@label} class="label mb-1">{@label}</span>
         <select
           id={@id}
           name={@name}
@@ -256,7 +256,7 @@ defmodule SmartKioskWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1"><%= @label %></span>
+        <span :if={@label} class="label mb-1">{@label}</span>
         <textarea
           id={@id}
           name={@name}
@@ -265,9 +265,9 @@ defmodule SmartKioskWeb.CoreComponents do
             @errors != [] && (@error_class || "textarea-error")
           ]}
           {@rest}
-        ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
+        >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
       </label>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -277,7 +277,7 @@ defmodule SmartKioskWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1 block"><%= @label %></span>
+        <span :if={@label} class="label mb-1">{@label}</span>
         <input
           type={@type}
           name={@name}
@@ -290,7 +290,7 @@ defmodule SmartKioskWeb.CoreComponents do
           {@rest}
         />
       </label>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -363,7 +363,7 @@ defmodule SmartKioskWeb.CoreComponents do
     <table class="table table-zebra">
       <thead>
         <tr>
-          <th :for={col <- @col}><%= col[:label] %></th>
+          <th :for={col <- @col}>{col[:label]}</th>
           <th :if={@action != []}>
             <span class="sr-only">{gettext("Actions")}</span>
           </th>
@@ -410,7 +410,7 @@ defmodule SmartKioskWeb.CoreComponents do
     <ul class="list">
       <li :for={item <- @item} class="list-row">
         <div class="list-col-grow">
-          <div class="font-bold"><%= item.title %></div>
+          <div class="font-bold">{item.title}</div>
           <div><%= render_slot(item) %></div>
         </div>
       </li>
