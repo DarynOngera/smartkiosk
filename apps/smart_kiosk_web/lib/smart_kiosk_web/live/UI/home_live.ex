@@ -7,7 +7,6 @@ defmodule SmartKioskWeb.HomeLive do
   alias SmartKioskCore.Schemas.{Shop, Product}
   alias SmartKioskCore.Repo
   alias SmartKioskCore.Accounts
-  alias SmartKioskCore.Catalogue
   alias SmartKioskCore.Cart
   import SmartKioskWeb.Navbar
   import SmartKioskWeb.Sidebar
@@ -93,7 +92,7 @@ defmodule SmartKioskWeb.HomeLive do
   def handle_event("add_to_cart", %{"product_id" => product_id}, socket) do
     current_user = socket.assigns[:current_user]
     session_id = socket.assigns[:session_id]
-    
+
     product = Repo.get!(Product, product_id)
 
     opts =
@@ -112,7 +111,8 @@ defmodule SmartKioskWeb.HomeLive do
         true -> 0
       end
 
-    {:noreply, assign(socket, :cart_count, cart_count) |> put_flash(:info, "Added #{product.name} to cart")}
+    {:noreply,
+     assign(socket, :cart_count, cart_count) |> put_flash(:info, "Added #{product.name} to cart")}
   end
 
   def handle_event("clear_filter", _params, socket) do

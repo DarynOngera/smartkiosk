@@ -18,8 +18,7 @@
               navigate="/"
               class="inline-flex items-center gap-2 px-6 py-3 bg-violet-500 hover:bg-violet-400 text-white rounded-xl font-semibold transition-all"
             >
-              <.icon name="hero-arrow-left" class="w-5 h-5" />
-              Browse Shops
+              <.icon name="hero-arrow-left" class="w-5 h-5" /> Browse Shops
             </.link>
           </div>
         <% else %>
@@ -92,11 +91,7 @@
 
           <%= if @cart_items != [] do %>
             <%!-- Checkout Form --%>
-            <.form
-              for={@checkout_form}
-              phx-submit="checkout"
-              id="checkout-form"
-            >
+            <.form for={@checkout_form} phx-submit="checkout" id="checkout-form">
               <div class="space-y-6 mb-8">
                 <.input
                   field={@checkout_form[:full_name]}

@@ -10,7 +10,8 @@ defmodule SmartKioskWeb.UserLoginLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen flex flex-col lg:flex-row bg-[#0B0F1A]">
+    <Layouts.app flash={@flash} current_path="/login">
+      <div class="min-h-screen flex flex-col lg:flex-row bg-[#0B0F1A]">
       <%!-- Left Side: Marketing --%>
       <div class="hidden lg:flex lg:w-1/2 bg-[#0B0F1A] relative overflow-hidden items-center justify-center p-12">
         <%!-- Background Glows --%>
@@ -190,7 +191,8 @@ defmodule SmartKioskWeb.UserLoginLive do
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Layouts.app>
     """
   end
 end

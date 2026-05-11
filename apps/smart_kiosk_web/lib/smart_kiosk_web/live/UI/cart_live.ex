@@ -43,7 +43,13 @@ defmodule SmartKioskWeb.CartLive do
      |> assign(:cart_total, cart_total)
      |> assign(:cart_count, length(cart_items))
      |> assign(:session_id, session_id)
-     |> assign(:checkout_form, to_form(%{"full_name" => initial_checkout_params.full_name, "phone_number" => initial_checkout_params.phone_number}))}
+     |> assign(
+       :checkout_form,
+       to_form(%{
+         "full_name" => initial_checkout_params.full_name,
+         "phone_number" => initial_checkout_params.phone_number
+       })
+     )}
   end
 
   def handle_event("update_quantity", %{"id" => id, "quantity" => quantity}, socket) do
@@ -51,7 +57,8 @@ defmodule SmartKioskWeb.CartLive do
     cart_item = Cart.get_cart_item!(id)
 
     if quantity > 0 do
-      {:ok, _updated_item} = Cart.update_cart_item(cart_item, %{quantity: quantity, unit_price: cart_item.unit_price})
+      {:ok, _updated_item} =
+        Cart.update_cart_item(cart_item, %{quantity: quantity, unit_price: cart_item.unit_price})
     else
       Cart.remove_cart_item(cart_item)
     end
