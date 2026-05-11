@@ -53,16 +53,26 @@ defmodule SmartKioskCore.Cart do
     session_id = opts[:session_id]
 
     # Check if item exists in cart already to increment quantity instead
-    existing_item = 
+    existing_item =
       case {user_id, session_id} do
-        {uid, nil} when not is_nil(uid) -> Repo.one(from(c in CartItem, where: c.user_id == ^uid and c.product_id == ^product.id))
-        {nil, sid} when not is_nil(sid) -> Repo.one(from(c in CartItem, where: c.session_id == ^sid and c.product_id == ^product.id))
-        _ -> nil
+        {uid, nil} when not is_nil(uid) ->
+          Repo.one(from(c in CartItem, where: c.user_id == ^uid and c.product_id == ^product.id))
+
+        {nil, sid} when not is_nil(sid) ->
+          Repo.one(
+            from(c in CartItem, where: c.session_id == ^sid and c.product_id == ^product.id)
+          )
+
+        _ ->
+          nil
       end
 
     if existing_item do
       existing_item
-      |> CartItem.changeset(%{quantity: existing_item.quantity + quantity, unit_price: existing_item.unit_price})
+      |> CartItem.changeset(%{
+        quantity: existing_item.quantity + quantity,
+        unit_price: existing_item.unit_price
+      })
       |> Repo.update()
     else
       %CartItem{}

@@ -12,8 +12,10 @@ defmodule SmartKioskWeb.UserRegistrationLive do
       <%!-- Left Side: Marketing Content --%>
       <div class="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 py-8 relative h-full overflow-hidden">
         <%!-- Background Ambient Glows --%>
-        <div class="absolute top-0 left-0 w-[400px] h-[400px] bg-violet-500/15 rounded-full blur-[120px] pointer-events-none -translate-x-1/4 -translate-y-1/4"></div>
-        <div class="absolute bottom-0 right-0 w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none translate-x-1/4 translate-y-1/4"></div>
+        <div class="absolute top-0 left-0 w-[400px] h-[400px] bg-violet-500/15 rounded-full blur-[120px] pointer-events-none -translate-x-1/4 -translate-y-1/4">
+        </div>
+        <div class="absolute bottom-0 right-0 w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none translate-x-1/4 translate-y-1/4">
+        </div>
 
         <div class="relative z-10">
           <%!-- Logo --%>
@@ -40,7 +42,9 @@ defmodule SmartKioskWeb.UserRegistrationLive do
               </div>
               <div>
                 <h3 class="text-white font-semibold mb-0.5 text-sm">Quick Setup</h3>
-                <p class="text-slate-500 text-xs">Get your shop up and running in less than 5 minutes</p>
+                <p class="text-slate-500 text-xs">
+                  Get your shop up and running in less than 5 minutes
+                </p>
               </div>
             </div>
             <div class="flex items-start gap-3">
@@ -49,7 +53,9 @@ defmodule SmartKioskWeb.UserRegistrationLive do
               </div>
               <div>
                 <h3 class="text-white font-semibold mb-0.5 text-sm">M-Pesa Integration</h3>
-                <p class="text-slate-500 text-xs">Accept payments seamlessly with Kenya's #1 mobile money</p>
+                <p class="text-slate-500 text-xs">
+                  Accept payments seamlessly with Kenya's #1 mobile money
+                </p>
               </div>
             </div>
             <div class="flex items-start gap-3">
@@ -58,7 +64,9 @@ defmodule SmartKioskWeb.UserRegistrationLive do
               </div>
               <div>
                 <h3 class="text-white font-semibold mb-0.5 text-sm">Real-time Analytics</h3>
-                <p class="text-slate-500 text-xs">Track sales, inventory, and customer insights instantly</p>
+                <p class="text-slate-500 text-xs">
+                  Track sales, inventory, and customer insights instantly
+                </p>
               </div>
             </div>
           </div>
@@ -68,7 +76,8 @@ defmodule SmartKioskWeb.UserRegistrationLive do
       <%!-- Right Side: Registration Form --%>
       <div class="w-full lg:w-1/2 flex items-center justify-center px-6 py-6 relative">
         <%!-- Mobile Background Glows --%>
-        <div class="lg:hidden absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-violet-500/15 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="lg:hidden absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-violet-500/15 rounded-full blur-[120px] pointer-events-none">
+        </div>
 
         <div class="w-full max-w-[420px] z-10">
           <%!-- Mobile Logo --%>
@@ -205,20 +214,47 @@ defmodule SmartKioskWeb.UserRegistrationLive do
                 <%!-- Shop Details --%>
                 <div class="grid grid-cols-2 gap-4 animate-fade-in">
                   <div class="space-y-2">
-                    <label class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold ml-1">City</label>
-                    <input type="text" name="registration[city]" value={@form[:city].value} placeholder="Nairobi" class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-3 px-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all text-sm" />
+                    <label class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold ml-1">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      name="registration[city]"
+                      value={@form[:city].value}
+                      placeholder="Nairobi"
+                      class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-3 px-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all text-sm"
+                    />
                   </div>
                   <div class="space-y-2">
-                    <label class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold ml-1">Address</label>
-                    <input type="text" name="registration[address]" value={@form[:address].value} placeholder="Tom Mboya St" class="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 px-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all text-sm" />
+                    <label class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold ml-1">
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      name="registration[address]"
+                      value={@form[:address].value}
+                      placeholder="Tom Mboya St"
+                      class="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 px-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all text-sm"
+                    />
                   </div>
                 </div>
 
                 <div class="space-y-2 animate-fade-in">
-                  <label class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold ml-1">Shop Category</label>
-                  <select name="registration[shop_category]" class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-violet-500/50 transition-all text-sm">
+                  <label class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold ml-1">
+                    Shop Category
+                  </label>
+                  <select
+                    name="registration[shop_category]"
+                    class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-violet-500/50 transition-all text-sm"
+                  >
                     <%= for {cat, label} <- @category_options do %>
-                      <option value={cat} selected={@form[:shop_category].value == cat} class="bg-slate-900"><%= label %></option>
+                      <option
+                        value={cat}
+                        selected={@form[:shop_category].value == cat}
+                        class="bg-slate-900"
+                      >
+                        <%= label %>
+                      </option>
                     <% end %>
                   </select>
                 </div>
@@ -226,12 +262,21 @@ defmodule SmartKioskWeb.UserRegistrationLive do
 
               <%!-- Password --%>
               <div class="space-y-2">
-                <label class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold ml-1">Password</label>
+                <label class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold ml-1">
+                  Password
+                </label>
                 <div class="relative group">
                   <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-violet-400 transition-colors">
                     <.icon name="hero-lock-closed" class="w-5 h-5" />
                   </div>
-                  <input type="password" name="registration[password]" value={@form[:password].value} required minlength="12" class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all text-sm" />
+                  <input
+                    type="password"
+                    name="registration[password]"
+                    value={@form[:password].value}
+                    required
+                    minlength="12"
+                    class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all text-sm"
+                  />
                 </div>
               </div>
 
@@ -240,14 +285,24 @@ defmodule SmartKioskWeb.UserRegistrationLive do
                 phx-disable-with="Creating account..."
                 class="w-full bg-violet-500 hover:bg-violet-400 text-white font-bold py-3 rounded-xl shadow-lg shadow-violet-500/20 transition-all active:scale-[0.98] text-sm"
               >
-                <%= if @reg_type == "shop" do %>Open my shop<% else %>Create account<% end %>
+                <%= if @reg_type == "shop" do %>
+                  Open my shop
+                <% else %>
+                  Create account
+                <% end %>
               </button>
             </.form>
           </div>
 
           <%!-- Footer --%>
           <p class="text-center mt-6 text-slate-500 text-sm">
-            Already have an account? <a href={~p"/login"} class="text-white font-semibold hover:text-violet-400 transition-colors">Sign in</a>
+            Already have an account?
+            <a
+              href={~p"/login"}
+              class="text-white font-semibold hover:text-violet-400 transition-colors"
+            >
+              Sign in
+            </a>
           </p>
         </div>
       </div>
@@ -273,8 +328,9 @@ defmodule SmartKioskWeb.UserRegistrationLive do
      |> assign(:page_title, "Create Account · SmartKiosk")}
   end
 
-  def handle_event("validate", params, socket) do
-    {:noreply, socket} # Simplification for now
+  def handle_event("validate", _params, socket) do
+    # Simplification for now
+    {:noreply, socket}
   end
 
   def handle_event("save", params, socket) do
@@ -291,10 +347,11 @@ defmodule SmartKioskWeb.UserRegistrationLive do
         "country" => "KE",
         "plan" => "kiosk"
       }
-      
+
       case Accounts.register_shop_owner(shop_attrs, user_attrs) do
         {:ok, _shop, _user} ->
           {:noreply, put_flash(socket, :info, "Shop created!") |> redirect(to: ~p"/login")}
+
         {:error, _changeset} ->
           {:noreply, put_flash(socket, :error, "Registration failed.")}
       end
@@ -302,6 +359,7 @@ defmodule SmartKioskWeb.UserRegistrationLive do
       case Accounts.register_user(user_attrs) do
         {:ok, _user} ->
           {:noreply, put_flash(socket, :info, "Account created!") |> redirect(to: ~p"/login")}
+
         {:error, _changeset} ->
           {:noreply, put_flash(socket, :error, "Registration failed.")}
       end

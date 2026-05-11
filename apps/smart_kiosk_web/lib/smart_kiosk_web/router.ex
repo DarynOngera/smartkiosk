@@ -95,15 +95,12 @@ defmodule SmartKioskWeb.Router do
   end
 
   # ── Platform admin ────────────────────────────────────────────────────────────
-  scope "/admin", SmartKioskWeb.Admin do
+  scope "/admin", SmartKioskWeb do
     pipe_through [:browser, :require_auth, :require_admin]
 
     live_session :admin,
-      on_mount: [{SmartKioskWeb.UserAuth, :ensure_authenticated}, SmartKioskWeb.AdminAuth] do
-      live "/", AdminDashboardLive, :index
-      live "/shops", AdminShopsLive.Index, :index
-      live "/shops/:id", AdminShopsLive.Show, :show
-      live "/users", AdminUsersLive.Index, :index
+      on_mount: [{SmartKioskWeb.UserAuth, :ensure_authenticated}] do
+      live "/", AdminLive, :index
     end
   end
 

@@ -4,7 +4,6 @@ defmodule SmartKioskWeb.UI.DashboardLive do
   """
   use SmartKioskWeb, :live_view
 
-  alias SmartKioskCore.Accounts
   alias SmartKioskCore.Catalogue
   import SmartKioskWeb.Navbar
   import SmartKioskWeb.Components.ProductCard
@@ -97,7 +96,10 @@ defmodule SmartKioskWeb.UI.DashboardLive do
             navigate="/inventory"
             class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
           >
-            <.icon name="hero-plus-circle" class="w-8 h-8 text-violet-400 mb-3 group-hover:scale-110 transition-transform" />
+            <.icon
+              name="hero-plus-circle"
+              class="w-8 h-8 text-violet-400 mb-3 group-hover:scale-110 transition-transform"
+            />
             <p class="font-bold text-white">Add/Remove Stock</p>
             <p class="text-slate-500 text-xs mt-1">Manage your inventory levels</p>
           </.link>
@@ -106,7 +108,10 @@ defmodule SmartKioskWeb.UI.DashboardLive do
             navigate="/orders"
             class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
           >
-            <.icon name="hero-truck" class="w-8 h-8 text-indigo-400 mb-3 group-hover:scale-110 transition-transform" />
+            <.icon
+              name="hero-truck"
+              class="w-8 h-8 text-indigo-400 mb-3 group-hover:scale-110 transition-transform"
+            />
             <p class="font-bold text-white">Orders & Deliveries</p>
             <p class="text-slate-500 text-xs mt-1">Track customer shipments</p>
           </.link>

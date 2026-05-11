@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "timestamp": 1778215640062,
+  "timestamp": 1778482420092,
   "workspaceRoot": "/home/dtech/Projects/smartkiosk",
   "registries": {
     "components": {
@@ -598,6 +598,159 @@
           ]
         ],
         [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/navbar.ex",
+          [
+            {
+              "name": "navbar",
+              "moduleName": "SmartKioskWeb.Navbar",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/navbar.ex",
+              "line": 20,
+              "attributes": [
+                {
+                  "name": "current_user",
+                  "type": "map",
+                  "rawType": ":map",
+                  "required": false,
+                  "default": "nil"
+                },
+                {
+                  "name": "user_shop",
+                  "type": "any",
+                  "rawType": ":any",
+                  "required": false,
+                  "default": "nil"
+                },
+                {
+                  "name": "cart_count",
+                  "type": "integer",
+                  "rawType": ":integer",
+                  "required": false,
+                  "default": "0"
+                }
+              ],
+              "slots": []
+            },
+            {
+              "name": "user_avatar",
+              "moduleName": "SmartKioskWeb.Navbar",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/navbar.ex",
+              "line": 88,
+              "attributes": [
+                {
+                  "name": "current_user",
+                  "type": "map",
+                  "rawType": ":map",
+                  "required": true
+                },
+                {
+                  "name": "user_shop",
+                  "type": "map",
+                  "rawType": ":map",
+                  "required": false,
+                  "default": "nil"
+                }
+              ],
+              "slots": []
+            },
+            {
+              "name": "guest_actions",
+              "moduleName": "SmartKioskWeb.Navbar",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/navbar.ex",
+              "line": 134,
+              "attributes": [],
+              "slots": []
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/product_card.ex",
+          [
+            {
+              "name": "product_card",
+              "moduleName": "SmartKioskWeb.Components.ProductCard",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/product_card.ex",
+              "line": 11,
+              "attributes": [
+                {
+                  "name": "product",
+                  "type": "map",
+                  "rawType": ":map",
+                  "required": true
+                },
+                {
+                  "name": "on_add",
+                  "type": "string",
+                  "rawType": ":string",
+                  "required": false,
+                  "default": "\"add_to_cart\""
+                }
+              ],
+              "slots": []
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/sidebar.ex",
+          [
+            {
+              "name": "sidebar",
+              "moduleName": "SmartKioskWeb.Sidebar",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/sidebar.ex",
+              "line": 18,
+              "attributes": [
+                {
+                  "name": "shop_categories",
+                  "type": "map",
+                  "rawType": ":map",
+                  "required": true
+                },
+                {
+                  "name": "selected_category",
+                  "type": "string",
+                  "rawType": ":string",
+                  "required": false,
+                  "default": "nil"
+                }
+              ],
+              "slots": []
+            },
+            {
+              "name": "category_button",
+              "moduleName": "SmartKioskWeb.Sidebar",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/sidebar.ex",
+              "line": 65,
+              "attributes": [
+                {
+                  "name": "cat_key",
+                  "type": "atom",
+                  "rawType": ":atom",
+                  "required": true
+                },
+                {
+                  "name": "label",
+                  "type": "string",
+                  "rawType": ":string",
+                  "required": true
+                },
+                {
+                  "name": "icon",
+                  "type": "string",
+                  "rawType": ":string",
+                  "required": true
+                },
+                {
+                  "name": "is_selected",
+                  "type": "boolean",
+                  "rawType": ":boolean",
+                  "required": false,
+                  "default": "false"
+                }
+              ],
+              "slots": []
+            }
+          ]
+        ],
+        [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/error_html.ex",
           []
         ],
@@ -608,29 +761,230 @@
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/accounts.ex",
           []
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex",
+          []
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/user_session_controller.ex",
+          []
         ]
       ],
       "fileHashes": {
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex": "529060e0d682cb34a33aa25f081c9fab01cf1817",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex": "9567a47c972a7642dbb86309cc1628d8ba80bb9f",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex": "35f9f4e3a35597a0ef4e41d3b641bee50f957acb",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex": "e0f95831ae45e6003d0165a056245c6ea7f54a3b",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/navbar.ex": "586666bdde84a3c37de4f63c879606c0a5e22ab4",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/product_card.ex": "059bc8e3a6a41fec67eadbccd400826049b94615",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/sidebar.ex": "0ee976f8e554b30861c0f71220c597db648cb970",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/error_html.ex": "08165e3e5c179cb89876aec497444ef494984b19",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_html.ex": "36a342058a6f61388314f76709f934a706c42cac",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/accounts.ex": "a3839724150cd9d0a4157a339406798207407708"
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/accounts.ex": "d299d0ea7fc8ad2adcf951dab31ea73ae01ad627",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex": "bbac68d528aa2c719ea1e433721c5a802ff0e1cd",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/user_session_controller.ex": "dad6778d5f8f912ba9a1628004694196e7bf681c"
       },
       "workspaceRoot": "/home/dtech/Projects/smartkiosk"
     },
     "schemas": {
       "schemas": [
         [
+          "SmartKioskCore.Schemas.CartItem",
+          {
+            "moduleName": "SmartKioskCore.Schemas.CartItem",
+            "tableName": "cart_items",
+            "fields": [
+              {
+                "name": "quantity",
+                "type": "integer"
+              },
+              {
+                "name": "unit_price",
+                "type": "decimal"
+              },
+              {
+                "name": "line_total",
+                "type": "decimal"
+              },
+              {
+                "name": "product_name",
+                "type": "string"
+              },
+              {
+                "name": "session_id",
+                "type": "string"
+              },
+              {
+                "name": "user",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.User"
+              },
+              {
+                "name": "shop",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.Shop"
+              },
+              {
+                "name": "product",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.Product"
+              },
+              {
+                "name": "inserted_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "updated_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
+              }
+            ],
+            "associations": {},
+            "associationsDetailed": [
+              {
+                "fieldName": "user",
+                "targetModule": "SmartKioskCore.Schemas.User",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "shop",
+                "targetModule": "SmartKioskCore.Schemas.Shop",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "product",
+                "targetModule": "SmartKioskCore.Schemas.Product",
+                "type": "belongs_to"
+              }
+            ],
+            "aliases": {},
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/cart_item.ex",
+            "line": 12
+          }
+        ],
+        [
+          "SmartKioskCore.Schemas.User",
+          {
+            "moduleName": "SmartKioskCore.Schemas.User",
+            "tableName": "users",
+            "fields": [
+              {
+                "name": "email",
+                "type": "string"
+              },
+              {
+                "name": "hashed_password",
+                "type": "string"
+              },
+              {
+                "name": "full_name",
+                "type": "string"
+              },
+              {
+                "name": "phone",
+                "type": "string"
+              },
+              {
+                "name": "confirmed_at",
+                "type": "utc_datetime"
+              },
+              {
+                "name": "avatar_url",
+                "type": "string"
+              },
+              {
+                "name": "password",
+                "type": "string"
+              },
+              {
+                "name": "shop",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.Shop"
+              },
+              {
+                "name": "owned_shops",
+                "type": "list",
+                "elixirType": "SmartKioskCore.Schemas.Shop"
+              },
+              {
+                "name": "rider_profile",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.Rider"
+              },
+              {
+                "name": "tokens",
+                "type": "list",
+                "elixirType": "SmartKioskCore.Schemas.UserToken"
+              },
+              {
+                "name": "customer_profiles",
+                "type": "list",
+                "elixirType": "SmartKioskCore.Schemas.Customer"
+              },
+              {
+                "name": "user_roles",
+                "type": "list",
+                "elixirType": "SmartKioskCore.Schemas.UserRole"
+              },
+              {
+                "name": "inserted_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "updated_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
+              }
+            ],
+            "associations": {},
+            "associationsDetailed": [
+              {
+                "fieldName": "shop",
+                "targetModule": "SmartKioskCore.Schemas.Shop",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "owned_shops",
+                "targetModule": "SmartKioskCore.Schemas.Shop",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "rider_profile",
+                "targetModule": "SmartKioskCore.Schemas.Rider",
+                "type": "has_one"
+              },
+              {
+                "fieldName": "tokens",
+                "targetModule": "SmartKioskCore.Schemas.UserToken",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "customer_profiles",
+                "targetModule": "SmartKioskCore.Schemas.Customer",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "user_roles",
+                "targetModule": "SmartKioskCore.Schemas.UserRole",
+                "type": "has_many"
+              }
+            ],
+            "aliases": {},
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex",
+            "line": 24
+          }
+        ],
+        [
           "SmartKioskCore.Schemas.Category",
           {
             "moduleName": "SmartKioskCore.Schemas.Category",
             "tableName": "categories",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "name",
                 "type": "string"
@@ -652,16 +1006,6 @@
                 "type": "integer"
               },
               {
-                "name": "parent",
-                "type": "assoc",
-                "elixirType": "SmartKioskCore.Schemas.__MODULE__"
-              },
-              {
-                "name": "children",
-                "type": "list",
-                "elixirType": "SmartKioskCore.Schemas.__MODULE__"
-              },
-              {
                 "name": "products",
                 "type": "list",
                 "elixirType": "SmartKioskCore.Schemas.Product"
@@ -673,25 +1017,31 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "products",
+                "targetModule": "SmartKioskCore.Schemas.Product",
+                "type": "has_many"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/category.ex",
             "line": 26
           }
         ],
         [
-          "SmartKioskCore.Schemas.Delivery",
+          "SmartKioskCore.Schemas.Invoice",
           {
-            "moduleName": "SmartKioskCore.Schemas.Delivery",
+            "moduleName": "SmartKioskCore.Schemas.Invoice",
             "tableName": "invoices",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "amount",
                 "type": "decimal"
@@ -725,13 +1075,401 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "shop",
+                "targetModule": "SmartKioskCore.Schemas.Shop",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "subscription",
+                "targetModule": "SmartKioskCore.Schemas.Subscription",
+                "type": "belongs_to"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
-            "line": 249
+            "line": 260
+          }
+        ],
+        [
+          "SmartKioskCore.Schemas.Subscription",
+          {
+            "moduleName": "SmartKioskCore.Schemas.Subscription",
+            "tableName": "subscriptions",
+            "fields": [
+              {
+                "name": "current_period_start",
+                "type": "utc_datetime"
+              },
+              {
+                "name": "current_period_end",
+                "type": "utc_datetime"
+              },
+              {
+                "name": "trial_ends_at",
+                "type": "utc_datetime"
+              },
+              {
+                "name": "cancelled_at",
+                "type": "utc_datetime"
+              },
+              {
+                "name": "shop",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.Shop"
+              },
+              {
+                "name": "invoices",
+                "type": "list",
+                "elixirType": "SmartKioskCore.Schemas.Invoice"
+              },
+              {
+                "name": "inserted_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "updated_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
+              }
+            ],
+            "associations": {},
+            "associationsDetailed": [
+              {
+                "fieldName": "shop",
+                "targetModule": "SmartKioskCore.Schemas.Shop",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "invoices",
+                "targetModule": "SmartKioskCore.Schemas.Invoice",
+                "type": "has_many"
+              }
+            ],
+            "aliases": {},
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
+            "line": 216
+          }
+        ],
+        [
+          "SmartKioskCore.Schemas.AdEvent",
+          {
+            "moduleName": "SmartKioskCore.Schemas.AdEvent",
+            "tableName": "ad_events",
+            "fields": [
+              {
+                "name": "session_id",
+                "type": "string"
+              },
+              {
+                "name": "ip_hash",
+                "type": "string"
+              },
+              {
+                "name": "campaign",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.Campaign"
+              },
+              {
+                "name": "creative",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.AdCreative"
+              },
+              {
+                "name": "shop",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.Shop"
+              },
+              {
+                "name": "inserted_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "updated_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
+              }
+            ],
+            "associations": {},
+            "associationsDetailed": [
+              {
+                "fieldName": "campaign",
+                "targetModule": "SmartKioskCore.Schemas.Campaign",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "creative",
+                "targetModule": "SmartKioskCore.Schemas.AdCreative",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "shop",
+                "targetModule": "SmartKioskCore.Schemas.Shop",
+                "type": "belongs_to"
+              }
+            ],
+            "aliases": {},
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
+            "line": 175
+          }
+        ],
+        [
+          "SmartKioskCore.Schemas.AdCreative",
+          {
+            "moduleName": "SmartKioskCore.Schemas.AdCreative",
+            "tableName": "ad_creatives",
+            "fields": [
+              {
+                "name": "headline",
+                "type": "string"
+              },
+              {
+                "name": "body",
+                "type": "string"
+              },
+              {
+                "name": "image_url",
+                "type": "string"
+              },
+              {
+                "name": "cta",
+                "type": "string"
+              },
+              {
+                "name": "link_url",
+                "type": "string"
+              },
+              {
+                "name": "active",
+                "type": "boolean"
+              },
+              {
+                "name": "campaign",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.Campaign"
+              },
+              {
+                "name": "events",
+                "type": "list",
+                "elixirType": "SmartKioskCore.Schemas.AdEvent"
+              },
+              {
+                "name": "inserted_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "updated_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
+              }
+            ],
+            "associations": {},
+            "associationsDetailed": [
+              {
+                "fieldName": "campaign",
+                "targetModule": "SmartKioskCore.Schemas.Campaign",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "events",
+                "targetModule": "SmartKioskCore.Schemas.AdEvent",
+                "type": "has_many"
+              }
+            ],
+            "aliases": {},
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
+            "line": 135
+          }
+        ],
+        [
+          "SmartKioskCore.Schemas.Campaign",
+          {
+            "moduleName": "SmartKioskCore.Schemas.Campaign",
+            "tableName": "campaigns",
+            "fields": [
+              {
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "name": "targeting",
+                "type": "map"
+              },
+              {
+                "name": "budget",
+                "type": "decimal"
+              },
+              {
+                "name": "spent",
+                "type": "decimal"
+              },
+              {
+                "name": "cpc",
+                "type": "decimal"
+              },
+              {
+                "name": "starts_at",
+                "type": "utc_datetime"
+              },
+              {
+                "name": "ends_at",
+                "type": "utc_datetime"
+              },
+              {
+                "name": "shop",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.Shop"
+              },
+              {
+                "name": "creatives",
+                "type": "list",
+                "elixirType": "SmartKioskCore.Schemas.AdCreative"
+              },
+              {
+                "name": "events",
+                "type": "list",
+                "elixirType": "SmartKioskCore.Schemas.AdEvent"
+              },
+              {
+                "name": "inserted_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "updated_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
+              }
+            ],
+            "associations": {},
+            "associationsDetailed": [
+              {
+                "fieldName": "shop",
+                "targetModule": "SmartKioskCore.Schemas.Shop",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "creatives",
+                "targetModule": "SmartKioskCore.Schemas.AdCreative",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "events",
+                "targetModule": "SmartKioskCore.Schemas.AdEvent",
+                "type": "has_many"
+              }
+            ],
+            "aliases": {},
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
+            "line": 81
+          }
+        ],
+        [
+          "SmartKioskCore.Schemas.Delivery",
+          {
+            "moduleName": "SmartKioskCore.Schemas.Delivery",
+            "tableName": "deliveries",
+            "fields": [
+              {
+                "name": "pickup_lat",
+                "type": "float"
+              },
+              {
+                "name": "pickup_lng",
+                "type": "float"
+              },
+              {
+                "name": "dropoff_lat",
+                "type": "float"
+              },
+              {
+                "name": "dropoff_lng",
+                "type": "float"
+              },
+              {
+                "name": "distance_km",
+                "type": "decimal"
+              },
+              {
+                "name": "notes",
+                "type": "string"
+              },
+              {
+                "name": "picked_up_at",
+                "type": "utc_datetime"
+              },
+              {
+                "name": "delivered_at",
+                "type": "utc_datetime"
+              },
+              {
+                "name": "order",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.Order"
+              },
+              {
+                "name": "rider",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.Rider"
+              },
+              {
+                "name": "delivery_zone",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.DeliveryZone"
+              },
+              {
+                "name": "inserted_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "updated_at",
+                "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
+              }
+            ],
+            "associations": {},
+            "associationsDetailed": [
+              {
+                "fieldName": "order",
+                "targetModule": "SmartKioskCore.Schemas.Order",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "rider",
+                "targetModule": "SmartKioskCore.Schemas.Rider",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "delivery_zone",
+                "targetModule": "SmartKioskCore.Schemas.DeliveryZone",
+                "type": "belongs_to"
+              }
+            ],
+            "aliases": {},
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
+            "line": 15
           }
         ],
         [
@@ -740,10 +1478,6 @@
             "moduleName": "SmartKioskCore.Schemas.Customer",
             "tableName": "customers",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "name",
                 "type": "string"
@@ -766,6 +1500,11 @@
                 "elixirType": "SmartKioskCore.Schemas.Shop"
               },
               {
+                "name": "user",
+                "type": "assoc",
+                "elixirType": "SmartKioskCore.Schemas.User"
+              },
+              {
                 "name": "orders",
                 "type": "list",
                 "elixirType": "SmartKioskCore.Schemas.Order"
@@ -777,10 +1516,30 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "shop",
+                "targetModule": "SmartKioskCore.Schemas.Shop",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "user",
+                "targetModule": "SmartKioskCore.Schemas.User",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "orders",
+                "targetModule": "SmartKioskCore.Schemas.Order",
+                "type": "has_many"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/customer.ex",
             "line": 12
@@ -792,10 +1551,6 @@
             "moduleName": "SmartKioskCore.Schemas.DeliveryZone",
             "tableName": "delivery_zones",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "name",
                 "type": "string"
@@ -824,10 +1579,20 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "deliveries",
+                "targetModule": "SmartKioskCore.Schemas.Delivery",
+                "type": "has_many"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/delivery_zone.ex",
             "line": 13
@@ -839,10 +1604,6 @@
             "moduleName": "SmartKioskCore.Schemas.OrderItem",
             "tableName": "order_items",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "quantity",
                 "type": "integer"
@@ -876,10 +1637,25 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "order",
+                "targetModule": "SmartKioskCore.Schemas.Order",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "product",
+                "targetModule": "SmartKioskCore.Schemas.Product",
+                "type": "belongs_to"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/order_item.ex",
             "line": 12
@@ -891,10 +1667,6 @@
             "moduleName": "SmartKioskCore.Schemas.Order",
             "tableName": "orders",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "subtotal",
                 "type": "decimal"
@@ -955,10 +1727,40 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "shop",
+                "targetModule": "SmartKioskCore.Schemas.Shop",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "customer",
+                "targetModule": "SmartKioskCore.Schemas.Customer",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "items",
+                "targetModule": "SmartKioskCore.Schemas.OrderItem",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "delivery",
+                "targetModule": "SmartKioskCore.Schemas.Delivery",
+                "type": "has_one"
+              },
+              {
+                "fieldName": "transactions",
+                "targetModule": "SmartKioskCore.Schemas.Transaction",
+                "type": "has_many"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/orders.ex",
             "line": 22
@@ -970,10 +1772,6 @@
             "moduleName": "SmartKioskCore.Schemas.Permission",
             "tableName": "permissions",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "resource",
                 "type": "string"
@@ -998,10 +1796,20 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "role_permissions",
+                "targetModule": "SmartKioskCore.Schemas.RolePermission",
+                "type": "has_many"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/permission.ex",
             "line": 8
@@ -1013,10 +1821,6 @@
             "moduleName": "SmartKioskCore.Schemas.Product",
             "tableName": "products",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "name",
                 "type": "string"
@@ -1084,10 +1888,35 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "shop",
+                "targetModule": "SmartKioskCore.Schemas.Shop",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "category",
+                "targetModule": "SmartKioskCore.Schemas.Category",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "images",
+                "targetModule": "SmartKioskCore.Schemas.ProductImage",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "order_items",
+                "targetModule": "SmartKioskCore.Schemas.OrderItem",
+                "type": "has_many"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/product.ex",
             "line": 19
@@ -1099,10 +1928,6 @@
             "moduleName": "SmartKioskCore.Schemas.ProductImage",
             "tableName": "product_images",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "url",
                 "type": "string"
@@ -1127,10 +1952,20 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "product",
+                "targetModule": "SmartKioskCore.Schemas.Product",
+                "type": "belongs_to"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/product_image.ex",
             "line": 8
@@ -1142,10 +1977,6 @@
             "moduleName": "SmartKioskCore.Schemas.Rider",
             "tableName": "riders",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "current_lat",
                 "type": "float"
@@ -1179,10 +2010,25 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "user",
+                "targetModule": "SmartKioskCore.Schemas.User",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "deliveries",
+                "targetModule": "SmartKioskCore.Schemas.Delivery",
+                "type": "has_many"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/rider.ex",
             "line": 16
@@ -1194,10 +2040,6 @@
             "moduleName": "SmartKioskCore.Schemas.Role",
             "tableName": "roles",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "name",
                 "type": "string"
@@ -1224,11 +2066,6 @@
                 "elixirType": "SmartKioskCore.Schemas.RolePermission"
               },
               {
-                "name": "permissions",
-                "type": "list",
-                "elixirType": "SmartKioskCore.Schemas.through"
-              },
-              {
                 "name": "user_roles",
                 "type": "list",
                 "elixirType": "SmartKioskCore.Schemas.UserRole"
@@ -1240,10 +2077,25 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "role_permissions",
+                "targetModule": "SmartKioskCore.Schemas.RolePermission",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "user_roles",
+                "targetModule": "SmartKioskCore.Schemas.UserRole",
+                "type": "has_many"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/role.ex",
             "line": 8
@@ -1255,10 +2107,6 @@
             "moduleName": "SmartKioskCore.Schemas.RolePermission",
             "tableName": "role_permissions",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "role",
                 "type": "assoc",
@@ -1276,10 +2124,25 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "role",
+                "targetModule": "SmartKioskCore.Schemas.Role",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "permission",
+                "targetModule": "SmartKioskCore.Schemas.Permission",
+                "type": "belongs_to"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/role_permission.ex",
             "line": 8
@@ -1291,10 +2154,6 @@
             "moduleName": "SmartKioskCore.Schemas.Shop",
             "tableName": "shops",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "name",
                 "type": "string"
@@ -1338,6 +2197,10 @@
               {
                 "name": "description",
                 "type": "string"
+              },
+              {
+                "name": "owner_id",
+                "type": "binary_id"
               },
               {
                 "name": "settings",
@@ -1390,13 +2253,58 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "users",
+                "targetModule": "SmartKioskCore.Schemas.User",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "products",
+                "targetModule": "SmartKioskCore.Schemas.Product",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "orders",
+                "targetModule": "SmartKioskCore.Schemas.Order",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "customers",
+                "targetModule": "SmartKioskCore.Schemas.Customer",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "transactions",
+                "targetModule": "SmartKioskCore.Schemas.Transaction",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "campaigns",
+                "targetModule": "SmartKioskCore.Schemas.Campaign",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "invoices",
+                "targetModule": "SmartKioskCore.Schemas.Invoice",
+                "type": "has_many"
+              },
+              {
+                "fieldName": "subscription",
+                "targetModule": "SmartKioskCore.Schemas.Subscription",
+                "type": "has_one"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/shop.ex",
-            "line": 17
+            "line": 23
           }
         ],
         [
@@ -1405,10 +2313,6 @@
             "moduleName": "SmartKioskCore.Schemas.Transaction",
             "tableName": "transactions",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "amount",
                 "type": "decimal"
@@ -1447,39 +2351,33 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
-              }
-            ],
-            "associations": {},
-            "associationsDetailed": [],
-            "aliases": {},
-            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/transaction.ex",
-            "line": 28
-          }
-        ],
-        [
-          "SmartKioskCore.Schemas.User",
-          {
-            "moduleName": "SmartKioskCore.Schemas.User",
-            "tableName": "users",
-            "fields": [
+              },
               {
                 "name": "id",
                 "type": "id"
-              },
-              {
-                "name": "inserted_at",
-                "type": "naive_datetime"
-              },
-              {
-                "name": "updated_at",
-                "type": "naive_datetime"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "shop",
+                "targetModule": "SmartKioskCore.Schemas.Shop",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "user",
+                "targetModule": "SmartKioskCore.Schemas.User",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "order",
+                "targetModule": "SmartKioskCore.Schemas.Order",
+                "type": "belongs_to"
+              }
+            ],
             "aliases": {},
-            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex",
-            "line": 24
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/transaction.ex",
+            "line": 28
           }
         ],
         [
@@ -1488,10 +2386,6 @@
             "moduleName": "SmartKioskCore.Schemas.UserRole",
             "tableName": "user_roles",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "user",
                 "type": "assoc",
@@ -1514,10 +2408,30 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "user",
+                "targetModule": "SmartKioskCore.Schemas.User",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "role",
+                "targetModule": "SmartKioskCore.Schemas.Role",
+                "type": "belongs_to"
+              },
+              {
+                "fieldName": "shop",
+                "targetModule": "SmartKioskCore.Schemas.Shop",
+                "type": "belongs_to"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user_role.ex",
             "line": 8
@@ -1529,10 +2443,6 @@
             "moduleName": "SmartKioskCore.Schemas.UserToken",
             "tableName": "users_tokens",
             "fields": [
-              {
-                "name": "id",
-                "type": "id"
-              },
               {
                 "name": "token",
                 "type": "binary"
@@ -1557,10 +2467,20 @@
               {
                 "name": "updated_at",
                 "type": "naive_datetime"
+              },
+              {
+                "name": "id",
+                "type": "id"
               }
             ],
             "associations": {},
-            "associationsDetailed": [],
+            "associationsDetailed": [
+              {
+                "fieldName": "user",
+                "targetModule": "SmartKioskCore.Schemas.User",
+                "type": "belongs_to"
+              }
+            ],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user_token.ex",
             "line": 24
@@ -1569,16 +2489,208 @@
       ],
       "schemasByFile": [
         [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/cart_item.ex",
+          [
+            {
+              "moduleName": "SmartKioskCore.Schemas.CartItem",
+              "tableName": "cart_items",
+              "fields": [
+                {
+                  "name": "quantity",
+                  "type": "integer"
+                },
+                {
+                  "name": "unit_price",
+                  "type": "decimal"
+                },
+                {
+                  "name": "line_total",
+                  "type": "decimal"
+                },
+                {
+                  "name": "product_name",
+                  "type": "string"
+                },
+                {
+                  "name": "session_id",
+                  "type": "string"
+                },
+                {
+                  "name": "user",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.User"
+                },
+                {
+                  "name": "shop",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.Shop"
+                },
+                {
+                  "name": "product",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.Product"
+                },
+                {
+                  "name": "inserted_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "updated_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
+                }
+              ],
+              "associations": {},
+              "associationsDetailed": [
+                {
+                  "fieldName": "user",
+                  "targetModule": "SmartKioskCore.Schemas.User",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "shop",
+                  "targetModule": "SmartKioskCore.Schemas.Shop",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "product",
+                  "targetModule": "SmartKioskCore.Schemas.Product",
+                  "type": "belongs_to"
+                }
+              ],
+              "aliases": {},
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/cart_item.ex",
+              "line": 12
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex",
+          [
+            {
+              "moduleName": "SmartKioskCore.Schemas.User",
+              "tableName": "users",
+              "fields": [
+                {
+                  "name": "email",
+                  "type": "string"
+                },
+                {
+                  "name": "hashed_password",
+                  "type": "string"
+                },
+                {
+                  "name": "full_name",
+                  "type": "string"
+                },
+                {
+                  "name": "phone",
+                  "type": "string"
+                },
+                {
+                  "name": "confirmed_at",
+                  "type": "utc_datetime"
+                },
+                {
+                  "name": "avatar_url",
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "type": "string"
+                },
+                {
+                  "name": "shop",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.Shop"
+                },
+                {
+                  "name": "owned_shops",
+                  "type": "list",
+                  "elixirType": "SmartKioskCore.Schemas.Shop"
+                },
+                {
+                  "name": "rider_profile",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.Rider"
+                },
+                {
+                  "name": "tokens",
+                  "type": "list",
+                  "elixirType": "SmartKioskCore.Schemas.UserToken"
+                },
+                {
+                  "name": "customer_profiles",
+                  "type": "list",
+                  "elixirType": "SmartKioskCore.Schemas.Customer"
+                },
+                {
+                  "name": "user_roles",
+                  "type": "list",
+                  "elixirType": "SmartKioskCore.Schemas.UserRole"
+                },
+                {
+                  "name": "inserted_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "updated_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
+                }
+              ],
+              "associations": {},
+              "associationsDetailed": [
+                {
+                  "fieldName": "shop",
+                  "targetModule": "SmartKioskCore.Schemas.Shop",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "owned_shops",
+                  "targetModule": "SmartKioskCore.Schemas.Shop",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "rider_profile",
+                  "targetModule": "SmartKioskCore.Schemas.Rider",
+                  "type": "has_one"
+                },
+                {
+                  "fieldName": "tokens",
+                  "targetModule": "SmartKioskCore.Schemas.UserToken",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "customer_profiles",
+                  "targetModule": "SmartKioskCore.Schemas.Customer",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "user_roles",
+                  "targetModule": "SmartKioskCore.Schemas.UserRole",
+                  "type": "has_many"
+                }
+              ],
+              "aliases": {},
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex",
+              "line": 24
+            }
+          ]
+        ],
+        [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/category.ex",
           [
             {
               "moduleName": "SmartKioskCore.Schemas.Category",
               "tableName": "categories",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "name",
                   "type": "string"
@@ -1600,16 +2712,6 @@
                   "type": "integer"
                 },
                 {
-                  "name": "parent",
-                  "type": "assoc",
-                  "elixirType": "SmartKioskCore.Schemas.__MODULE__"
-                },
-                {
-                  "name": "children",
-                  "type": "list",
-                  "elixirType": "SmartKioskCore.Schemas.__MODULE__"
-                },
-                {
                   "name": "products",
                   "type": "list",
                   "elixirType": "SmartKioskCore.Schemas.Product"
@@ -1621,10 +2723,20 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "products",
+                  "targetModule": "SmartKioskCore.Schemas.Product",
+                  "type": "has_many"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/category.ex",
               "line": 26
@@ -1635,13 +2747,341 @@
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
           [
             {
-              "moduleName": "SmartKioskCore.Schemas.Delivery",
-              "tableName": "deliveries",
+              "moduleName": "SmartKioskCore.Schemas.Invoice",
+              "tableName": "invoices",
               "fields": [
+                {
+                  "name": "amount",
+                  "type": "decimal"
+                },
+                {
+                  "name": "currency",
+                  "type": "string"
+                },
+                {
+                  "name": "due_at",
+                  "type": "utc_datetime"
+                },
+                {
+                  "name": "paid_at",
+                  "type": "utc_datetime"
+                },
+                {
+                  "name": "shop",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.Shop"
+                },
+                {
+                  "name": "subscription",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.Subscription"
+                },
+                {
+                  "name": "inserted_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "updated_at",
+                  "type": "naive_datetime"
+                },
                 {
                   "name": "id",
                   "type": "id"
+                }
+              ],
+              "associations": {},
+              "associationsDetailed": [
+                {
+                  "fieldName": "shop",
+                  "targetModule": "SmartKioskCore.Schemas.Shop",
+                  "type": "belongs_to"
                 },
+                {
+                  "fieldName": "subscription",
+                  "targetModule": "SmartKioskCore.Schemas.Subscription",
+                  "type": "belongs_to"
+                }
+              ],
+              "aliases": {},
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
+              "line": 260
+            },
+            {
+              "moduleName": "SmartKioskCore.Schemas.Subscription",
+              "tableName": "subscriptions",
+              "fields": [
+                {
+                  "name": "current_period_start",
+                  "type": "utc_datetime"
+                },
+                {
+                  "name": "current_period_end",
+                  "type": "utc_datetime"
+                },
+                {
+                  "name": "trial_ends_at",
+                  "type": "utc_datetime"
+                },
+                {
+                  "name": "cancelled_at",
+                  "type": "utc_datetime"
+                },
+                {
+                  "name": "shop",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.Shop"
+                },
+                {
+                  "name": "invoices",
+                  "type": "list",
+                  "elixirType": "SmartKioskCore.Schemas.Invoice"
+                },
+                {
+                  "name": "inserted_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "updated_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
+                }
+              ],
+              "associations": {},
+              "associationsDetailed": [
+                {
+                  "fieldName": "shop",
+                  "targetModule": "SmartKioskCore.Schemas.Shop",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "invoices",
+                  "targetModule": "SmartKioskCore.Schemas.Invoice",
+                  "type": "has_many"
+                }
+              ],
+              "aliases": {},
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
+              "line": 216
+            },
+            {
+              "moduleName": "SmartKioskCore.Schemas.AdEvent",
+              "tableName": "ad_events",
+              "fields": [
+                {
+                  "name": "session_id",
+                  "type": "string"
+                },
+                {
+                  "name": "ip_hash",
+                  "type": "string"
+                },
+                {
+                  "name": "campaign",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.Campaign"
+                },
+                {
+                  "name": "creative",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.AdCreative"
+                },
+                {
+                  "name": "shop",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.Shop"
+                },
+                {
+                  "name": "inserted_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "updated_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
+                }
+              ],
+              "associations": {},
+              "associationsDetailed": [
+                {
+                  "fieldName": "campaign",
+                  "targetModule": "SmartKioskCore.Schemas.Campaign",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "creative",
+                  "targetModule": "SmartKioskCore.Schemas.AdCreative",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "shop",
+                  "targetModule": "SmartKioskCore.Schemas.Shop",
+                  "type": "belongs_to"
+                }
+              ],
+              "aliases": {},
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
+              "line": 175
+            },
+            {
+              "moduleName": "SmartKioskCore.Schemas.AdCreative",
+              "tableName": "ad_creatives",
+              "fields": [
+                {
+                  "name": "headline",
+                  "type": "string"
+                },
+                {
+                  "name": "body",
+                  "type": "string"
+                },
+                {
+                  "name": "image_url",
+                  "type": "string"
+                },
+                {
+                  "name": "cta",
+                  "type": "string"
+                },
+                {
+                  "name": "link_url",
+                  "type": "string"
+                },
+                {
+                  "name": "active",
+                  "type": "boolean"
+                },
+                {
+                  "name": "campaign",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.Campaign"
+                },
+                {
+                  "name": "events",
+                  "type": "list",
+                  "elixirType": "SmartKioskCore.Schemas.AdEvent"
+                },
+                {
+                  "name": "inserted_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "updated_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
+                }
+              ],
+              "associations": {},
+              "associationsDetailed": [
+                {
+                  "fieldName": "campaign",
+                  "targetModule": "SmartKioskCore.Schemas.Campaign",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "events",
+                  "targetModule": "SmartKioskCore.Schemas.AdEvent",
+                  "type": "has_many"
+                }
+              ],
+              "aliases": {},
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
+              "line": 135
+            },
+            {
+              "moduleName": "SmartKioskCore.Schemas.Campaign",
+              "tableName": "campaigns",
+              "fields": [
+                {
+                  "name": "name",
+                  "type": "string"
+                },
+                {
+                  "name": "targeting",
+                  "type": "map"
+                },
+                {
+                  "name": "budget",
+                  "type": "decimal"
+                },
+                {
+                  "name": "spent",
+                  "type": "decimal"
+                },
+                {
+                  "name": "cpc",
+                  "type": "decimal"
+                },
+                {
+                  "name": "starts_at",
+                  "type": "utc_datetime"
+                },
+                {
+                  "name": "ends_at",
+                  "type": "utc_datetime"
+                },
+                {
+                  "name": "shop",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.Shop"
+                },
+                {
+                  "name": "creatives",
+                  "type": "list",
+                  "elixirType": "SmartKioskCore.Schemas.AdCreative"
+                },
+                {
+                  "name": "events",
+                  "type": "list",
+                  "elixirType": "SmartKioskCore.Schemas.AdEvent"
+                },
+                {
+                  "name": "inserted_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "updated_at",
+                  "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
+                }
+              ],
+              "associations": {},
+              "associationsDetailed": [
+                {
+                  "fieldName": "shop",
+                  "targetModule": "SmartKioskCore.Schemas.Shop",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "creatives",
+                  "targetModule": "SmartKioskCore.Schemas.AdCreative",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "events",
+                  "targetModule": "SmartKioskCore.Schemas.AdEvent",
+                  "type": "has_many"
+                }
+              ],
+              "aliases": {},
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
+              "line": 81
+            },
+            {
+              "moduleName": "SmartKioskCore.Schemas.Delivery",
+              "tableName": "deliveries",
+              "fields": [
                 {
                   "name": "pickup_lat",
                   "type": "float"
@@ -1696,280 +3136,33 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "order",
+                  "targetModule": "SmartKioskCore.Schemas.Order",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "rider",
+                  "targetModule": "SmartKioskCore.Schemas.Rider",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "delivery_zone",
+                  "targetModule": "SmartKioskCore.Schemas.DeliveryZone",
+                  "type": "belongs_to"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
               "line": 15
-            },
-            {
-              "moduleName": "SmartKioskCore.Schemas.Delivery",
-              "tableName": "campaigns",
-              "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
-                {
-                  "name": "name",
-                  "type": "string"
-                },
-                {
-                  "name": "targeting",
-                  "type": "map"
-                },
-                {
-                  "name": "budget",
-                  "type": "decimal"
-                },
-                {
-                  "name": "spent",
-                  "type": "decimal"
-                },
-                {
-                  "name": "cpc",
-                  "type": "decimal"
-                },
-                {
-                  "name": "starts_at",
-                  "type": "utc_datetime"
-                },
-                {
-                  "name": "ends_at",
-                  "type": "utc_datetime"
-                },
-                {
-                  "name": "shop",
-                  "type": "assoc",
-                  "elixirType": "SmartKioskCore.Schemas.Shop"
-                },
-                {
-                  "name": "creatives",
-                  "type": "list",
-                  "elixirType": "SmartKioskCore.Schemas.AdCreative"
-                },
-                {
-                  "name": "events",
-                  "type": "list",
-                  "elixirType": "SmartKioskCore.Schemas.AdEvent"
-                },
-                {
-                  "name": "inserted_at",
-                  "type": "naive_datetime"
-                },
-                {
-                  "name": "updated_at",
-                  "type": "naive_datetime"
-                }
-              ],
-              "associations": {},
-              "associationsDetailed": [],
-              "aliases": {},
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
-              "line": 81
-            },
-            {
-              "moduleName": "SmartKioskCore.Schemas.Delivery",
-              "tableName": "ad_creatives",
-              "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
-                {
-                  "name": "headline",
-                  "type": "string"
-                },
-                {
-                  "name": "body",
-                  "type": "string"
-                },
-                {
-                  "name": "image_url",
-                  "type": "string"
-                },
-                {
-                  "name": "cta",
-                  "type": "string"
-                },
-                {
-                  "name": "link_url",
-                  "type": "string"
-                },
-                {
-                  "name": "active",
-                  "type": "boolean"
-                },
-                {
-                  "name": "campaign",
-                  "type": "assoc",
-                  "elixirType": "SmartKioskCore.Schemas.Campaign"
-                },
-                {
-                  "name": "events",
-                  "type": "list",
-                  "elixirType": "SmartKioskCore.Schemas.AdEvent"
-                },
-                {
-                  "name": "inserted_at",
-                  "type": "naive_datetime"
-                },
-                {
-                  "name": "updated_at",
-                  "type": "naive_datetime"
-                }
-              ],
-              "associations": {},
-              "associationsDetailed": [],
-              "aliases": {},
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
-              "line": 134
-            },
-            {
-              "moduleName": "SmartKioskCore.Schemas.Delivery",
-              "tableName": "ad_events",
-              "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
-                {
-                  "name": "session_id",
-                  "type": "string"
-                },
-                {
-                  "name": "ip_hash",
-                  "type": "string"
-                },
-                {
-                  "name": "campaign",
-                  "type": "assoc",
-                  "elixirType": "SmartKioskCore.Schemas.Campaign"
-                },
-                {
-                  "name": "creative",
-                  "type": "assoc",
-                  "elixirType": "SmartKioskCore.Schemas.AdCreative"
-                },
-                {
-                  "name": "shop",
-                  "type": "assoc",
-                  "elixirType": "SmartKioskCore.Schemas.Shop"
-                },
-                {
-                  "name": "inserted_at",
-                  "type": "naive_datetime"
-                },
-                {
-                  "name": "updated_at",
-                  "type": "naive_datetime"
-                }
-              ],
-              "associations": {},
-              "associationsDetailed": [],
-              "aliases": {},
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
-              "line": 173
-            },
-            {
-              "moduleName": "SmartKioskCore.Schemas.Delivery",
-              "tableName": "subscriptions",
-              "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
-                {
-                  "name": "current_period_start",
-                  "type": "utc_datetime"
-                },
-                {
-                  "name": "current_period_end",
-                  "type": "utc_datetime"
-                },
-                {
-                  "name": "trial_ends_at",
-                  "type": "utc_datetime"
-                },
-                {
-                  "name": "cancelled_at",
-                  "type": "utc_datetime"
-                },
-                {
-                  "name": "shop",
-                  "type": "assoc",
-                  "elixirType": "SmartKioskCore.Schemas.Shop"
-                },
-                {
-                  "name": "invoices",
-                  "type": "list",
-                  "elixirType": "SmartKioskCore.Schemas.Invoice"
-                },
-                {
-                  "name": "inserted_at",
-                  "type": "naive_datetime"
-                },
-                {
-                  "name": "updated_at",
-                  "type": "naive_datetime"
-                }
-              ],
-              "associations": {},
-              "associationsDetailed": [],
-              "aliases": {},
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
-              "line": 212
-            },
-            {
-              "moduleName": "SmartKioskCore.Schemas.Delivery",
-              "tableName": "invoices",
-              "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
-                {
-                  "name": "amount",
-                  "type": "decimal"
-                },
-                {
-                  "name": "currency",
-                  "type": "string"
-                },
-                {
-                  "name": "due_at",
-                  "type": "utc_datetime"
-                },
-                {
-                  "name": "paid_at",
-                  "type": "utc_datetime"
-                },
-                {
-                  "name": "shop",
-                  "type": "assoc",
-                  "elixirType": "SmartKioskCore.Schemas.Shop"
-                },
-                {
-                  "name": "subscription",
-                  "type": "assoc",
-                  "elixirType": "SmartKioskCore.Schemas.Subscription"
-                },
-                {
-                  "name": "inserted_at",
-                  "type": "naive_datetime"
-                },
-                {
-                  "name": "updated_at",
-                  "type": "naive_datetime"
-                }
-              ],
-              "associations": {},
-              "associationsDetailed": [],
-              "aliases": {},
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex",
-              "line": 249
             }
           ]
         ],
@@ -1980,10 +3173,6 @@
               "moduleName": "SmartKioskCore.Schemas.Customer",
               "tableName": "customers",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "name",
                   "type": "string"
@@ -2006,6 +3195,11 @@
                   "elixirType": "SmartKioskCore.Schemas.Shop"
                 },
                 {
+                  "name": "user",
+                  "type": "assoc",
+                  "elixirType": "SmartKioskCore.Schemas.User"
+                },
+                {
                   "name": "orders",
                   "type": "list",
                   "elixirType": "SmartKioskCore.Schemas.Order"
@@ -2017,10 +3211,30 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "shop",
+                  "targetModule": "SmartKioskCore.Schemas.Shop",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "user",
+                  "targetModule": "SmartKioskCore.Schemas.User",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "orders",
+                  "targetModule": "SmartKioskCore.Schemas.Order",
+                  "type": "has_many"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/customer.ex",
               "line": 12
@@ -2034,10 +3248,6 @@
               "moduleName": "SmartKioskCore.Schemas.DeliveryZone",
               "tableName": "delivery_zones",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "name",
                   "type": "string"
@@ -2066,10 +3276,20 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "deliveries",
+                  "targetModule": "SmartKioskCore.Schemas.Delivery",
+                  "type": "has_many"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/delivery_zone.ex",
               "line": 13
@@ -2083,10 +3303,6 @@
               "moduleName": "SmartKioskCore.Schemas.OrderItem",
               "tableName": "order_items",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "quantity",
                   "type": "integer"
@@ -2120,10 +3336,25 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "order",
+                  "targetModule": "SmartKioskCore.Schemas.Order",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "product",
+                  "targetModule": "SmartKioskCore.Schemas.Product",
+                  "type": "belongs_to"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/order_item.ex",
               "line": 12
@@ -2137,10 +3368,6 @@
               "moduleName": "SmartKioskCore.Schemas.Order",
               "tableName": "orders",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "subtotal",
                   "type": "decimal"
@@ -2201,10 +3428,40 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "shop",
+                  "targetModule": "SmartKioskCore.Schemas.Shop",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "customer",
+                  "targetModule": "SmartKioskCore.Schemas.Customer",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "items",
+                  "targetModule": "SmartKioskCore.Schemas.OrderItem",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "delivery",
+                  "targetModule": "SmartKioskCore.Schemas.Delivery",
+                  "type": "has_one"
+                },
+                {
+                  "fieldName": "transactions",
+                  "targetModule": "SmartKioskCore.Schemas.Transaction",
+                  "type": "has_many"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/orders.ex",
               "line": 22
@@ -2218,10 +3475,6 @@
               "moduleName": "SmartKioskCore.Schemas.Permission",
               "tableName": "permissions",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "resource",
                   "type": "string"
@@ -2246,10 +3499,20 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "role_permissions",
+                  "targetModule": "SmartKioskCore.Schemas.RolePermission",
+                  "type": "has_many"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/permission.ex",
               "line": 8
@@ -2263,10 +3526,6 @@
               "moduleName": "SmartKioskCore.Schemas.Product",
               "tableName": "products",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "name",
                   "type": "string"
@@ -2334,10 +3593,35 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "shop",
+                  "targetModule": "SmartKioskCore.Schemas.Shop",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "category",
+                  "targetModule": "SmartKioskCore.Schemas.Category",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "images",
+                  "targetModule": "SmartKioskCore.Schemas.ProductImage",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "order_items",
+                  "targetModule": "SmartKioskCore.Schemas.OrderItem",
+                  "type": "has_many"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/product.ex",
               "line": 19
@@ -2351,10 +3635,6 @@
               "moduleName": "SmartKioskCore.Schemas.ProductImage",
               "tableName": "product_images",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "url",
                   "type": "string"
@@ -2379,10 +3659,20 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "product",
+                  "targetModule": "SmartKioskCore.Schemas.Product",
+                  "type": "belongs_to"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/product_image.ex",
               "line": 8
@@ -2396,10 +3686,6 @@
               "moduleName": "SmartKioskCore.Schemas.Rider",
               "tableName": "riders",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "current_lat",
                   "type": "float"
@@ -2433,10 +3719,25 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "user",
+                  "targetModule": "SmartKioskCore.Schemas.User",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "deliveries",
+                  "targetModule": "SmartKioskCore.Schemas.Delivery",
+                  "type": "has_many"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/rider.ex",
               "line": 16
@@ -2450,10 +3751,6 @@
               "moduleName": "SmartKioskCore.Schemas.Role",
               "tableName": "roles",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "name",
                   "type": "string"
@@ -2480,11 +3777,6 @@
                   "elixirType": "SmartKioskCore.Schemas.RolePermission"
                 },
                 {
-                  "name": "permissions",
-                  "type": "list",
-                  "elixirType": "SmartKioskCore.Schemas.through"
-                },
-                {
                   "name": "user_roles",
                   "type": "list",
                   "elixirType": "SmartKioskCore.Schemas.UserRole"
@@ -2496,10 +3788,25 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "role_permissions",
+                  "targetModule": "SmartKioskCore.Schemas.RolePermission",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "user_roles",
+                  "targetModule": "SmartKioskCore.Schemas.UserRole",
+                  "type": "has_many"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/role.ex",
               "line": 8
@@ -2513,10 +3820,6 @@
               "moduleName": "SmartKioskCore.Schemas.RolePermission",
               "tableName": "role_permissions",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "role",
                   "type": "assoc",
@@ -2534,10 +3837,25 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "role",
+                  "targetModule": "SmartKioskCore.Schemas.Role",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "permission",
+                  "targetModule": "SmartKioskCore.Schemas.Permission",
+                  "type": "belongs_to"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/role_permission.ex",
               "line": 8
@@ -2551,10 +3869,6 @@
               "moduleName": "SmartKioskCore.Schemas.Shop",
               "tableName": "shops",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "name",
                   "type": "string"
@@ -2598,6 +3912,10 @@
                 {
                   "name": "description",
                   "type": "string"
+                },
+                {
+                  "name": "owner_id",
+                  "type": "binary_id"
                 },
                 {
                   "name": "settings",
@@ -2650,13 +3968,58 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "users",
+                  "targetModule": "SmartKioskCore.Schemas.User",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "products",
+                  "targetModule": "SmartKioskCore.Schemas.Product",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "orders",
+                  "targetModule": "SmartKioskCore.Schemas.Order",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "customers",
+                  "targetModule": "SmartKioskCore.Schemas.Customer",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "transactions",
+                  "targetModule": "SmartKioskCore.Schemas.Transaction",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "campaigns",
+                  "targetModule": "SmartKioskCore.Schemas.Campaign",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "invoices",
+                  "targetModule": "SmartKioskCore.Schemas.Invoice",
+                  "type": "has_many"
+                },
+                {
+                  "fieldName": "subscription",
+                  "targetModule": "SmartKioskCore.Schemas.Subscription",
+                  "type": "has_one"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/shop.ex",
-              "line": 17
+              "line": 23
             }
           ]
         ],
@@ -2667,10 +4030,6 @@
               "moduleName": "SmartKioskCore.Schemas.Transaction",
               "tableName": "transactions",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "amount",
                   "type": "decimal"
@@ -2709,41 +4068,33 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
-                }
-              ],
-              "associations": {},
-              "associationsDetailed": [],
-              "aliases": {},
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/transaction.ex",
-              "line": 28
-            }
-          ]
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex",
-          [
-            {
-              "moduleName": "SmartKioskCore.Schemas.User",
-              "tableName": "users",
-              "fields": [
+                },
                 {
                   "name": "id",
                   "type": "id"
-                },
-                {
-                  "name": "inserted_at",
-                  "type": "naive_datetime"
-                },
-                {
-                  "name": "updated_at",
-                  "type": "naive_datetime"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "shop",
+                  "targetModule": "SmartKioskCore.Schemas.Shop",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "user",
+                  "targetModule": "SmartKioskCore.Schemas.User",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "order",
+                  "targetModule": "SmartKioskCore.Schemas.Order",
+                  "type": "belongs_to"
+                }
+              ],
               "aliases": {},
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex",
-              "line": 24
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/transaction.ex",
+              "line": 28
             }
           ]
         ],
@@ -2754,10 +4105,6 @@
               "moduleName": "SmartKioskCore.Schemas.UserRole",
               "tableName": "user_roles",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "user",
                   "type": "assoc",
@@ -2780,10 +4127,30 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "user",
+                  "targetModule": "SmartKioskCore.Schemas.User",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "role",
+                  "targetModule": "SmartKioskCore.Schemas.Role",
+                  "type": "belongs_to"
+                },
+                {
+                  "fieldName": "shop",
+                  "targetModule": "SmartKioskCore.Schemas.Shop",
+                  "type": "belongs_to"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user_role.ex",
               "line": 8
@@ -2797,10 +4164,6 @@
               "moduleName": "SmartKioskCore.Schemas.UserToken",
               "tableName": "users_tokens",
               "fields": [
-                {
-                  "name": "id",
-                  "type": "id"
-                },
                 {
                   "name": "token",
                   "type": "binary"
@@ -2825,10 +4188,20 @@
                 {
                   "name": "updated_at",
                   "type": "naive_datetime"
+                },
+                {
+                  "name": "id",
+                  "type": "id"
                 }
               ],
               "associations": {},
-              "associationsDetailed": [],
+              "associationsDetailed": [
+                {
+                  "fieldName": "user",
+                  "targetModule": "SmartKioskCore.Schemas.User",
+                  "type": "belongs_to"
+                }
+              ],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user_token.ex",
               "line": 24
@@ -2837,49 +4210,253 @@
         ]
       ],
       "fileHashes": {
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/category.ex": "a943b5bb9c7cd1af5a2f8e2610909eaa52ce2702",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex": "57248b5b7005c9824f1abc18f6b356365d7b882d",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/customer.ex": "df23c77efcb702a1b57df5343dee2ca286130d7e",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/delivery_zone.ex": "007dfa99e5dff6a1c717a08c4ec189ca0bdd1bef",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/order_item.ex": "19e2c7b899dbb3e1adaa86b6067085461f679f2b",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/orders.ex": "c1147dc958a66f684f22bc36f33b3e560ca3b86f",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/permission.ex": "68e683d93300dcf09729fa449e8e12d72941ed98",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/product.ex": "e5fd9bc311a31cf37823913af120c0b912116af5",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/product_image.ex": "33c56859dfc9c5905b36c6ff35d57807099c701a",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/rider.ex": "7686da1372d33001f33a54e0421019248bd0590a",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/role.ex": "fb5e7b6d9204e94955c58001c09b683a8420950a",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/role_permission.ex": "54cad2991f6be650ba43c8a94c585310b4ab2221",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/shop.ex": "090949c821a2afb412a996feb537783dc90bccb2",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/transaction.ex": "f331ec72bad68c6198b41f466a1096f7bfe21c4b",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex": "e352f7e5578574fe1437dc1de7bd09c5f5c5155e",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user_role.ex": "3d41a7443160930db1e22ee9a05fe87d126730ca",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user_token.ex": "87329d4b5e54f52e5a758abdeb0d9b01fb8b2a04"
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/cart_item.ex": "d4a58590cefa0b05a00412062d5e96790f6c0649",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex": "bbac68d528aa2c719ea1e433721c5a802ff0e1cd",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/category.ex": "9891a2e19b992068f72a5be1e431af17c0be31e7",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/commerce.ex": "ac9b3ba291c6f52cebf1f4bf055c8e37fe555d12",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/customer.ex": "3ba655d71ccd9d882678a6b7d2c5d5ba0ac01b06",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/delivery_zone.ex": "f7a694352034a0e38ed599871665253dbb92d4fe",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/order_item.ex": "17f04ad62dc8b58929a15730e4f1de0a55f64042",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/orders.ex": "76c59b106c5273008e1034217eef16da92abb084",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/permission.ex": "0724817b5cd63969858cd0d45afe1394a73c7b07",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/product.ex": "5448ee33a0943fe0ab3c68db3a06537ed9d450c3",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/product_image.ex": "fbf6d104acbdc8baab8ea5cb8500d8a99fd93172",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/rider.ex": "f1ea4444d77c39f6ac52f712565d0316f008b041",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/role.ex": "973ed37b5d8deb5dc3f5469e37fdb8f4d17f9b72",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/role_permission.ex": "97c9efb2fa4bf16505ad71035c94eced00db23dc",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/shop.ex": "53d57cdd89b0d98733190203f08cefe6ad46707a",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/transaction.ex": "92252bf1e47b48331e6ba13a44df5dcd59c8a6f9",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user_role.ex": "6fada9543127f724d38c9ac1f4c3b3f4fa9d6084",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user_token.ex": "3e1c719071fff0e8896b86e34d11c81e5c8ac1c4"
       },
       "workspaceRoot": "/home/dtech/Projects/smartkiosk"
     },
     "events": {
       "events": [
         [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/UI/user_registration_live.ex",
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex",
+          [
+            {
+              "name": "toggle_cart",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex",
+              "moduleName": "SmartKioskWeb.UI.POSLive.Index",
+              "line": 29,
+              "params": "_params",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"toggle_cart\", _params, socket) do",
+              "nameKind": "string"
+            },
+            {
+              "name": "switch_tab",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex",
+              "moduleName": "SmartKioskWeb.UI.POSLive.Index",
+              "line": 34,
+              "params": "%{\"tab\" => tab}",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"switch_tab\", %{\"tab\" => tab}, socket) do",
+              "nameKind": "string"
+            },
+            {
+              "name": "toggle_mobile_menu",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex",
+              "moduleName": "SmartKioskWeb.UI.POSLive.Index",
+              "line": 39,
+              "params": "_params",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"toggle_mobile_menu\", _params, socket) do",
+              "nameKind": "string"
+            },
+            {
+              "name": "add_to_cart",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex",
+              "moduleName": "SmartKioskWeb.UI.POSLive.Index",
+              "line": 44,
+              "params": "%{\"product_id\" => product_id}",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"add_to_cart\", %{\"product_id\" => product_id}, socket) do",
+              "nameKind": "string"
+            },
+            {
+              "name": "update_quantity",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex",
+              "moduleName": "SmartKioskWeb.UI.POSLive.Index",
+              "line": 58,
+              "params": "%{\"product_id\" => product_id",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"update_quantity\", %{\"product_id\" => product_id, \"delta\" => delta}, socket) do",
+              "nameKind": "string"
+            },
+            {
+              "name": "clear_cart",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex",
+              "moduleName": "SmartKioskWeb.UI.POSLive.Index",
+              "line": 77,
+              "params": "_params",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"clear_cart\", _params, socket) do",
+              "nameKind": "string"
+            },
+            {
+              "name": "search",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex",
+              "moduleName": "SmartKioskWeb.UI.POSLive.Index",
+              "line": 82,
+              "params": "%{\"search\" => search}",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"search\", %{\"search\" => search}, socket) do",
+              "nameKind": "string"
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex",
+          [
+            {
+              "name": "update_quantity",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex",
+              "moduleName": "SmartKioskWeb.CartLive",
+              "line": 55,
+              "params": "%{\"id\" => id",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"update_quantity\", %{\"id\" => id, \"quantity\" => quantity}, socket) do",
+              "nameKind": "string"
+            },
+            {
+              "name": "remove_item",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex",
+              "moduleName": "SmartKioskWeb.CartLive",
+              "line": 86,
+              "params": "%{\"id\" => id}",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"remove_item\", %{\"id\" => id}, socket) do",
+              "nameKind": "string"
+            },
+            {
+              "name": "checkout",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex",
+              "moduleName": "SmartKioskWeb.CartLive",
+              "line": 110,
+              "params": "%{\"full_name\" => _name",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"checkout\", %{\"full_name\" => _name, \"phone_number\" => _phone}, socket) do",
+              "nameKind": "string"
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/create_shop_live.ex",
+          [
+            {
+              "name": "save",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/create_shop_live.ex",
+              "moduleName": "SmartKioskWeb.UI.CreateShopLive",
+              "line": 42,
+              "params": "%{\"shop\" => shop_params}",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"save\", %{\"shop\" => shop_params}, socket) do",
+              "nameKind": "string"
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
+          []
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/home_live.ex",
+          [
+            {
+              "name": "filter_category",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/home_live.ex",
+              "moduleName": "SmartKioskWeb.HomeLive",
+              "line": 88,
+              "params": "%{\"category\" => category}",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"filter_category\", %{\"category\" => category}, socket) do",
+              "nameKind": "string"
+            },
+            {
+              "name": "add_to_cart",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/home_live.ex",
+              "moduleName": "SmartKioskWeb.HomeLive",
+              "line": 92,
+              "params": "%{\"product_id\" => product_id}",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"add_to_cart\", %{\"product_id\" => product_id}, socket) do",
+              "nameKind": "string"
+            },
+            {
+              "name": "clear_filter",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/home_live.ex",
+              "moduleName": "SmartKioskWeb.HomeLive",
+              "line": 118,
+              "params": "_params",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"clear_filter\", _params, socket) do",
+              "nameKind": "string"
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/store_front_live.ex",
+          []
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_registration_live.ex",
           [
             {
               "name": "validate",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/UI/user_registration_live.ex",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_registration_live.ex",
               "moduleName": "SmartKioskWeb.UserRegistrationLive",
-              "line": 189,
-              "params": "params",
+              "line": 331,
+              "params": "_params",
               "kind": "handle_event",
-              "clause": "def handle_event(\"validate\", params, socket) do",
+              "clause": "def handle_event(\"validate\", _params, socket) do",
               "nameKind": "string"
             },
             {
               "name": "save",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/UI/user_registration_live.ex",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_registration_live.ex",
               "moduleName": "SmartKioskWeb.UserRegistrationLive",
-              "line": 195,
+              "line": 336,
               "params": "params",
               "kind": "handle_event",
               "clause": "def handle_event(\"save\", params, socket) do",
+              "nameKind": "string"
+            },
+            {
+              "name": "select_type",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_registration_live.ex",
+              "moduleName": "SmartKioskWeb.UserRegistrationLive",
+              "line": 369,
+              "params": "%{\"type\" => type}",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"select_type\", %{\"type\" => type}, socket) do",
+              "nameKind": "string"
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex",
+          [
+            {
+              "name": "approve_shop",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex",
+              "moduleName": "SmartKioskWeb.AdminLive",
+              "line": 47,
+              "params": "%{\"shop_id\" => shop_id}",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"approve_shop\", %{\"shop_id\" => shop_id}, socket) do",
+              "nameKind": "string"
+            },
+            {
+              "name": "reject_shop",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex",
+              "moduleName": "SmartKioskWeb.AdminLive",
+              "line": 70,
+              "params": "%{\"shop_id\" => shop_id}",
+              "kind": "handle_event",
+              "clause": "def handle_event(\"reject_shop\", %{\"shop_id\" => shop_id}, socket) do",
               "nameKind": "string"
             }
           ]
@@ -2887,151 +4464,410 @@
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/accounts.ex",
           []
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex",
+          []
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex",
+          []
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/user_session_controller.ex",
+          []
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
+          []
         ]
       ],
       "fileHashes": {
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/UI/user_registration_live.ex": "fec998b70a9b0c7a212af4c3be33f6e09741c73e",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/accounts.ex": "a3839724150cd9d0a4157a339406798207407708"
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex": "eef01e61134a7348eb140b7c133f14422c4716ee",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex": "8e1fe8bc4277ea015dbca90dea69f5009d087411",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/create_shop_live.ex": "a3d97e22db41ef1cb0bd94838ea7c251d8ae2fc4",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex": "177840f15377131d6b69f497088640cd95dc5379",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/home_live.ex": "014658392c60db714f08d613f0c403f37c777710",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/store_front_live.ex": "dfb2fe264dd365565bf37df08ce45e1c21426dd3",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_registration_live.ex": "cd3593b875c074b4abbabb7e1bd3f29b53951913",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex": "22ab938bd1c0851b0fe83267d9e8a41efe5502f8",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/accounts.ex": "d299d0ea7fc8ad2adcf951dab31ea73ae01ad627",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex": "bbac68d528aa2c719ea1e433721c5a802ff0e1cd",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex": "e0f95831ae45e6003d0165a056245c6ea7f54a3b",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/user_session_controller.ex": "dad6778d5f8f912ba9a1628004694196e7bf681c",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex": "35f9f4e3a35597a0ef4e41d3b641bee50f957acb"
       },
       "workspaceRoot": "/home/dtech/Projects/smartkiosk"
     },
     "routes": {
       "routes": [
         {
-          "path": "/api/rider/tasks/:id/status",
-          "verb": "POST",
+          "verb": "LIVE",
+          "path": "/",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 114,
-          "helperBase": "api_rider_tasks_status",
+          "line": 35,
+          "liveModule": "HomeLive",
+          "helperBase": "root",
+          "params": [],
+          "isResource": false,
+          "pipeline": "browser"
+        },
+        {
+          "verb": "LIVE",
+          "path": "/cart",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 36,
+          "liveModule": "CartLive",
+          "helperBase": "cart",
+          "params": [],
+          "isResource": false,
+          "pipeline": "browser"
+        },
+        {
+          "verb": "LIVE",
+          "path": "/shop/:slug",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 39,
+          "liveModule": "StorefrontLive.Index",
+          "liveAction": "Index",
+          "helperBase": "shop",
           "params": [
-            "id"
+            "slug"
           ],
           "isResource": false,
-          "controller": "RiderStubController",
-          "action": "update_task_status",
-          "scopePath": "/api/rider"
+          "pipeline": "browser"
         },
         {
-          "path": "/api/rider/tasks",
-          "verb": "GET",
-          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 113,
-          "helperBase": "api_rider_tasks",
-          "params": [],
-          "isResource": false,
-          "controller": "RiderStubController",
-          "action": "list_tasks",
-          "scopePath": "/api/rider"
-        },
-        {
-          "path": "/api/rider/location",
-          "verb": "POST",
-          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 112,
-          "helperBase": "api_rider_location",
-          "params": [],
-          "isResource": false,
-          "controller": "RiderStubController",
-          "action": "update_location",
-          "scopePath": "/api/rider"
-        },
-        {
-          "path": "/api/mpesa/validation",
-          "verb": "POST",
-          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 106,
-          "helperBase": "api_mpesa_validation",
-          "params": [],
-          "isResource": false,
-          "controller": "MpesaCallbackController",
-          "action": "validation",
-          "scopePath": "/api/mpesa"
-        },
-        {
-          "path": "/api/mpesa/callback",
-          "verb": "POST",
-          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 105,
-          "helperBase": "api_mpesa_callback",
-          "params": [],
-          "isResource": false,
-          "controller": "MpesaCallbackController",
-          "action": "create",
-          "scopePath": "/api/mpesa"
-        },
-        {
-          "path": "/logout",
-          "verb": "DELETE",
-          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 64,
-          "helperBase": "logout",
-          "params": [],
-          "isResource": false,
-          "controller": "UserSessionController",
-          "action": "delete",
-          "scopePath": "/"
-        },
-        {
-          "path": "/login",
-          "verb": "POST",
-          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 52,
-          "helperBase": "login",
-          "params": [],
-          "isResource": false,
-          "controller": "UserSessionController",
-          "action": "create",
-          "scopePath": "/"
-        },
-        {
-          "path": "/shop/:slug/product/:id",
           "verb": "LIVE",
+          "path": "/shop/:slug/product/:id",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 37,
+          "line": 40,
+          "liveModule": "StorefrontLive.Show",
+          "liveAction": "Show",
           "helperBase": "shop_product",
           "params": [
             "slug",
             "id"
           ],
           "isResource": false,
-          "liveModule": "StorefrontLive.Show",
-          "liveAction": "show",
-          "scopePath": "/"
+          "pipeline": "browser"
         },
         {
-          "path": "/shop/:slug",
           "verb": "LIVE",
+          "path": "/register",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 36,
-          "helperBase": "shop",
-          "params": [
-            "slug"
-          ],
-          "isResource": false,
-          "liveModule": "StorefrontLive.Index",
-          "liveAction": "index",
-          "scopePath": "/"
+          "line": 50,
+          "liveModule": "UserRegistrationLive",
+          "helperBase": "register",
+          "params": [],
+          "isResource": false
         },
         {
-          "path": "/",
-          "verb": "GET",
+          "verb": "LIVE",
+          "path": "/login",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 33,
+          "line": 51,
+          "liveModule": "UserLoginLive",
+          "helperBase": "login",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/reset-password",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 52,
+          "liveModule": "UserForgotPasswordLive",
+          "helperBase": "reset_password",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/reset-password/:token",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 53,
+          "liveModule": "UserResetPasswordLive",
+          "helperBase": "reset_password",
+          "params": [
+            "token"
+          ],
+          "isResource": false
+        },
+        {
+          "verb": "POST",
+          "path": "/login",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 56,
+          "controller": "UserSessionController",
+          "action": "create",
+          "helperBase": "login",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/users/settings",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 65,
+          "liveModule": "UserSettingsLive",
+          "helperBase": "user_setting",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/users/settings/confirm-email/:token",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 66,
+          "liveModule": "UserSettingsLive",
+          "helperBase": "user_setting_confirm_email",
+          "params": [
+            "token"
+          ],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/dashboard",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 67,
+          "liveModule": "UI.DashboardLive",
+          "liveAction": "DashboardLive",
+          "helperBase": "dashboard",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/create-shop",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 68,
+          "liveModule": "UI.CreateShopLive",
+          "liveAction": "CreateShopLive",
+          "helperBase": "create_shop",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "DELETE",
+          "path": "/logout",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 71,
+          "controller": "UserSessionController",
+          "action": "delete",
+          "helperBase": "logout",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/inventory",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 84,
+          "liveModule": "InventoryLive.Index",
+          "liveAction": "Index",
+          "helperBase": "inventory",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/inventory/new",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 85,
+          "liveModule": "InventoryLive.New",
+          "liveAction": "New",
+          "helperBase": "inventory_new",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/inventory/:id/edit",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 86,
+          "liveModule": "InventoryLive.Edit",
+          "liveAction": "Edit",
+          "helperBase": "inventory_edit",
+          "params": [
+            "id"
+          ],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/orders",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 87,
+          "liveModule": "OrdersLive.Index",
+          "liveAction": "Index",
+          "helperBase": "order",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/orders/:id",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 88,
+          "liveModule": "OrdersLive.Show",
+          "liveAction": "Show",
+          "helperBase": "order",
+          "params": [
+            "id"
+          ],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/pos",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 89,
+          "liveModule": "POSLive.Index",
+          "liveAction": "Index",
+          "helperBase": "po",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/customers",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 90,
+          "liveModule": "CustomersLive.Index",
+          "liveAction": "Index",
+          "helperBase": "customer",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/analytics",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 91,
+          "liveModule": "AnalyticsLive.Index",
+          "liveAction": "Index",
+          "helperBase": "analytic",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/campaigns",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 92,
+          "liveModule": "CampaignsLive.Index",
+          "liveAction": "Index",
+          "helperBase": "campaign",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/settings",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 93,
+          "liveModule": "SettingsLive.Index",
+          "liveAction": "Index",
+          "helperBase": "setting",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/admin/",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 103,
+          "liveModule": "AdminLive",
           "helperBase": "root",
           "params": [],
           "isResource": false,
-          "controller": "PageController",
-          "action": "home",
-          "scopePath": "/"
+          "scopePath": "/admin"
+        },
+        {
+          "verb": "POST",
+          "path": "/api/mpesa/callback",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 110,
+          "controller": "MpesaCallbackController",
+          "action": "create",
+          "helperBase": "callback",
+          "params": [],
+          "isResource": false,
+          "pipeline": "api",
+          "scopePath": "/api/mpesa"
+        },
+        {
+          "verb": "POST",
+          "path": "/api/mpesa/validation",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 111,
+          "controller": "MpesaCallbackController",
+          "action": "validation",
+          "helperBase": "validation",
+          "params": [],
+          "isResource": false,
+          "pipeline": "api",
+          "scopePath": "/api/mpesa"
+        },
+        {
+          "verb": "POST",
+          "path": "/api/rider/location",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 117,
+          "controller": "RiderStubController",
+          "action": "update_location",
+          "helperBase": "location",
+          "params": [],
+          "isResource": false,
+          "pipeline": "api",
+          "scopePath": "/api/rider"
+        },
+        {
+          "verb": "GET",
+          "path": "/api/rider/tasks",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 118,
+          "controller": "RiderStubController",
+          "action": "list_tasks",
+          "helperBase": "task",
+          "params": [],
+          "isResource": false,
+          "pipeline": "api",
+          "scopePath": "/api/rider"
+        },
+        {
+          "verb": "POST",
+          "path": "/api/rider/tasks/:id/status",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 119,
+          "controller": "RiderStubController",
+          "action": "update_task_status",
+          "helperBase": "task_statu",
+          "params": [
+            "id"
+          ],
+          "isResource": false,
+          "pipeline": "api",
+          "scopePath": "/api/rider"
         }
       ],
       "fileHashes": {
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex": "de6d37b349c1d015714733fd77499f895d840c22"
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex": "ae1b1463df0c6afc59dca45860540d6c7912bcb9"
       },
       "workspaceRoot": "/home/dtech/Projects/smartkiosk"
     },
     "controllers": {
       "rendersByFile": [
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/api/mpesa_callback_controller.ex",
+          []
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/api/rider_stub_controller.ex",
+          []
+        ],
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_controller.ex",
           [
@@ -3042,6 +4878,7 @@
               "templateName": "home",
               "assigns": [],
               "assignsWithTypes": [],
+              "actionBody": "  def home(conn, _params) do\n    render(conn, :home)\n  end",
               "line": 5,
               "templatePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_html/home.html.heex"
             }
@@ -3049,10 +4886,6 @@
         ],
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/user_session_controller.ex",
-          []
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/api/rider_stub_controller.ex",
           []
         ]
       ],
@@ -3070,6 +4903,7 @@
                 "templateName": "home",
                 "assigns": [],
                 "assignsWithTypes": [],
+                "actionBody": "  def home(conn, _params) do\n    render(conn, :home)\n  end",
                 "line": 5,
                 "templatePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_html/home.html.heex"
               }
@@ -3078,9 +4912,10 @@
         ]
       ],
       "fileHashes": {
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/api/mpesa_callback_controller.ex": "cb06aefa25810926baeecb02427b76e0cced33e5",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/api/rider_stub_controller.ex": "72da4e4625c4e5499d1e9d36570006db8762756a",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_controller.ex": "00f9a27a73fd600d85082895d81457c8bda70728",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/user_session_controller.ex": "6b211d1a4800bb01289e07ed756d75aa4d5d7f32",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/api/rider_stub_controller.ex": "54d92a236a6d4468ce0ba595fcb23edc88b8a632"
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/user_session_controller.ex": "dad6778d5f8f912ba9a1628004694196e7bf681c"
       },
       "workspaceRoot": "/home/dtech/Projects/smartkiosk"
     },
@@ -3096,6 +4931,76 @@
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_html/home.html.heex"
             }
           ]
+        ],
+        [
+          "SmartKioskWeb.Layouts",
+          [
+            {
+              "moduleName": "SmartKioskWeb.Layouts",
+              "name": "root",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts/root.html.heex"
+            },
+            {
+              "moduleName": "SmartKioskWeb.Layouts",
+              "name": "app",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex#app"
+            },
+            {
+              "moduleName": "SmartKioskWeb.Layouts",
+              "name": "flash_group",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex#flash_group"
+            },
+            {
+              "moduleName": "SmartKioskWeb.Layouts",
+              "name": "theme_toggle",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex#theme_toggle"
+            }
+          ]
+        ],
+        [
+          "SmartKioskWeb.CoreComponents",
+          [
+            {
+              "moduleName": "SmartKioskWeb.CoreComponents",
+              "name": "list",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#list"
+            },
+            {
+              "moduleName": "SmartKioskWeb.CoreComponents",
+              "name": "table",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#table"
+            },
+            {
+              "moduleName": "SmartKioskWeb.CoreComponents",
+              "name": "header",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#header"
+            },
+            {
+              "moduleName": "SmartKioskWeb.CoreComponents",
+              "name": "error",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#error"
+            },
+            {
+              "moduleName": "SmartKioskWeb.CoreComponents",
+              "name": "input",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#input"
+            },
+            {
+              "moduleName": "SmartKioskWeb.CoreComponents",
+              "name": "flash",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#flash"
+            }
+          ]
         ]
       ],
       "templatesByPath": [
@@ -3107,59 +5012,130 @@
             "format": "html",
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_html/home.html.heex"
           }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts/root.html.heex",
+          {
+            "moduleName": "SmartKioskWeb.Layouts",
+            "name": "root",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts/root.html.heex"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex#app",
+          {
+            "moduleName": "SmartKioskWeb.Layouts",
+            "name": "app",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex#app"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex#flash_group",
+          {
+            "moduleName": "SmartKioskWeb.Layouts",
+            "name": "flash_group",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex#flash_group"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex#theme_toggle",
+          {
+            "moduleName": "SmartKioskWeb.Layouts",
+            "name": "theme_toggle",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex#theme_toggle"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#list",
+          {
+            "moduleName": "SmartKioskWeb.CoreComponents",
+            "name": "list",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#list"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#table",
+          {
+            "moduleName": "SmartKioskWeb.CoreComponents",
+            "name": "table",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#table"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#header",
+          {
+            "moduleName": "SmartKioskWeb.CoreComponents",
+            "name": "header",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#header"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#error",
+          {
+            "moduleName": "SmartKioskWeb.CoreComponents",
+            "name": "error",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#error"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#input",
+          {
+            "moduleName": "SmartKioskWeb.CoreComponents",
+            "name": "input",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#input"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#flash",
+          {
+            "moduleName": "SmartKioskWeb.CoreComponents",
+            "name": "flash",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex#flash"
+          }
         ]
       ],
       "moduleByFile": [
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_html.ex",
           "SmartKioskWeb.PageHTML"
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex",
+          "SmartKioskWeb.Layouts"
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
+          "SmartKioskWeb.CoreComponents"
         ]
       ],
       "fileHashes": {
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_html.ex": "36a342058a6f61388314f76709f934a706c42cac"
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_html.ex": "36a342058a6f61388314f76709f934a706c42cac",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex": "e0f95831ae45e6003d0165a056245c6ea7f54a3b",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex": "35f9f4e3a35597a0ef4e41d3b641bee50f957acb"
       },
       "workspaceRoot": "/home/dtech/Projects/smartkiosk"
     },
     "liveview": {
-      "liveViews": [
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/UI/user_registration_live.ex",
-          {
-            "module": "SmartKioskWeb.UserRegistrationLive",
-            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/UI/user_registration_live.ex",
-            "functions": [
-              {
-                "line": 195,
-                "name": "save",
-                "type": "handle_event",
-                "module_name": "SmartKioskWeb.UserRegistrationLive",
-                "event_name": "save"
-              },
-              {
-                "line": 189,
-                "name": "validate",
-                "type": "handle_event",
-                "module_name": "SmartKioskWeb.UserRegistrationLive",
-                "event_name": "validate"
-              },
-              {
-                "line": 184,
-                "name": "mount",
-                "type": "mount",
-                "module_name": "SmartKioskWeb.UserRegistrationLive"
-              },
-              {
-                "line": 10,
-                "name": "render",
-                "type": "render",
-                "module_name": "SmartKioskWeb.UserRegistrationLive"
-              }
-            ]
-          }
-        ]
-      ],
+      "liveViews": [],
       "fileHashes": {
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/UI/user_registration_live.ex": "fec998b70a9b0c7a212af4c3be33f6e09741c73e"
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex": "eef01e61134a7348eb140b7c133f14422c4716ee",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex": "8e1fe8bc4277ea015dbca90dea69f5009d087411",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/create_shop_live.ex": "a3d97e22db41ef1cb0bd94838ea7c251d8ae2fc4",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex": "177840f15377131d6b69f497088640cd95dc5379",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/home_live.ex": "014658392c60db714f08d613f0c403f37c777710",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/store_front_live.ex": "dfb2fe264dd365565bf37df08ce45e1c21426dd3",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_registration_live.ex": "cd3593b875c074b4abbabb7e1bd3f29b53951913",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex": "22ab938bd1c0851b0fe83267d9e8a41efe5502f8"
       },
       "workspaceRoot": "/home/dtech/Projects/smartkiosk"
     }

@@ -6,21 +6,44 @@ defmodule SmartKioskWeb.UI.CreateShopLive do
   def mount(_params, _session, socket) do
     # Shop plans and categories
     plans = [Kiosk: :kiosk, Duka: :duka, Biashara: :biashara, Enterprise: :enterprise]
-    categories = [General: :general_shop, Electronics: :electronics, Groceries: :groceries, Pharmacy: :pharmacy]
 
-    form = to_form(%{
-      "name" => "", "phone" => "", "email" => "", "address" => "",
-      "city" => "", "country" => "KE", "plan" => :kiosk, "category" => :general_shop, "description" => ""
-    }, as: :shop)
+    categories = [
+      General: :general_shop,
+      Electronics: :electronics,
+      Groceries: :groceries,
+      Pharmacy: :pharmacy
+    ]
 
-    {:ok, assign(socket, form: form, plans: plans, categories: categories, page_title: "Create Your Shop")}
+    form =
+      to_form(
+        %{
+          "name" => "",
+          "phone" => "",
+          "email" => "",
+          "address" => "",
+          "city" => "",
+          "country" => "KE",
+          "plan" => :kiosk,
+          "category" => :general_shop,
+          "description" => ""
+        },
+        as: :shop
+      )
+
+    {:ok,
+     assign(socket,
+       form: form,
+       plans: plans,
+       categories: categories,
+       page_title: "Create Your Shop"
+     )}
   end
 
   def handle_event("save", %{"shop" => shop_params}, socket) do
     user = socket.assigns.current_user
-    
+
     case Accounts.create_shop_for_user(user, shop_params) do
-      {:ok, _shop} ->
+      {:ok, _shop, _user} ->
         {:noreply,
          socket
          |> put_flash(:info, "Shop created successfully!")

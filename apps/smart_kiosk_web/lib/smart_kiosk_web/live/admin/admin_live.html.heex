@@ -1,0 +1,319 @@
+<div class="min-h-screen bg-[#0B0F1A] text-white">
+  <.navbar current_user={@current_user} user_shop={@current_shop} cart_count={0} />
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
+    <%!-- Page Header --%>
+    <header class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+        <p class="text-slate-500 mt-2">Platform overview and management</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="px-3 py-1.5 bg-violet-500/20 text-violet-400 rounded-full text-sm font-medium">
+          <.icon name="hero-shield-check" class="w-4 h-4 inline mr-1" /> Platform Admin
+        </span>
+      </div>
+    </header>
+
+    <%!-- Stats Overview Cards --%>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+            <.icon name="hero-building-storefront" class="w-5 h-5 text-blue-400" />
+          </div>
+          <span class="text-slate-400 text-sm">Total Shops</span>
+        </div>
+        <p class="text-3xl font-bold"><%= @total_shops %></p>
+      </div>
+
+      <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+            <.icon name="hero-check-circle" class="w-5 h-5 text-green-400" />
+          </div>
+          <span class="text-slate-400 text-sm">Active Shops</span>
+        </div>
+        <p class="text-3xl font-bold"><%= @active_shops %></p>
+      </div>
+
+      <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+            <.icon name="hero-clock" class="w-5 h-5 text-yellow-400" />
+          </div>
+          <span class="text-slate-400 text-sm">Pending Review</span>
+        </div>
+        <p class="text-3xl font-bold"><%= @pending_count %></p>
+      </div>
+
+      <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 bg-violet-500/20 rounded-lg flex items-center justify-center">
+            <.icon name="hero-users" class="w-5 h-5 text-violet-400" />
+          </div>
+          <span class="text-slate-400 text-sm">Riders</span>
+        </div>
+        <p class="text-3xl font-bold"><%= length(@riders) %></p>
+      </div>
+    </div>
+
+    <%!-- Main Dashboard Content --%>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <%!-- Left Column: Shops & Pending --%>
+      <div class="lg:col-span-2 space-y-8">
+        <%!-- Pending Approval Section --%>
+        <section class="bg-white/5 border border-white/10 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <.icon name="hero-clock" class="w-6 h-6 text-yellow-400" />
+            <h2 class="text-xl font-semibold">Pending Approval</h2>
+            <span class="ml-auto px-3 py-1 bg-yellow-500/20 text-yellow-400 text-sm font-semibold rounded-full">
+              <%= @pending_count %>
+            </span>
+          </div>
+
+          <%= if Enum.empty?(@pending) do %>
+            <p class="text-slate-500 text-center py-8">No shops pending approval</p>
+          <% else %>
+            <div class="space-y-4">
+              <%= for shop <- @pending do %>
+                <div class="bg-slate-800/50 border border-white/5 rounded-xl p-4">
+                  <div class="flex justify-between items-start mb-3">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                        <.icon name="hero-storefront" class="w-5 h-5 text-slate-400" />
+                      </div>
+                      <div>
+                        <h3 class="font-semibold"><%= shop.name %></h3>
+                        <p class="text-slate-400 text-sm">
+                          <%= shop.category %> • <%= shop.city %>
+                        </p>
+                      </div>
+                    </div>
+                    <div class="flex gap-2">
+                      <button
+                        type="button"
+                        phx-click="approve_shop"
+                        phx-value-shop_id={shop.id}
+                        class="px-3 py-1.5 bg-green-600 hover:bg-green-500 rounded-lg text-sm font-semibold flex items-center gap-1"
+                      >
+                        <.icon name="hero-check" class="w-4 h-4" /> Approve
+                      </button>
+                      <button
+                        type="button"
+                        phx-click="reject_shop"
+                        phx-value-shop_id={shop.id}
+                        class="px-3 py-1.5 bg-red-600 hover:bg-red-500 rounded-lg text-sm font-semibold flex items-center gap-1"
+                      >
+                        <.icon name="hero-x-mark" class="w-4 h-4" /> Reject
+                      </button>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                    <div class="flex items-center gap-1.5 text-slate-400 min-w-0">
+                      <.icon name="hero-phone" class="w-4 h-4" />
+                      <span><%= shop.phone %></span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-slate-400 min-w-0">
+                      <.icon name="hero-envelope" class="w-4 h-4" />
+                      <span class="truncate"><%= shop.email %></span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-slate-400 min-w-0">
+                      <.icon name="hero-map-pin" class="w-4 h-4" />
+                      <span class="truncate"><%= shop.address %></span>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </section>
+
+        <%!-- All Shops Section --%>
+        <section class="bg-white/5 border border-white/10 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <.icon name="hero-building-storefront" class="w-6 h-6 text-blue-400" />
+            <h2 class="text-xl font-semibold">All Shops</h2>
+            <span class="ml-auto px-3 py-1 bg-blue-500/20 text-blue-400 text-sm font-semibold rounded-full">
+              <%= @total_shops %>
+            </span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="text-left text-slate-400 text-sm border-b border-white/10">
+                  <th class="pb-3 font-medium">Shop</th>
+                  <th class="pb-3 font-medium">Category</th>
+                  <th class="pb-3 font-medium">Location</th>
+                  <th class="text-right pb-3 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody class="text-sm">
+                <%= for shop <- Enum.take(@shops, 10) do %>
+                  <tr class="border-b border-white/5 last:border-0">
+                    <td class="py-3">
+                      <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+                          <.icon name="hero-storefront" class="w-4 h-4 text-slate-400" />
+                        </div>
+                        <span class="font-medium"><%= shop.name %></span>
+                      </div>
+                    </td>
+                    <td class="py-3 text-slate-400"><%= shop.category %></td>
+                    <td class="py-3 text-slate-400"><%= shop.city %></td>
+                    <td class="py-3 text-right">
+                      <span class={[
+                        "px-2 py-1 rounded-full text-xs font-semibold",
+                        shop.status == :active && "bg-green-500/20 text-green-400",
+                        shop.status == :pending_review && "bg-yellow-500/20 text-yellow-400",
+                        shop.status == :suspended && "bg-red-500/20 text-red-400",
+                        shop.status == :closed && "bg-slate-500/20 text-slate-400"
+                      ]}>
+                        <%= String.replace(Atom.to_string(shop.status), "_", " ")
+                        |> String.capitalize() %>
+                      </span>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+
+          <%= if length(@shops) > 10 do %>
+            <p class="text-center text-slate-500 text-sm mt-4">
+              And <%= length(@shops) - 10 %> more shops...
+            </p>
+          <% end %>
+        </section>
+      </div>
+
+      <%!-- Right Column: Riders, Reports, Logistics --%>
+      <div class="space-y-8">
+        <%!-- Riders Section --%>
+        <section class="bg-white/5 border border-white/10 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <.icon name="hero-truck" class="w-6 h-6 text-violet-400" />
+            <h2 class="text-xl font-semibold">Riders</h2>
+            <span class="ml-auto px-3 py-1 bg-violet-500/20 text-violet-400 text-sm font-semibold rounded-full">
+              <%= length(@riders) %>
+            </span>
+          </div>
+
+          <%= if Enum.empty?(@riders) do %>
+            <div class="text-center py-8">
+              <.icon name="hero-user-group" class="w-12 h-12 text-slate-600 mx-auto mb-3" />
+              <p class="text-slate-500">No riders registered yet</p>
+              <p class="text-slate-600 text-sm mt-1">Rider management coming soon</p>
+            </div>
+          <% else %>
+            <div class="space-y-3">
+              <%= for rider <- @riders do %>
+                <div class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg">
+                  <div class="w-10 h-10 bg-violet-500/20 rounded-full flex items-center justify-center">
+                    <.icon name="hero-user" class="w-5 h-5 text-violet-400" />
+                  </div>
+                  <div>
+                    <p class="font-medium"><%= rider.name %></p>
+                    <p class="text-slate-400 text-sm"><%= rider.phone %></p>
+                  </div>
+                  <span class={[
+                    "ml-auto px-2 py-1 rounded-full text-xs font-semibold",
+                    rider.status == :online && "bg-green-500/20 text-green-400",
+                    rider.status == :offline && "bg-slate-500/20 text-slate-400",
+                    rider.status == :busy && "bg-yellow-500/20 text-yellow-400"
+                  ]}>
+                    <%= rider.status %>
+                  </span>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </section>
+
+        <%!-- Customer Reports Section --%>
+        <section class="bg-white/5 border border-white/10 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <.icon name="hero-exclamation-triangle" class="w-6 h-6 text-orange-400" />
+            <h2 class="text-xl font-semibold">Customer Reports</h2>
+            <span class="ml-auto px-3 py-1 bg-orange-500/20 text-orange-400 text-sm font-semibold rounded-full">
+              <%= length(@customer_reports) %>
+            </span>
+          </div>
+
+          <%= if Enum.empty?(@customer_reports) do %>
+            <div class="text-center py-8">
+              <.icon name="hero-shield-check" class="w-12 h-12 text-slate-600 mx-auto mb-3" />
+              <p class="text-slate-500">No customer reports</p>
+              <p class="text-slate-600 text-sm mt-1">All systems operational</p>
+            </div>
+          <% else %>
+            <div class="space-y-3">
+              <%= for report <- @customer_reports do %>
+                <div class="p-3 bg-slate-800/50 rounded-lg border-l-2 border-orange-500">
+                  <div class="flex justify-between items-start mb-2">
+                    <p class="font-medium"><%= report.type %></p>
+                    <span class="text-xs text-slate-400"><%= report.inserted_at %></span>
+                  </div>
+                  <p class="text-sm text-slate-400 line-clamp-2"><%= report.description %></p>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </section>
+
+        <%!-- Pickup & Drop Points Section --%>
+        <section class="bg-white/5 border border-white/10 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <.icon name="hero-map" class="w-6 h-6 text-cyan-400" />
+            <h2 class="text-xl font-semibold">Logistics Points</h2>
+          </div>
+
+          <div class="space-y-4">
+            <%!-- Pickup Points --%>
+            <div>
+              <h3 class="text-sm font-medium text-slate-400 mb-2 flex items-center gap-2">
+                <.icon name="hero-arrow-up-circle" class="w-4 h-4" />
+                Pickup Points (<%= length(@pickup_points) %>)
+              </h3>
+
+              <%= if Enum.empty?(@pickup_points) do %>
+                <p class="text-slate-500 text-sm py-2">No pickup points configured</p>
+              <% else %>
+                <div class="space-y-2">
+                  <%= for point <- @pickup_points do %>
+                    <div class="flex items-center gap-2 p-2 bg-slate-800/50 rounded-lg">
+                      <.icon name="hero-map-pin" class="w-4 h-4 text-cyan-400" />
+                      <span class="text-sm"><%= point.name %></span>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+
+            <%!-- Hotspots --%>
+            <div>
+              <h3 class="text-sm font-medium text-slate-400 mb-2 flex items-center gap-2">
+                <.icon name="hero-fire" class="w-4 h-4" /> Hotspots (<%= length(@hotspots) %>)
+              </h3>
+
+              <%= if Enum.empty?(@hotspots) do %>
+                <p class="text-slate-500 text-sm py-2">No hotspots defined</p>
+              <% else %>
+                <div class="flex flex-wrap gap-2">
+                  <%= for hotspot <- @hotspots do %>
+                    <span class="px-3 py-1 bg-cyan-500/20 text-cyan-400 text-sm rounded-full">
+                      <%= hotspot.name %>
+                    </span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <p class="text-slate-600 text-xs mt-4 text-center">Logistics management coming soon</p>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
