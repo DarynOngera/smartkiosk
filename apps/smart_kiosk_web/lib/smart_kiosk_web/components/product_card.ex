@@ -14,7 +14,11 @@ defmodule SmartKioskWeb.Components.ProductCard do
       <div class="flex items-center gap-4">
         <div class="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 font-bold overflow-hidden">
           <%= if @product.images != [] do %>
-            <img src={List.first(@product.images).url} alt={@product.name} class="w-full h-full object-cover" />
+            <img
+              src={List.first(@product.images).url}
+              alt={@product.name}
+              class="w-full h-full object-cover"
+            />
           <% else %>
             <%= String.slice(@product.name, 0..1) |> String.upcase() %>
           <% end %>
@@ -29,7 +33,10 @@ defmodule SmartKioskWeb.Components.ProductCard do
           <p class="text-white font-bold">KES <%= @product.price %></p>
           <p class={[
             "text-xs font-semibold",
-            if(@product.stock_qty <= @product.low_stock_threshold, do: "text-red-400", else: "text-emerald-400")
+            if(@product.stock_qty <= @product.low_stock_threshold,
+              do: "text-red-400",
+              else: "text-emerald-400"
+            )
           ]}>
             <%= @product.stock_qty %> in stock
           </p>

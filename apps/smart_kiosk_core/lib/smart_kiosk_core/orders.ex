@@ -11,7 +11,7 @@ defmodule SmartKioskCore.Orders do
   import SmartKioskCore.Tenant
 
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Schemas.{Order, OrderItem, Customer, Shop}
+  alias SmartKioskCore.Schemas.{Customer, Order, OrderItem, Product, Shop}
   alias SmartKioskCore.Catalogue
 
   # ── Order queries ─────────────────────────────────────────────────────────────
@@ -57,9 +57,11 @@ defmodule SmartKioskCore.Orders do
     delivery_attrs = opts[:delivery] || %{}
 
     Repo.transaction(fn ->
+      scoped_items = load_scoped_items!(shop, items)
+
       # 1. Build line items with snapshotted prices
       line_items =
-        Enum.map(items, fn {product, qty} ->
+        Enum.map(scoped_items, fn {product, qty} ->
           %{
             product_id: product.id,
             product_name: product.name,
@@ -106,7 +108,7 @@ defmodule SmartKioskCore.Orders do
       end)
 
       # 4. Deduct stock
-      stock_items = Enum.map(items, fn {product, qty} -> {product, -qty} end)
+      stock_items = Enum.map(scoped_items, fn {product, qty} -> {product, -qty} end)
       Catalogue.adjust_stock_bulk(stock_items) |> ok_or_rollback()
 
       order = order |> Repo.preload([:customer, items: :product])
@@ -172,6 +174,47 @@ defmodule SmartKioskCore.Orders do
 
   defp ok_or_rollback({:ok, val}), do: {:ok, val}
   defp ok_or_rollback({:error, reason}), do: Repo.rollback(reason)
+
+  defp load_scoped_items!(%Shop{} = shop, items) when is_list(items) do
+    if items == [] do
+      Repo.rollback(:invalid_cart)
+    end
+
+    extracted_items =
+      Enum.map(items, fn
+        {%{id: id}, qty} when is_binary(id) and is_integer(qty) and qty > 0 ->
+          {id, qty}
+
+        _ ->
+          Repo.rollback(:invalid_cart)
+      end)
+
+    product_ids = Enum.map(extracted_items, &elem(&1, 0))
+
+    if length(Enum.uniq(product_ids)) != length(product_ids) do
+      Repo.rollback({:invalid_cart, :duplicate_products})
+    end
+
+    products_by_id =
+      Product
+      |> scope(shop)
+      |> where([p], p.id in ^product_ids)
+      |> Repo.all()
+      |> Map.new(&{&1.id, &1})
+
+    Enum.map(extracted_items, fn {product_id, qty} ->
+      case Map.get(products_by_id, product_id) do
+        nil ->
+          Repo.rollback({:invalid_product, product_id})
+
+        %Product{stock_qty: stock_qty} = product when stock_qty < qty ->
+          Repo.rollback({:insufficient_stock, product.id})
+
+        %Product{} = product ->
+          {product, qty}
+      end
+    end)
+  end
 
   defp filter_order_status(query, nil), do: query
   defp filter_order_status(query, s), do: where(query, [o], o.status == ^s)

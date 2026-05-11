@@ -6,7 +6,6 @@ defmodule SmartKioskWeb.Application do
   def start(_type, _args) do
     children = [
       SmartKioskWeb.Telemetry,
-      {Phoenix.PubSub, name: SmartKiosk.PubSub},
       {Finch, name: SmartKiosk.Finch},
       SmartKioskWeb.Endpoint
     ]

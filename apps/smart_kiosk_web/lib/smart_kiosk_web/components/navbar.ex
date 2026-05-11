@@ -84,49 +84,50 @@ defmodule SmartKioskWeb.Navbar do
   """
   attr :current_user, :map, required: true
   attr :user_shop, :map, default: nil
-def user_avatar(assigns) do
-  ~H"""
-  <div class="flex items-center gap-2">
-    <.link
-      navigate="/dashboard"
-      class="flex items-center gap-3 p-2 pr-4 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group"
-    >
-      <%= cond do %>
-        <% @current_user.avatar_url && @current_user.avatar_url != "" -> %>
-          <img
-            src={@current_user.avatar_url}
-            alt="Avatar"
-            class="w-9 h-9 rounded-full object-cover border border-violet-500/30"
-          />
-        <% @user_shop && @user_shop.logo_url && @user_shop.logo_url != "" -> %>
-          <img
-            src={@user_shop.logo_url}
-            alt="Shop Logo"
-            class="w-9 h-9 rounded-full object-cover border border-violet-500/30"
-          />
-        <% true -> %>
-          <div class="w-9 h-9 bg-gradient-to-br from-violet-500/30 to-indigo-500/30 rounded-full flex items-center justify-center border border-violet-500/30">
-            <span class="text-sm font-semibold text-violet-300">
-              <%= get_initials(@current_user.full_name || @current_user.email) %>
-            </span>
-          </div>
-      <% end %>
 
-    </.link>
+  def user_avatar(assigns) do
+    ~H"""
+    <div class="flex items-center gap-2">
+      <.link
+        navigate="/dashboard"
+        class="flex items-center gap-3 p-2 pr-4 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group"
+      >
+        <%= cond do %>
+          <% @current_user.avatar_url && @current_user.avatar_url != "" -> %>
+            <img
+              src={@current_user.avatar_url}
+              alt="Avatar"
+              class="w-9 h-9 rounded-full object-cover border border-violet-500/30"
+            />
+          <% @user_shop && @user_shop.logo_url && @user_shop.logo_url != "" -> %>
+            <img
+              src={@user_shop.logo_url}
+              alt="Shop Logo"
+              class="w-9 h-9 rounded-full object-cover border border-violet-500/30"
+            />
+          <% true -> %>
+            <div class="w-9 h-9 bg-gradient-to-br from-violet-500/30 to-indigo-500/30 rounded-full flex items-center justify-center border border-violet-500/30">
+              <span class="text-sm font-semibold text-violet-300">
+                <%= get_initials(@current_user.full_name || @current_user.email) %>
+              </span>
+            </div>
+        <% end %>
+      </.link>
 
-    <div class="w-px h-4 bg-white/10 mx-1"></div>
+      <div class="w-px h-4 bg-white/10 mx-1"></div>
 
-    <.link
-      href={~p"/logout"}
-      method="delete"
-      class="p-2 text-slate-400 hover:text-red-400 transition-colors"
-      title="Sign out"
-    >
-      <.icon name="hero-arrow-right-on-rectangle" class="w-5 h-5" />
-    </.link>
-  </div>
-  """
-end
+      <.link
+        href={~p"/logout"}
+        method="delete"
+        class="p-2 text-slate-400 hover:text-red-400 transition-colors"
+        title="Sign out"
+      >
+        <.icon name="hero-arrow-right-on-rectangle" class="w-5 h-5" />
+      </.link>
+    </div>
+    """
+  end
+
   @doc """
   Renders guest action buttons (Sign in / Get Started).
   """

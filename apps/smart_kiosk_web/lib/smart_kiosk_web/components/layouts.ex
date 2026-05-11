@@ -32,13 +32,17 @@ defmodule SmartKioskWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
+  attr :current_path, :string,
+    default: nil,
+    doc: "the current request path for LiveView-safe conditional layout logic"
+
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <% current_path = Phoenix.Controller.current_path(@conn) %>
+    <% current_path = @current_path || (assigns[:conn] && Phoenix.Controller.current_path(assigns.conn)) %>
     <%= if current_path not in ["/login", "/register"] do %>
-      <.navbar current_user={@current_user} user_shop={assigns[:current_shop]} cart_count={0} />
+      <.navbar current_user={assigns[:current_user]} user_shop={assigns[:current_shop]} cart_count={0} />
     <% end %>
 
     <main>
