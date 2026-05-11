@@ -65,6 +65,18 @@ defmodule SmartKioskCore.Schemas.User do
   end
 
   @doc """
+  Internal bootstrap changeset for seeds and trusted admin flows.
+  """
+  def bootstrap_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email, :password, :full_name, :phone, :role, :shop_id, :avatar_url])
+    |> validate_email(opts)
+    |> validate_password(opts)
+    |> validate_required([:full_name, :role])
+    |> validate_role_shop_consistency()
+  end
+
+  @doc """
   Assigns a user to a shop and updates their role.
 
   This is used when an existing platform user creates a shop and becomes the owner,

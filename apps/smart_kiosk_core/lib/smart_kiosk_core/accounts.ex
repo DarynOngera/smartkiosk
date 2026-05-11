@@ -10,7 +10,7 @@ defmodule SmartKioskCore.Accounts do
 
   import Ecto.Query
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Schemas.{User, UserToken, Shop}
+  alias SmartKioskCore.Schemas.{Role, Shop, Subscription, User, UserRole, UserToken}
 
   # ── User queries ─────────────────────────────────────────────────────────────
 
@@ -103,9 +103,12 @@ defmodule SmartKioskCore.Accounts do
         |> User.assign_to_shop_changeset(shop, :owner)
         |> repo.update()
       end)
+      |> Ecto.Multi.run(:owner_role, fn repo, %{user: updated_user, shop: shop} ->
+        assign_system_role(repo, updated_user, "owner", shop)
+      end)
       |> Ecto.Multi.insert(:subscription, fn %{shop: shop} ->
-        %SmartKioskCore.Schemas.Subscription{}
-        |> SmartKioskCore.Schemas.Subscription.changeset(%{
+        %Subscription{}
+        |> Subscription.changeset(%{
           shop_id: shop.id,
           # Respect the shop's chosen plan; fall back to :kiosk if missing
           plan: shop.plan || :kiosk,
@@ -133,7 +136,7 @@ defmodule SmartKioskCore.Accounts do
     multi =
       Ecto.Multi.new()
       |> Ecto.Multi.insert(:user, fn _changes ->
-        %User{role: :owner}
+        %User{role: :customer}
         |> User.registration_changeset(user_attrs)
       end)
       |> Ecto.Multi.insert(:shop, fn %{user: user} ->
@@ -145,9 +148,12 @@ defmodule SmartKioskCore.Accounts do
         |> User.assign_to_shop_changeset(shop, :owner)
         |> repo.update()
       end)
+      |> Ecto.Multi.run(:owner_role, fn repo, %{updated_user: user, shop: shop} ->
+        assign_system_role(repo, user, "owner", shop)
+      end)
       |> Ecto.Multi.insert(:subscription, fn %{shop: shop} ->
-        %SmartKioskCore.Schemas.Subscription{}
-        |> SmartKioskCore.Schemas.Subscription.changeset(%{
+        %Subscription{}
+        |> Subscription.changeset(%{
           shop_id: shop.id,
           plan: shop.plan || :kiosk,
           status: :trialing,
@@ -162,8 +168,18 @@ defmodule SmartKioskCore.Accounts do
   end
 
   @doc "Registers a staff user under an existing shop."
-  def register_shop_user(shop, attrs) do
-    create_user(%User{shop_id: shop.id, role: :staff}, attrs)
+  def register_shop_user(%Shop{} = shop, attrs) do
+    Repo.transaction(fn ->
+      user =
+        %User{shop_id: shop.id, role: :staff}
+        |> create_user(attrs)
+        |> unwrap_or_rollback()
+
+      assign_system_role(Repo, user, "staff", shop)
+      |> unwrap_or_rollback()
+
+      user
+    end)
   end
 
   defp create_user(%User{} = user, attrs) do
@@ -181,12 +197,12 @@ defmodule SmartKioskCore.Accounts do
     |> Repo.update()
   end
 
-  # list shops
+  @doc "Lists all shops."
   def list_shops do
     Repo.all(Shop)
   end
 
-  # get shop by the id
+  @doc "Gets a shop by name."
   def get_shop_by_name(name) when is_binary(name) do
     Repo.get_by(Shop, name: name)
   end
@@ -325,4 +341,26 @@ defmodule SmartKioskCore.Accounts do
     from(u in User, where: u.shop_id == ^shop_id, order_by: [asc: u.role, asc: u.full_name])
     |> Repo.all()
   end
+
+  defp assign_system_role(repo, %User{id: user_id}, role_slug, shop) when is_binary(role_slug) do
+    case repo.get_by(Role, slug: role_slug) do
+      %Role{id: role_id} ->
+        %UserRole{}
+        |> UserRole.changeset(%{
+          user_id: user_id,
+          role_id: role_id,
+          shop_id: shop && shop.id
+        })
+        |> repo.insert(on_conflict: :nothing)
+
+      nil ->
+        %UserRole{}
+        |> UserRole.changeset(%{})
+        |> Ecto.Changeset.add_error(:role_id, "missing system role #{role_slug}")
+        |> then(&{:error, &1})
+    end
+  end
+
+  defp unwrap_or_rollback({:ok, value}), do: value
+  defp unwrap_or_rollback({:error, reason}), do: Repo.rollback(reason)
 end
