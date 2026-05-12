@@ -1,19 +1,18 @@
-<div class="min-h-screen bg-[#0B0F1A] text-white">
-  <.navbar current_user={@current_user} user_shop={@current_shop} cart_count={0} />
-
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
-    <%!-- Page Header --%>
-    <header class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-      <div>
-        <h1 class="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p class="text-slate-500 mt-2">Platform overview and management</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="px-3 py-1.5 bg-violet-500/20 text-violet-400 rounded-full text-sm font-medium">
-          <.icon name="hero-shield-check" class="w-4 h-4 inline mr-1" /> Platform Admin
-        </span>
-      </div>
-    </header>
+<Layouts.app flash={@flash} current_path="/admin" current_user={@current_user}>
+  <div class="min-h-screen bg-[#0B0F1A] text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
+      <%!-- Page Header --%>
+      <header class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+          <p class="text-slate-500 mt-2">Platform overview and management</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="px-3 py-1.5 bg-violet-500/20 text-violet-400 rounded-full text-sm font-medium">
+            <.icon name="hero-shield-check" class="w-4 h-4 inline mr-1" /> Platform Admin
+          </span>
+        </div>
+      </header>
 
     <%!-- Stats Overview Cards --%>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -317,3 +316,4 @@
     </div>
   </div>
 </div>
+</Layouts.app>

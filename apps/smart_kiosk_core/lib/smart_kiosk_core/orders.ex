@@ -37,6 +37,27 @@ defmodule SmartKioskCore.Orders do
     |> Repo.get!(id)
   end
 
+  # =======================Order ACTIONS===========================================
+  # =======get pending orders================
+  def get_pending_orders(%Shop{} = shop) do
+    Order
+    |> scope(shop)
+    |> where([o], o.status == :pending)
+    |> Repo.all()
+  end
+
+  @doc """
+  Updates the status of a specific order within a shop.
+  """
+  def update_order_status(%Shop{} = shop, order_id, status) when is_atom(status) do
+    Order
+    |> scope(shop)
+    |> where([o], o.id == ^order_id)
+    |> Repo.update_all(set: [status: status])
+  end
+
+  # ==================================================================================
+
   # ── Order creation ────────────────────────────────────────────────────────────
 
   @doc """

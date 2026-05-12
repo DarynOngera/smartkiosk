@@ -22,7 +22,9 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
      |> assign(:search_query, "")
      |> assign(:cart_open, false)
      |> assign(:active_tab, "products")
-     |> assign(:mobile_menu_open, false)}
+     |> assign(:mobile_menu_open, false)
+     |> assign(:mobile_cart_open, false)
+     |> assign(:show_payment, false)}
   end
 
   @impl true
@@ -38,6 +40,11 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
   @impl true
   def handle_event("toggle_mobile_menu", _params, socket) do
     {:noreply, assign(socket, :mobile_menu_open, !socket.assigns.mobile_menu_open)}
+  end
+
+  @impl true
+  def handle_event("toggle_mobile_cart", _params, socket) do
+    {:noreply, assign(socket, :mobile_cart_open, !socket.assigns.mobile_cart_open)}
   end
 
   @impl true
@@ -76,6 +83,11 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
   @impl true
   def handle_event("clear_cart", _params, socket) do
     {:noreply, assign(socket, cart: [], cart_total: 0.0)}
+  end
+
+  @impl true
+  def handle_event("show_payment", _params, socket) do
+    {:noreply, assign(socket, :show_payment, true)}
   end
 
   @impl true
@@ -313,7 +325,9 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
         <%!-- 2. Cart Sidebar (Responsive) --%>
         <section class={[
           "fixed inset-0 z-50 lg:relative lg:block lg:w-96 border-l border-white/10 bg-[#0B0F1A] flex flex-col transition-transform duration-300",
-          !@cart_open && "hidden lg:block translate-x-full lg:translate-x-0"
+          !@mobile_cart_open && "hidden lg:block",
+          @mobile_cart_open && "translate-x-0",
+          !@mobile_cart_open && "translate-x-full lg:translate-x-0"
         ]}>
           <div class="p-6 border-b border-white/10 flex justify-between items-center">
             <h2 class="text-xl font-bold">Cart (<%= length(@cart) %>)</h2>
@@ -325,59 +339,29 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
             </div>
           </div>
 
-          <div class="flex-1 overflow-y-auto p-6 space-y-4">
-            <%= for item <- @cart do %>
-              <div class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
-                <div class="flex-1 min-w-0">
-                  <p class="font-semibold truncate"><%= item.product.name %></p>
-                  <p class="text-slate-400 text-sm">KES <%= item.product.price %></p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <button
-                    phx-click="update_quantity"
-                    phx-value-product_id={item.product.id}
-                    phx-value-delta="-1"
-                    class="w-8 h-8 bg-slate-800 rounded-lg"
-                  >
-                    -
-                  </button>
-                  <span class="w-8 text-center"><%= item.quantity %></span>
-                  <button
-                    phx-click="update_quantity"
-                    phx-value-product_id={item.product.id}
-                    phx-value-delta="1"
-                    class="w-8 h-8 bg-violet-600 rounded-lg"
-                  >
-                    +
-                  </button>
-                </div>
+          <%= if @show_payment do %>
+            <%!-- Payment Details --%>
+            <div>
+              <label class="text-sm text-slate-400 mb-3 block">Amount Due</label>
+              <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+                <p class="text-3xl font-bold text-violet-400">
+                  KES <%= :erlang.float_to_binary(@cart_total, decimals: 2) %>
+                </p>
               </div>
-            <% end %>
-          </div>
+            </div>
 
-              <%!-- Payment Details --%>
-              <div>
-                <label class="text-sm text-slate-400 mb-3 block">Amount Due</label>
-                <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-                  <p class="text-3xl font-bold text-violet-400">
-                    KES <%= :erlang.float_to_binary(@cart_total, decimals: 2) %>
-                  </p>
+            <%!-- Order Summary --%>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
+              <h3 class="font-semibold mb-3">Order Summary</h3>
+              <%= for item <- @cart do %>
+                <div class="flex justify-between text-sm">
+                  <span class="text-slate-400"><%= item.product.name %> x<%= item.quantity %></span>
+                  <span>
+                    KES <%= :erlang.float_to_binary(
+                      Decimal.to_float(item.product.price) * item.quantity, decimals: 2) %>
+                  </span>
                 </div>
-              </div>
-
-              <%!-- Order Summary --%>
-              <div class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
-                <h3 class="font-semibold mb-3">Order Summary</h3>
-                <%= for item <- @cart do %>
-                  <div class="flex justify-between text-sm">
-                    <span class="text-slate-400"><%= item.product.name %> x<%= item.quantity %></span>
-                    <span>
-                      KES <%= :erlang.float_to_binary(
-                        Decimal.to_float(item.product.price) * item.quantity, decimals: 2) %>
-                    </span>
-                  </div>
-                <% end %>
-              </div>
+              <% end %>
             </div>
 
             <div class="p-6 border-t border-white/10 space-y-4">
@@ -387,13 +371,6 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
             </div>
           <% else %>
             <%!-- Cart View --%>
-            <div class="p-6 border-b border-white/10 flex justify-between items-center">
-              <h2 class="text-xl font-bold">Cart (<%= length(@cart) %>)</h2>
-              <button phx-click="clear_cart" class="text-red-400 text-sm hover:text-red-300">
-                Clear
-              </button>
-            </div>
-
             <div class="flex-1 overflow-y-auto p-6 space-y-4">
               <%= for item <- @cart do %>
                 <div class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
@@ -435,10 +412,7 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                 Proceed to Payment
               </button>
             </div>
-            <button class="w-full py-4 bg-violet-600 rounded-xl font-bold hover:bg-violet-500">
-              Proceed to Payment
-            </button>
-          </div>
+          <% end %>
         </section>
       </div>
     </div>

@@ -26,7 +26,7 @@ defmodule SmartKioskCore.Schemas.Product do
     field(:stock_qty, :integer, default: 0)
     field(:low_stock_threshold, :integer, default: 5)
     field(:attributes, :map, default: %{})
-    field(:status, Ecto.Enum, values: @statuses, default: :draft)
+    field(:status, Ecto.Enum, values: @statuses, default: :active)
     field(:is_featured, :boolean, default: false)
 
     belongs_to(:shop, SmartKioskCore.Schemas.Shop)

@@ -81,9 +81,9 @@ defmodule SmartKioskWeb.Router do
         SmartKioskWeb.ShopAuth,
         {SmartKioskWeb.ShopAuth, :require_shop}
       ] do
-      live "/inventory", InventoryLive.Index, :index
-      live "/inventory/new", InventoryLive.New, :new
-      live "/inventory/:id/edit", InventoryLive.Edit, :edit
+      live "/inventory", Inventory.InventoryLive.Index, :index
+      live "/inventory/new", Inventory.InventoryLive.New, :new
+      live "/inventory/:id/edit", Inventory.InventoryLive.Edit, :edit
       live "/orders", OrdersLive.Index, :index
       live "/orders/:id", OrdersLive.Show, :show
       live "/pos", POSLive.Index, :index
