@@ -97,6 +97,14 @@ defmodule SmartKioskCore.Schemas.User do
     |> validate_format(:phone, ~r/^\+?[\d\s\-]{9,15}$/)
   end
 
+  @doc "Email change changeset (used for pending email updates)."
+  def email_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email])
+    |> validate_email(opts)
+    |> maybe_validate_unique_email_change(opts)
+  end
+
   @doc "Password change changeset."
   def password_changeset(user, attrs, opts \\ []) do
     user
@@ -136,6 +144,12 @@ defmodule SmartKioskCore.Schemas.User do
     else
       changeset
     end
+  end
+
+  defp maybe_validate_unique_email_change(changeset, _opts) do
+    changeset
+    |> unsafe_validate_unique(:email, SmartKioskCore.Repo)
+    |> unique_constraint(:email)
   end
 
   defp maybe_hash_password(changeset, opts) do

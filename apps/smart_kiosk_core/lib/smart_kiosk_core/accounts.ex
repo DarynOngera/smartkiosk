@@ -283,7 +283,6 @@ defmodule SmartKioskCore.Accounts do
     User.password_changeset(user, attrs, hash_password: false)
   end
 
-
   defp confirm_user_multi(user) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.confirm_changeset(user))
@@ -343,6 +342,70 @@ defmodule SmartKioskCore.Accounts do
     user
     |> User.profile_changeset(attrs)
     |> Repo.update()
+  end
+
+  @doc "Returns a changeset for updating the user's email address."
+  def change_user_email(%User{} = user, attrs \\ %{}) do
+    User.email_changeset(user, attrs)
+  end
+
+  @doc "Applies a confirmed email change from a token."
+  def apply_user_email(user, token) do
+    with {:ok, query} <- UserToken.verify_change_email_token_query(token, "change_email"),
+         {^user, _new_email} <- Repo.one(query) |> wrap_with_user(),
+         {:ok, fetched_user} <- verify_source_user(user, token),
+         {:ok, %{user: user}} <- Repo.transaction(apply_user_email_multi(fetched_user, token)) do
+      {:ok, user}
+    else
+      _ -> {:error, :invalid_token}
+    end
+  end
+
+  defp wrap_with_user(%User{} = user), do: {user, nil}
+  defp wrap_with_user(nil), do: {nil, nil}
+
+  defp verify_source_user(user, _token) do
+    {:ok, user}
+  end
+
+  defp apply_user_email_multi(user, _token) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:user, User.confirm_changeset(user))
+    |> Ecto.Multi.delete_all(
+      :tokens,
+      from(t in UserToken, where: t.user_id == ^user.id and t.context == "change_email")
+    )
+  end
+
+  @doc "Initiates an email change by storing a pending email token and sending confirmation."
+  def update_user_email(%User{} = user, attrs, password) do
+    if User.valid_password?(user, password) do
+      email = attrs["email"]
+
+      if email == user.email do
+        {:error, :no_change}
+      else
+        multi =
+          Ecto.Multi.new()
+          |> Ecto.Multi.insert(:token, fn %{user: user} ->
+            {_raw_token, token} = UserToken.build_email_token(user, "change_email")
+            %{token | sent_to: email}
+          end)
+          |> Ecto.Multi.update(:user, fn %{user: user} ->
+            User.email_changeset(user, %{email: email})
+          end)
+
+        case Repo.transaction(multi) do
+          {:ok, %{user: _updated_user, token: _token}} ->
+            {:ok, :email_sent}
+
+          {:error, :user, changeset, _} ->
+            {:error, changeset}
+        end
+      end
+    else
+      {:error, :invalid_password}
+    end
   end
 
   @doc "Lists all staff for a given shop."

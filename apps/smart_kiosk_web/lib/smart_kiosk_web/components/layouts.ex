@@ -40,9 +40,14 @@ defmodule SmartKioskWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <% current_path = @current_path || (assigns[:conn] && Phoenix.Controller.current_path(assigns.conn)) %>
+    <% current_path =
+      @current_path || (assigns[:conn] && Phoenix.Controller.current_path(assigns.conn)) %>
     <%= if current_path not in ["/login", "/register"] do %>
-      <.navbar current_user={assigns[:current_user]} user_shop={assigns[:current_shop]} cart_count={0} />
+      <.navbar
+        current_user={assigns[:current_user]}
+        user_shop={assigns[:current_shop]}
+        cart_count={0}
+      />
     <% end %>
 
     <main>

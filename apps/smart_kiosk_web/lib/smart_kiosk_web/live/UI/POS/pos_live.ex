@@ -430,7 +430,9 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                     <span class="text-slate-400"><%= item.product.name %> x<%= item.quantity %></span>
                     <span>
                       KES <%= :erlang.float_to_binary(
-                        Decimal.to_float(item.product.price) * item.quantity, decimals: 2) %>
+                        Decimal.to_float(item.product.price) * item.quantity,
+                        decimals: 2
+                      ) %>
                     </span>
                   </div>
                 <% end %>

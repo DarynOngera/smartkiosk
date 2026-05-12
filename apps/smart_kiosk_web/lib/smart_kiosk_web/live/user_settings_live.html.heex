@@ -1,0 +1,172 @@
+<div class="min-h-screen bg-[#0B0F1A]">
+  <Layouts.app flash={@flash} current_path="/users/settings">
+    <div class="max-w-4xl mx-auto p-6 lg:p-10">
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold text-white tracking-tight">Account Settings</h1>
+        <p class="text-slate-500 mt-2">Manage your profile, email, and security settings.</p>
+      </header>
+
+      <div class="flex flex-col lg:flex-row gap-8">
+        <nav class="lg:w-56 shrink-0">
+          <ul class="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+            <li>
+              <.link
+                patch={~p"/users/settings?tab=profile"}
+                class={[
+                  "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
+                  if(@tab == "profile",
+                    do: "bg-violet-500/20 text-violet-300 border border-violet-500/30",
+                    else: "text-slate-400 hover:text-white hover:bg-white/5"
+                  )
+                ]}
+              >
+                <.icon name="hero-user" class="w-4 h-4" /> Profile
+              </.link>
+            </li>
+            <li>
+              <.link
+                patch={~p"/users/settings?tab=email"}
+                class={[
+                  "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
+                  if(@tab == "email",
+                    do: "bg-violet-500/20 text-violet-300 border border-violet-500/30",
+                    else: "text-slate-400 hover:text-white hover:bg-white/5"
+                  )
+                ]}
+              >
+                <.icon name="hero-at-symbol" class="w-4 h-4" /> Email
+              </.link>
+            </li>
+            <li>
+              <.link
+                patch={~p"/users/settings?tab=password"}
+                class={[
+                  "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
+                  if(@tab == "password",
+                    do: "bg-violet-500/20 text-violet-300 border border-violet-500/30",
+                    else: "text-slate-400 hover:text-white hover:bg-white/5"
+                  )
+                ]}
+              >
+                <.icon name="hero-lock-closed" class="w-4 h-4" /> Password
+              </.link>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="flex-1 min-w-0">
+          <%= cond do %>
+            <% @tab == "profile" -> %>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <h2 class="text-lg font-semibold text-white mb-6">Profile Information</h2>
+                <.form
+                  for={@profile_form}
+                  id="profile-form"
+                  phx-change="validate_profile"
+                  phx-submit="save_profile"
+                >
+                  <div class="space-y-5">
+                    <.input
+                      field={@profile_form[:full_name]}
+                      type="text"
+                      label="Full Name"
+                      placeholder="Your full name"
+                    />
+                    <.input
+                      field={@profile_form[:phone]}
+                      type="text"
+                      label="Phone Number"
+                      placeholder="+254 700 000 000"
+                    />
+                  </div>
+                  <div class="mt-6 flex justify-end">
+                    <button
+                      type="submit"
+                      class="px-6 py-2.5 bg-violet-500 hover:bg-violet-400 text-white rounded-xl font-semibold transition-all"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </.form>
+              </div>
+            <% @tab == "email" -> %>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <h2 class="text-lg font-semibold text-white mb-6">Email Address</h2>
+                <p class="text-slate-400 text-sm mb-6">
+                  Change your email address. You'll need to confirm your new email to complete the change.
+                </p>
+                <.form
+                  for={@email_form}
+                  id="email-form"
+                  phx-change="validate_email"
+                  phx-submit="save_email"
+                >
+                  <div class="space-y-5">
+                    <.input
+                      field={@email_form[:email]}
+                      type="email"
+                      label="New Email Address"
+                      placeholder="you@example.com"
+                    />
+                    <.input
+                      field={@email_form[:current_password]}
+                      type="password"
+                      label="Current Password"
+                      placeholder="Enter your current password to confirm"
+                    />
+                  </div>
+                  <div class="mt-6 flex justify-end">
+                    <button
+                      type="submit"
+                      class="px-6 py-2.5 bg-violet-500 hover:bg-violet-400 text-white rounded-xl font-semibold transition-all"
+                    >
+                      Update Email
+                    </button>
+                  </div>
+                </.form>
+              </div>
+            <% @tab == "password" -> %>
+              <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <h2 class="text-lg font-semibold text-white mb-6">Change Password</h2>
+                <.form
+                  for={@password_form}
+                  id="password-form"
+                  phx-change="validate_password"
+                  phx-submit="save_password"
+                >
+                  <div class="space-y-5">
+                    <.input
+                      field={@password_form[:password]}
+                      type="password"
+                      label="New Password"
+                      placeholder="At least 12 characters"
+                    />
+                    <.input
+                      field={@password_form[:password_confirmation]}
+                      type="password"
+                      label="Confirm New Password"
+                      placeholder="Repeat your new password"
+                    />
+                    <.input
+                      field={@password_form[:current_password]}
+                      type="password"
+                      label="Current Password"
+                      placeholder="Enter your current password to confirm"
+                    />
+                  </div>
+                  <div class="mt-6 flex justify-end">
+                    <button
+                      type="submit"
+                      class="px-6 py-2.5 bg-violet-500 hover:bg-violet-400 text-white rounded-xl font-semibold transition-all"
+                    >
+                      Update Password
+                    </button>
+                  </div>
+                </.form>
+              </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </Layouts.app>
+</div>
