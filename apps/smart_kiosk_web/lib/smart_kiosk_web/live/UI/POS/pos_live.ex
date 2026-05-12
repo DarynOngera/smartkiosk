@@ -361,7 +361,23 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                       Decimal.to_float(item.product.price) * item.quantity, decimals: 2) %>
                   </span>
                 </div>
-              <% end %>
+              </div>
+
+              <%!-- Order Summary --%>
+              <div class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
+                <h3 class="font-semibold mb-3">Order Summary</h3>
+                <%= for item <- @cart do %>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-slate-400"><%= item.product.name %> x<%= item.quantity %></span>
+                    <span>
+                      KES <%= :erlang.float_to_binary(
+                        Decimal.to_float(item.product.price) * item.quantity,
+                        decimals: 2
+                      ) %>
+                    </span>
+                  </div>
+                <% end %>
+              </div>
             </div>
 
             <div class="p-6 border-t border-white/10 space-y-4">

@@ -90,7 +90,6 @@ defmodule SmartKioskWeb.Router do
       live "/customers", CustomersLive.Index, :index
       live "/analytics", AnalyticsLive.Index, :index
       live "/campaigns", CampaignsLive.Index, :index
-      live "/settings", SettingsLive.Index, :index
     end
   end
 
