@@ -275,6 +275,15 @@ defmodule SmartKioskCore.Accounts do
     end
   end
 
+  @doc """
+  Returns a changeset for the reset-password form (used for live validation).
+  Does not hit the database or hash the password.
+  """
+  def change_user_password(%User{} = user, attrs \\ %{}) do
+    User.password_changeset(user, attrs, hash_password: false)
+  end
+
+
   defp confirm_user_multi(user) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.confirm_changeset(user))
