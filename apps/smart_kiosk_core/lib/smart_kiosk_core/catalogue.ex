@@ -102,14 +102,6 @@ defmodule SmartKioskCore.Catalogue do
     |> Repo.insert()
   end
 
-  #remove a product from inventory
-  @doc "removes the product from the shop"
-  def remove_product(%Product{} = product) do
-    product
-    |> Product.changeset(%{status: :archived})
-    |> Repo.update()
-  end
-
   @doc "Updates a product."
   def update_product(%Product{} = product, attrs) do
     product
@@ -171,7 +163,6 @@ defmodule SmartKioskCore.Catalogue do
     |> Repo.insert()
   end
 
-  @spec remove_product_image(%SmartKioskCore.Schemas.ProductImage{}) :: {:ok, %SmartKioskCore.Schemas.ProductImage{}} | {:error, Ecto.Changeset.t()}
   @doc "Removes a product image."
   def remove_product_image(%ProductImage{} = image), do: Repo.delete(image)
 
