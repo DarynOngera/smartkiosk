@@ -1,0 +1,124 @@
+<div class="min-h-screen bg-[#0B0F1A] text-white">
+  <div class="max-w-7xl mx-auto p-6">
+    <nav class="mb-8">
+      <.link
+        navigate={~p"/shop/#{@shop.slug}"}
+        class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+      >
+        <.icon name="hero-arrow-left" class="w-4 h-4" /> Back to
+        <span class="text-violet-400 font-medium"><%= @shop.name %></span>
+      </.link>
+    </nav>
+
+    <div class="grid lg:grid-cols-2 gap-10 lg:gap-16">
+      <div class="space-y-4">
+        <div class="w-full aspect-square bg-white/5 border border-white/10 rounded-3xl overflow-hidden">
+          <%= if @product.images != [] do %>
+            <img
+              src={List.first(@product.images).url}
+              alt={@product.name}
+              class="w-full h-full object-cover"
+            />
+          <% else %>
+            <div class="flex flex-col items-center justify-center h-full gap-4 text-slate-600">
+              <.icon name="hero-photo" class="w-16 h-16" />
+              <span class="text-sm">No image</span>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="flex gap-3 overflow-x-auto pb-1">
+          <%= for image <- @product.images do %>
+            <div class="w-20 h-20 shrink-0 rounded-xl bg-white/5 border border-white/10 overflow-hidden">
+              <img
+                src={image.url}
+                alt={image.alt_text || @product.name}
+                class="w-full h-full object-cover"
+              />
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="flex flex-col justify-center">
+        <div class="mb-2">
+          <%= if @product.category do %>
+            <span class="text-xs font-medium text-violet-400 uppercase tracking-wider">
+              <%= @product.category.name %>
+            </span>
+          <% end %>
+        </div>
+
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-4"><%= @product.name %></h1>
+
+        <div class="mb-6">
+          <p class="text-3xl font-bold text-violet-400">
+            KES <%= @product.price %>
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 mb-8">
+          <%= if @in_stock do %>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium border border-emerald-500/30">
+              <.icon name="hero-check-circle" class="w-4 h-4" />
+              In Stock (<%= @product.stock_qty %> available)
+            </span>
+          <% else %>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500/20 text-red-400 rounded-full text-sm font-medium border border-red-500/30">
+              <.icon name="hero-x-circle" class="w-4 h-4" /> Out of Stock
+            </span>
+          <% end %>
+        </div>
+
+        <div class="prose prose-invert prose-sm max-w-none text-slate-300 mb-8">
+          <p><%= @product.description || "No description available." %></p>
+        </div>
+
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <div class="flex flex-col sm:flex-row gap-4">
+            <div class="shrink-0">
+              <label for="quantity" class="block text-sm font-medium text-slate-400 mb-2">
+                Quantity
+              </label>
+              <input
+                type="number"
+                id="quantity"
+                name="quantity"
+                value={@quantity}
+                min="1"
+                max={@max_qty}
+                phx-change="set_quantity"
+                class="w-24 bg-[#0B0F1A] border border-white/20 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-violet-500 transition-colors text-center"
+              />
+            </div>
+
+            <div class="flex-1 flex flex-col justify-end">
+              <button
+                phx-click="add_to_cart"
+                phx-value-quantity={@quantity}
+                disabled={not @in_stock}
+                class={"w-full py-3.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 " <> if(@in_stock, do: "bg-violet-500 hover:bg-violet-400 text-white shadow-lg shadow-violet-500/20 cursor-pointer", else: "bg-white/5 text-slate-600 border border-white/10 cursor-not-allowed")}
+              >
+                <.icon name="hero-shopping-cart" class="w-5 h-5" />
+                <%= if @in_stock, do: "Add to Cart", else: "Out of Stock" %>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-2 gap-4 text-sm text-slate-500">
+          <div>
+            <span class="block text-slate-400">SKU</span>
+            <span class="text-white"><%= @product.sku || "—" %></span>
+          </div>
+          <div>
+            <span class="block text-slate-400">Category</span>
+            <span class="text-white">
+              <%= (@product.category && @product.category.name) || "—" %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

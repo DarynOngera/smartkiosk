@@ -1,5 +1,5 @@
 defmodule SmartKioskWeb.UserResetPasswordLive do
-   @moduledoc """
+  @moduledoc """
   Reset-password page.
 
   Validates the one-time token from the email link, then lets the user
@@ -33,16 +33,16 @@ defmodule SmartKioskWeb.UserResetPasswordLive do
         changeset = Accounts.change_user_password(user)
 
         {:ok,
-        socket
-        |> assign(:page_title, "Reset Password")
-        |> assign(:user, user)
-        |> assign(:token, token)
-        |> assign(:trigger_submit, false)
-        |> assign(:form, to_form(changeset, as: :user))}
+         socket
+         |> assign(:page_title, "Reset Password")
+         |> assign(:user, user)
+         |> assign(:token, token)
+         |> assign(:trigger_submit, false)
+         |> assign(:form, to_form(changeset, as: :user))}
     end
   end
 
-  #events
+  # events
 
   def handle_event("validate", %{"user" => params}, socket) do
     changeset =
@@ -56,7 +56,10 @@ defmodule SmartKioskWeb.UserResetPasswordLive do
       {:ok, _user} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Password reset successfully. You can now sign in with your new password.")
+         |> put_flash(
+           :info,
+           "Password reset successfully. You can now sign in with your new password."
+         )
          |> push_navigate(to: ~p"/login")}
 
       {:error, changeset} ->
@@ -163,7 +166,10 @@ defmodule SmartKioskWeb.UserResetPasswordLive do
 
               <%!-- Password strength hint --%>
               <div class="flex items-start gap-2 px-1">
-                <.icon name="hero-information-circle" class="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+                <.icon
+                  name="hero-information-circle"
+                  class="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5"
+                />
                 <p class="text-xs text-slate-500 leading-relaxed">
                   Use a mix of uppercase, lowercase, numbers, and symbols for a strong password.
                 </p>
@@ -193,6 +199,4 @@ defmodule SmartKioskWeb.UserResetPasswordLive do
     </Layouts.app>
     """
   end
-
-
 end

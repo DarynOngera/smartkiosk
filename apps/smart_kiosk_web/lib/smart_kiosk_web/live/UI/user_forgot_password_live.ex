@@ -24,14 +24,15 @@ defmodule SmartKioskWeb.UserForgotPasswordLive do
   @spec handle_event(<<_::152>>, map(), map()) :: {:noreply, map()}
   def handle_event("send_reset_password", %{"user" => %{"email" => email}}, socket) do
     if user = Accounts.get_user_by_email(email) do
-      Accounts.deliver_user_reset_password_instructions(user,&url(~p"/reset-password/#{&1}"))
+      Accounts.deliver_user_reset_password_instructions(user, &url(~p"/reset-password/#{&1}"))
     end
 
     # Always show the same success message regardless of whether the email
     # exists, to prevent user-enumeration.
-    {:noreply, socket
-    |> assign(:email_sent, true)
-    |> assign(:form, to_form(%{"email" => ""}, as: :user))}
+    {:noreply,
+     socket
+     |> assign(:email_sent, true)
+     |> assign(:form, to_form(%{"email" => ""}, as: :user))}
   end
 
   def render(assigns) do

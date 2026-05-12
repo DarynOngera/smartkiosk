@@ -436,6 +436,7 @@ defmodule SmartKioskWeb.CoreComponents do
   def icon(%{name: "hero-" <> _} = assigns) do
     {icon_name, style_assigns} = heroicon(assigns.name)
     icon_atom = String.to_atom(icon_name)
+
     heroicon_assigns =
       %{
         __changed__: nil,
