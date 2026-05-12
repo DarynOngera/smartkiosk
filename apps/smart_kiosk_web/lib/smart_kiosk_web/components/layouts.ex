@@ -54,6 +54,8 @@ defmodule SmartKioskWeb.Layouts do
       <.flash_group flash={@flash} />
       <%= render_slot(@inner_block) %>
     </main>
+
+    <.flash_group flash={@flash} />
     """
   end
 

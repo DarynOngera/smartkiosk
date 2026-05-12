@@ -1,8 +1,7 @@
-<div class="min-h-screen bg-[#0B0F1A] text-white">
-  <.navbar current_user={@current_user} cart_count={@cart_count} />
-
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<Layouts.app flash={@flash} current_path="/cart" current_user={@current_user}>
+  <div class="min-h-screen bg-[#0B0F1A] text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <%!-- Cart Items --%>
       <div class="lg:col-span-2">
         <h1 class="text-3xl font-bold mb-8">Shopping Cart</h1>
@@ -133,3 +132,4 @@
     </div>
   </div>
 </div>
+</Layouts.app>

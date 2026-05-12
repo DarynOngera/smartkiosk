@@ -1,9 +1,10 @@
-<div class="min-h-screen bg-[#0B0F1A] text-white p-6 md:py-16">
-  <div class="max-w-2xl mx-auto">
-    <h1 class="text-3xl font-bold mb-2 text-center">Create Your Shop</h1>
-    <p class="text-slate-400 text-center mb-10">
-      Fill in the details below to launch your digital storefront.
-    </p>
+<Layouts.app flash={@flash} current_path="/create-shop" current_user={@current_user}>
+  <div class="min-h-screen bg-[#0B0F1A] text-white p-6 md:py-16">
+    <div class="max-w-2xl mx-auto">
+      <h1 class="text-3xl font-bold mb-2 text-center">Create Your Shop</h1>
+      <p class="text-slate-400 text-center mb-10">
+        Fill in the details below to launch your digital storefront.
+      </p>
 
     <div class="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl shadow-2xl">
       <.form for={@form} phx-submit="save" class="space-y-6">
@@ -75,7 +76,8 @@
         >
           Create Shop
         </button>
-      </.form>
+        </.form>
+      </div>
     </div>
   </div>
-</div>
+</Layouts.app>

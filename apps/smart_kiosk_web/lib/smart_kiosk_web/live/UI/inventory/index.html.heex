@@ -1,0 +1,106 @@
+<Layouts.app flash={@flash} current_path="/inventory" current_user={@current_user}>
+  <div class="min-h-screen bg-[#0B0F1A] text-white p-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-3xl font-bold">Inventory</h1>
+          <p class="text-slate-400 mt-1">Manage products for <%= @current_shop.name %></p>
+        </div>
+        <.link navigate={~p"/inventory/new"} class="px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+          <.icon name="hero-plus" class="w-4 h-4" /> Add Product
+        </.link>
+      </div>
+
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <table class="w-full">
+          <thead class="bg-white/5">
+            <tr>
+              <th class="text-left px-6 py-4 text-sm font-semibold text-slate-300">Product</th>
+              <th class="text-left px-6 py-4 text-sm font-semibold text-slate-300">SKU</th>
+              <th class="text-left px-6 py-4 text-sm font-semibold text-slate-300">Price</th>
+              <th class="text-left px-6 py-4 text-sm font-semibold text-slate-300">Stock</th>
+              <th class="text-left px-6 py-4 text-sm font-semibold text-slate-300">Status</th>
+              <th class="text-right px-6 py-4 text-sm font-semibold text-slate-300">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/10">
+            <%= for product <- @products do %>
+              <tr class="hover:bg-white/5 transition-colors">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-violet-500/20 to-indigo-500/10 rounded-lg flex items-center justify-center">
+                      <%= if product.images != [] and List.first(product.images) do %>
+                        <img src={List.first(product.images).url} alt={product.name} class="w-full h-full object-cover rounded-lg" />
+                      <% else %>
+                        <.icon name="hero-cube" class="w-5 h-5 text-violet-400" />
+                      <% end %>
+                    </div>
+                    <div>
+                      <p class="font-medium"><%= product.name %></p>
+                      <%= if product.is_featured do %>
+                        <span class="text-xs text-violet-400">Featured</span>
+                      <% end %>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-slate-400"><%= product.sku || "-" %></td>
+                <td class="px-6 py-4 text-violet-400 font-semibold">KES <%= product.price %></td>
+                <td class="px-6 py-4">
+                  <span class={[
+                    "px-2 py-1 rounded-full text-xs font-medium",
+                    product.stock_qty > product.low_stock_threshold && "bg-green-500/20 text-green-400",
+                    product.stock_qty > 0 && product.stock_qty <= product.low_stock_threshold && "bg-yellow-500/20 text-yellow-400",
+                    product.stock_qty == 0 && "bg-red-500/20 text-red-400"
+                  ]}>
+                    <%= product.stock_qty %>
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <span class={[
+                    "px-2 py-1 rounded-full text-xs font-medium capitalize",
+                    product.status == :active && "bg-green-500/20 text-green-400",
+                    product.status == :draft && "bg-slate-500/20 text-slate-400",
+                    product.status == :archived && "bg-red-500/20 text-red-400",
+                    product.status == :out_of_stock && "bg-orange-500/20 text-orange-400"
+                  ]}>
+                    <%= Atom.to_string(product.status) %>
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center justify-end gap-2">
+                    <button
+                      phx-click="edit_product"
+                      phx-value-product_id={product.id}
+                      class="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                      title="Edit"
+                    >
+                      <.icon name="hero-pencil" class="w-4 h-4" />
+                    </button>
+                    <button
+                      phx-click="remove_product"
+                      phx-value-product_id={product.id}
+                      class="p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors"
+                      title="Archive"
+                    >
+                      <.icon name="hero-trash" class="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <%= if @edit_product do %>
+        <.live_component
+          module={SmartKioskWeb.Inventory.EditModal}
+          id="edit-modal"
+          product={@edit_product}
+          shop={@current_shop}
+        />
+      <% end %>
+    </div>
+  </div>
+</Layouts.app>
+ 
