@@ -66,18 +66,14 @@
                   phx-submit="save_profile"
                 >
                   <div class="space-y-5">
-                    <.input
-                      field={@profile_form[:full_name]}
-                      type="text"
-                      label="Full Name"
-                      placeholder="Your full name"
-                    />
-                    <.input
-                      field={@profile_form[:phone]}
-                      type="text"
-                      label="Phone Number"
-                      placeholder="+254 700 000 000"
-                    />
+                    <div>
+                      <span class="label mb-1">Full Name</span>
+                      <.input field={@profile_form[:full_name]} type="text" placeholder="Your full name" />
+                    </div>
+                    <div>
+                      <span class="label mb-1">Phone Number</span>
+                      <.input field={@profile_form[:phone]} type="text" placeholder="+254 700 000 000" />
+                    </div>
                   </div>
                   <div class="mt-6 flex justify-end">
                     <button
@@ -102,18 +98,14 @@
                   phx-submit="save_email"
                 >
                   <div class="space-y-5">
-                    <.input
-                      field={@email_form[:email]}
-                      type="email"
-                      label="New Email Address"
-                      placeholder="you@example.com"
-                    />
-                    <.input
-                      field={@email_form[:current_password]}
-                      type="password"
-                      label="Current Password"
-                      placeholder="Enter your current password to confirm"
-                    />
+                    <div>
+                      <span class="label mb-1">New Email Address</span>
+                      <.input field={@email_form[:email]} type="email" placeholder="you@example.com" />
+                    </div>
+                    <div>
+                      <span class="label mb-1">Current Password</span>
+                      <.input field={@email_form[:current_password]} type="password" placeholder="Enter your current password to confirm" />
+                    </div>
                   </div>
                   <div class="mt-6 flex justify-end">
                     <button
@@ -135,24 +127,18 @@
                   phx-submit="save_password"
                 >
                   <div class="space-y-5">
-                    <.input
-                      field={@password_form[:password]}
-                      type="password"
-                      label="New Password"
-                      placeholder="At least 12 characters"
-                    />
-                    <.input
-                      field={@password_form[:password_confirmation]}
-                      type="password"
-                      label="Confirm New Password"
-                      placeholder="Repeat your new password"
-                    />
-                    <.input
-                      field={@password_form[:current_password]}
-                      type="password"
-                      label="Current Password"
-                      placeholder="Enter your current password to confirm"
-                    />
+                    <div>
+                      <span class="label mb-1">New Password</span>
+                      <.input field={@password_form[:password]} type="password" placeholder="At least 12 characters" />
+                    </div>
+                    <div>
+                      <span class="label mb-1">Confirm New Password</span>
+                      <.input field={@password_form[:password_confirmation]} type="password" placeholder="Repeat your new password" />
+                    </div>
+                    <div>
+                      <span class="label mb-1">Current Password</span>
+                      <.input field={@password_form[:current_password]} type="password" placeholder="Enter your current password to confirm" />
+                    </div>
                   </div>
                   <div class="mt-6 flex justify-end">
                     <button

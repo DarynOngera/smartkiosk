@@ -1,0 +1,43 @@
+<Layouts.app flash={@flash} current_path="/settings" current_user={@current_user} current_scope={@current_shop}>
+  <div class="min-h-screen p-6 md:py-12">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-2xl font-bold mb-4">Shop Settings</h1>
+
+      <div class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl shadow-lg">
+        <.form for={@form} phx-change="validate" phx-submit="save" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <span class="label mb-1">Shop name</span>
+              <.input field={@form[:name]} placeholder="My Shop" />
+            </div>
+
+            <div>
+              <span class="label mb-1">Phone</span>
+              <.input field={@form[:phone]} placeholder="+254 7XX XXX XXX" />
+            </div>
+
+            <div>
+              <span class="label mb-1">Address</span>
+              <.input field={@form[:address]} placeholder="Tom Mboya Street" />
+            </div>
+
+            <div>
+              <span class="label mb-1">City</span>
+              <.input field={@form[:city]} placeholder="Nairobi" />
+            </div>
+          </div>
+
+          <div>
+            <span class="label mb-1">Category</span>
+            <.input field={@form[:category]} type="select" options={@categories} />
+          </div>
+
+          <div class="flex items-center gap-4">
+            <button type="submit" class="py-3 px-6 bg-violet-600 text-white rounded-lg font-semibold">Save</button>
+            <.link navigate={~p"/dashboard"} class="text-sm text-slate-400">Cancel</.link>
+          </div>
+        </.form>
+      </div>
+    </div>
+  </div>
+</Layouts.app>

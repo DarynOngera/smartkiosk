@@ -60,7 +60,7 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.Index do
     case Catalogue.get_product!(shop, product_id) do
       product ->
         case Catalogue.archive_product(product) do
-          :ok ->
+          {:ok, _archived_product} ->
             updated_products =
               Enum.reject(socket.assigns.products, fn p -> p.id == product_id end)
 

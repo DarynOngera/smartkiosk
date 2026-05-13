@@ -46,7 +46,9 @@ defmodule SmartKioskWeb.UserSettingsLive do
          |> assign(
            :profile_form,
            to_form(SmartKioskCore.Schemas.User.profile_changeset(user, %{}), as: "profile")
-         )}
+         )
+         |> push_navigate(to: ~p"/dashboard")
+        }
 
       {:error, changeset} ->
         {:noreply,

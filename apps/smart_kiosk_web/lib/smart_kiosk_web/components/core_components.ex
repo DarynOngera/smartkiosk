@@ -223,7 +223,8 @@ defmodule SmartKioskWeb.CoreComponents do
             checked={@checked}
             class={@class || "checkbox checkbox-sm"}
             {@rest}
-          />{@label}
+          />
+          <span :if={@label} class="ml-2">{@label}</span>
         </span>
       </label>
       <.error :for={msg <- @errors}><%= msg %></.error>
