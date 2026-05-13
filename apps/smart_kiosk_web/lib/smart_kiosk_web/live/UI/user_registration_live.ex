@@ -105,7 +105,8 @@ defmodule SmartKioskWeb.UserRegistrationLive do
                 phx-value-type="customer"
                 class={[
                   "flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all duration-300",
-                  @reg_type == "customer" && "bg-violet-500 text-white shadow-lg shadow-violet-500/25",
+                  @reg_type == "customer" &&
+                    "bg-violet-500 text-white shadow-lg shadow-violet-500/25",
                   @reg_type != "customer" && "text-slate-400 hover:text-white"
                 ]}
               >

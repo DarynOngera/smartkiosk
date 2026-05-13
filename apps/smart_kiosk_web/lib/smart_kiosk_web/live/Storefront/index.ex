@@ -3,9 +3,10 @@ defmodule SmartKioskWeb.StorefrontLive.Index do
 
   alias SmartKioskCore.Catalogue
   alias SmartKioskCore.Accounts
+  alias SmartKioskCore.Shops
 
   def mount(%{"slug" => slug}, _session, socket) do
-    shop = Accounts.get_shop_by_slug(slug)
+    shop = Shops.get_shop_by_slug(slug)
     session_id = get_connect_params(socket)["session_id"]
 
     if shop do

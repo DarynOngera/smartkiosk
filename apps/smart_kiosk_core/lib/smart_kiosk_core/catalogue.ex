@@ -97,8 +97,13 @@ defmodule SmartKioskCore.Catalogue do
 
   @doc "Creates a product for a shop."
   def create_product(%Shop{} = shop, attrs) do
-    %Product{}
-    |> Product.changeset(Map.put(attrs, :shop_id, shop.id))
+    attrs =
+      attrs
+      |> Map.delete(:shop_id)
+      |> Map.delete("shop_id")
+
+    %Product{shop_id: shop.id}
+    |> Product.changeset(attrs)
     |> Repo.insert()
   end
 

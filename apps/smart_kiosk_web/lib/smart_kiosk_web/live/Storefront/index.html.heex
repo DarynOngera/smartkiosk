@@ -7,14 +7,20 @@
           <div class="flex items-center gap-6">
             <div class="w-20 h-20 bg-gradient-to-br from-violet-500/20 to-indigo-500/10 rounded-2xl flex items-center justify-center border border-white/10">
               <%= if @shop.logo_url do %>
-                <img src={@shop.logo_url} alt={@shop.name} class="w-full h-full object-cover rounded-2xl" />
+                <img
+                  src={@shop.logo_url}
+                  alt={@shop.name}
+                  class="w-full h-full object-cover rounded-2xl"
+                />
               <% else %>
                 <.icon name="hero-building-storefront" class="w-10 h-10 text-violet-400" />
               <% end %>
             </div>
             <div>
               <h1 class="text-3xl font-bold mb-2"><%= @shop.name %></h1>
-              <p class="text-slate-400 max-w-xl"><%= @shop.description || "Welcome to our shop" %></p>
+              <p class="text-slate-400 max-w-xl">
+                <%= @shop.description || "Welcome to our shop" %>
+              </p>
               <div class="flex items-center gap-4 mt-3 text-sm text-slate-500">
                 <span class="flex items-center gap-1">
                   <.icon name="hero-map-pin" class="w-4 h-4" />
@@ -42,7 +48,10 @@
               placeholder="Search products..."
               class="w-64 px-4 py-2 pl-10 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-slate-500 focus:bg-white/10 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all outline-none"
             />
-            <.icon name="hero-magnifying-glass" class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <.icon
+              name="hero-magnifying-glass"
+              class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+            />
           </div>
         </div>
       </div>
@@ -59,7 +68,10 @@
             <div class="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/10 transition-all duration-300">
               <%!-- Product Image --%>
               <div class="relative w-full h-48 bg-slate-800 overflow-hidden">
-                <.link navigate={~p"/shop/#{@shop.slug}/product/#{product.id}"} class="block w-full h-full">
+                <.link
+                  navigate={~p"/shop/#{@shop.slug}/product/#{product.id}"}
+                  class="block w-full h-full"
+                >
                   <%= if product.images != [] and List.first(product.images) do %>
                     <img
                       src={List.first(product.images).url}
@@ -82,7 +94,9 @@
               <%!-- Product Info --%>
               <div class="p-4">
                 <.link navigate={~p"/shop/#{@shop.slug}/product/#{product.id}"} class="block">
-                  <h3 class="font-semibold text-lg mb-1 line-clamp-1 group-hover:text-violet-400 transition-colors"><%= product.name %></h3>
+                  <h3 class="font-semibold text-lg mb-1 line-clamp-1 group-hover:text-violet-400 transition-colors">
+                    <%= product.name %>
+                  </h3>
                 </.link>
                 <p class="text-slate-400 text-sm mb-3 line-clamp-2 h-10">
                   <%= product.description || "No description" %>

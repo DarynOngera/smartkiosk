@@ -9,12 +9,19 @@ defmodule SmartKioskCore.Cart do
 
   @doc "Returns a list of cart items for a logged-in user."
   def get_user_cart(%User{id: user_id}) do
-    Repo.all(from(c in CartItem, where: c.user_id == ^user_id, preload: [product: [:shop, :images]]))
+    Repo.all(
+      from(c in CartItem, where: c.user_id == ^user_id, preload: [product: [:shop, :images]])
+    )
   end
 
   @doc "Returns a list of cart items for a guest session."
   def get_session_cart(session_id) when is_binary(session_id) do
-    Repo.all(from(c in CartItem, where: c.session_id == ^session_id, preload: [product: [:shop, :images]]))
+    Repo.all(
+      from(c in CartItem,
+        where: c.session_id == ^session_id,
+        preload: [product: [:shop, :images]]
+      )
+    )
   end
 
   @doc "Calculates the total amount for a list of cart items."

@@ -6,76 +6,76 @@
         Fill in the details below to launch your digital storefront.
       </p>
 
-    <div class="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl shadow-2xl">
-      <.form for={@form} phx-submit="save" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <.input
-            field={@form[:name]}
-            label="Shop Name"
-            placeholder="My Amazing Shop"
-            class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
-          />
-          <.input
-            field={@form[:phone]}
-            label="Phone Number"
-            placeholder="+254 7XX XXX XXX"
-            class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
-          />
-          <.input
-            field={@form[:email]}
-            type="email"
-            label="Email Address"
-            placeholder="hello@shop.com"
-            class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
-          />
-          <.input
-            field={@form[:city]}
-            label="City"
-            placeholder="Nairobi"
-            class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
-          />
-          <.input
-            field={@form[:country]}
-            label="Country"
-            placeholder="Kenya"
-            class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
-          />
-          <.input
-            field={@form[:address]}
-            label="Address"
-            placeholder="Tom Mboya Street"
-            class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
-          />
-        </div>
+      <div class="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl shadow-2xl">
+        <.form for={@form} phx-submit="save" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <.input
+              field={@form[:name]}
+              label="Shop Name"
+              placeholder="My Amazing Shop"
+              class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+            />
+            <.input
+              field={@form[:phone]}
+              label="Phone Number"
+              placeholder="+254 7XX XXX XXX"
+              class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+            />
+            <.input
+              field={@form[:email]}
+              type="email"
+              label="Email Address"
+              placeholder="hello@shop.com"
+              class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+            />
+            <.input
+              field={@form[:city]}
+              label="City"
+              placeholder="Nairobi"
+              class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+            />
+            <.input
+              field={@form[:country]}
+              label="Country"
+              placeholder="Kenya"
+              class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+            />
+            <.input
+              field={@form[:address]}
+              label="Address"
+              placeholder="Tom Mboya Street"
+              class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+            />
+          </div>
 
-        <.input
-          field={@form[:plan]}
-          type="select"
-          options={@plans}
-          label="Choose Plan"
-          class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
-        />
-        <.input
-          field={@form[:category]}
-          type="select"
-          options={@categories}
-          label="Category"
-          class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
-        />
-        <.input
-          field={@form[:description]}
-          type="textarea"
-          label="Description"
-          placeholder="Tell customers about your shop..."
-          class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
-        />
+          <.input
+            field={@form[:plan]}
+            type="select"
+            options={@plans}
+            label="Choose Plan"
+            class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+          />
+          <.input
+            field={@form[:category]}
+            type="select"
+            options={@categories}
+            label="Category"
+            class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+          />
+          <.input
+            field={@form[:description]}
+            type="textarea"
+            label="Description"
+            placeholder="Tell customers about your shop..."
+            class="w-full bg-[#131825] border border-white/10 text-white rounded-xl p-4 focus:bg-[#1A2234] focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+          />
 
-        <button
-          type="submit"
-          class="w-full py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-bold text-lg transition-all shadow-lg shadow-violet-600/20 hover:scale-[1.01] active:scale-[0.98]"
-        >
-          Create Shop
-        </button>
+          <button
+            type="submit"
+            class="w-full py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-bold text-lg transition-all shadow-lg shadow-violet-600/20 hover:scale-[1.01] active:scale-[0.98]"
+          >
+            Create Shop
+          </button>
         </.form>
       </div>
     </div>

@@ -1,7 +1,7 @@
 defmodule SmartKioskWeb.UI.CreateShopLive do
   use SmartKioskWeb, :live_view
 
-  alias SmartKioskCore.Accounts
+  alias SmartKioskCore.Shops
 
   def mount(_params, _session, socket) do
     # Shop plans and categories
@@ -42,7 +42,7 @@ defmodule SmartKioskWeb.UI.CreateShopLive do
   def handle_event("save", %{"shop" => shop_params}, socket) do
     user = socket.assigns.current_user
 
-    case Accounts.create_shop_for_user(user, shop_params) do
+    case Shops.create_shop_for_user(user, shop_params) do
       {:ok, _shop, _user} ->
         {:noreply,
          socket

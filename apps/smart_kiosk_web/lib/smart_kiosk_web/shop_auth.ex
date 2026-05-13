@@ -16,7 +16,7 @@ defmodule SmartKioskWeb.ShopAuth do
 
   use SmartKioskWeb, :verified_routes
 
-  alias SmartKioskCore.Accounts
+  alias SmartKioskCore.Shops
   alias SmartKioskCore.Authorization
 
   @doc """
@@ -32,7 +32,7 @@ defmodule SmartKioskWeb.ShopAuth do
   def on_mount(:default, _params, _session, socket) do
     user = socket.assigns.current_user
 
-    case Accounts.get_shop_for_user(user) do
+    case Shops.get_shop_for_user(user) do
       nil ->
         {:cont,
          socket

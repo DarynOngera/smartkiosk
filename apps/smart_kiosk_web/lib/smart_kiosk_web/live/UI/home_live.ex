@@ -7,6 +7,7 @@ defmodule SmartKioskWeb.HomeLive do
   alias SmartKioskCore.Schemas.{Shop, Product}
   alias SmartKioskCore.Repo
   alias SmartKioskCore.Accounts
+  alias SmartKioskCore.Shops
   alias SmartKioskCore.Cart
   import SmartKioskWeb.Sidebar
   import SmartKioskWeb.SearchBar
@@ -30,7 +31,7 @@ defmodule SmartKioskWeb.HomeLive do
     # Fetch user's shop if they have one assigned
     user_shop =
       if current_user do
-        Accounts.get_shop_for_user(current_user)
+        Shops.get_shop_for_user(current_user)
       else
         nil
       end
@@ -144,16 +145,16 @@ defmodule SmartKioskWeb.HomeLive do
   def handle_event("search", %{"query" => query}, socket) do
     if String.trim(query) == "" do
       {:noreply,
-        socket
-        |> assign(:search_query, "")
-        |> assign(:search_results, [])
-        |> assign(:search_loading, false)}
+       socket
+       |> assign(:search_query, "")
+       |> assign(:search_results, [])
+       |> assign(:search_loading, false)}
     else
       {:noreply,
-        socket
-        |> assign(:search_query, query)
-        |> assign(:search_loading, true)
-        |> push_patch(to: ~p"/?search=#{URI.encode(query)}")}
+       socket
+       |> assign(:search_query, query)
+       |> assign(:search_loading, true)
+       |> push_patch(to: ~p"/?search=#{URI.encode(query)}")}
     end
   end
 

@@ -339,65 +339,82 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
             </div>
           </div>
 
-      <%= if @show_payment do %>
-  <%!-- Payment Details --%>
-  <div class="p-4">
-    <label class="text-sm text-slate-400 mb-3 block">Amount Due</label>
-    <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-      <p class="text-3xl font-bold text-violet-400">
-        KES <%= :erlang.float_to_binary(@cart_total, decimals: 2) %>
-      </p>
-    </div>
-  </div>
+          <%= if @show_payment do %>
+            <%!-- Payment Details --%>
+            <div class="p-4">
+              <label class="text-sm text-slate-400 mb-3 block">Amount Due</label>
+              <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+                <p class="text-3xl font-bold text-violet-400">
+                  KES <%= :erlang.float_to_binary(@cart_total, decimals: 2) %>
+                </p>
+              </div>
+            </div>
 
-  <%!-- Order Summary (single correct block) --%>
-  <div class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
-    <h3 class="font-semibold mb-3">Order Summary</h3>
-    <%= for item <- @cart do %>
-      <div class="flex justify-between text-sm">
-        <span class="text-slate-400"><%= item.product.name %> x<%= item.quantity %></span>
-        <span>
-          KES <%= :erlang.float_to_binary(
-            Decimal.to_float(item.product.price) * item.quantity,
-            decimals: 2
-          ) %>
-        </span>
-      </div>
-    <% end %>
-  </div>
+            <%!-- Order Summary (single correct block) --%>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
+              <h3 class="font-semibold mb-3">Order Summary</h3>
+              <%= for item <- @cart do %>
+                <div class="flex justify-between text-sm">
+                  <span class="text-slate-400"><%= item.product.name %> x<%= item.quantity %></span>
+                  <span>
+                    KES <%= :erlang.float_to_binary(
+                      Decimal.to_float(item.product.price) * item.quantity,
+                      decimals: 2
+                    ) %>
+                  </span>
+                </div>
+              <% end %>
+            </div>
 
-  <div class="p-6 border-t border-white/10 space-y-4">
-    <button class="w-full py-4 bg-violet-600 rounded-xl font-bold hover:bg-violet-500 flex items-center justify-center gap-2">
-      <.icon name="hero-check" class="w-5 h-5" /> Complete Payment
-    </button>
-  </div>
-<% else %>
-  <%!-- Cart View (your existing cart view code) --%>
-  <div class="flex-1 overflow-y-auto p-6 space-y-4">
-    <%= for item <- @cart do %>
-      <div class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
-        <div class="flex-1 min-w-0">
-          <p class="font-semibold truncate"><%= item.product.name %></p>
-          <p class="text-slate-400 text-sm">KES <%= item.product.price %></p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button phx-click="update_quantity" phx-value-product_id={item.product.id} phx-value-delta="-1" class="w-8 h-8 bg-slate-800 rounded-lg">-</button>
-          <span class="w-8 text-center"><%= item.quantity %></span>
-          <button phx-click="update_quantity" phx-value-product_id={item.product.id} phx-value-delta="1" class="w-8 h-8 bg-violet-600 rounded-lg">+</button>
-        </div>
-      </div>
-    <% end %>
-  </div>
+            <div class="p-6 border-t border-white/10 space-y-4">
+              <button class="w-full py-4 bg-violet-600 rounded-xl font-bold hover:bg-violet-500 flex items-center justify-center gap-2">
+                <.icon name="hero-check" class="w-5 h-5" /> Complete Payment
+              </button>
+            </div>
+          <% else %>
+            <%!-- Cart View (your existing cart view code) --%>
+            <div class="flex-1 overflow-y-auto p-6 space-y-4">
+              <%= for item <- @cart do %>
+                <div class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-semibold truncate"><%= item.product.name %></p>
+                    <p class="text-slate-400 text-sm">KES <%= item.product.price %></p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button
+                      phx-click="update_quantity"
+                      phx-value-product_id={item.product.id}
+                      phx-value-delta="-1"
+                      class="w-8 h-8 bg-slate-800 rounded-lg"
+                    >
+                      -
+                    </button>
+                    <span class="w-8 text-center"><%= item.quantity %></span>
+                    <button
+                      phx-click="update_quantity"
+                      phx-value-product_id={item.product.id}
+                      phx-value-delta="1"
+                      class="w-8 h-8 bg-violet-600 rounded-lg"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              <% end %>
+            </div>
 
-  <div class="p-6 border-t border-white/10 space-y-4">
-    <div class="flex justify-between font-bold text-lg">
-      <span>Total</span><span>KES <%= :erlang.float_to_binary(@cart_total, decimals: 2) %></span>
-    </div>
-    <button phx-click="show_payment" class="w-full py-4 bg-violet-600 rounded-xl font-bold hover:bg-violet-500">
-      Proceed to Payment
-    </button>
-  </div>
-<% end %>
+            <div class="p-6 border-t border-white/10 space-y-4">
+              <div class="flex justify-between font-bold text-lg">
+                <span>Total</span><span>KES <%= :erlang.float_to_binary(@cart_total, decimals: 2) %></span>
+              </div>
+              <button
+                phx-click="show_payment"
+                class="w-full py-4 bg-violet-600 rounded-xl font-bold hover:bg-violet-500"
+              >
+                Proceed to Payment
+              </button>
+            </div>
+          <% end %>
         </section>
       </div>
     </div>
