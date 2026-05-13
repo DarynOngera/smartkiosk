@@ -1,12 +1,20 @@
-<Layouts.app flash={@flash} current_path="/cart" current_user={@current_user}>
-  <div class="min-h-screen bg-[#0B0F1A] text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <%!-- Cart Items --%>
+<div class="min-h-screen bg-[#0B0F1A] text-white">
+  <.navbar current_user={@current_user} cart_count={@cart_count} />
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <%!-- ── Cart items ─────────────────────────────────────────────────── --%>
       <div class="lg:col-span-2">
-        <h1 class="text-3xl font-bold mb-8">Shopping Cart</h1>
+        <h1 class="text-3xl font-bold mb-8">
+          Shopping Cart
+          <span class="text-lg font-normal text-slate-500 ml-2">
+            (<%= @cart_count %> <%= if @cart_count == 1, do: "item", else: "items" %>)
+          </span>
+        </h1>
 
         <%= if @cart_items == [] do %>
+          <%!-- Empty state --%>
           <div class="bg-white/5 border border-white/10 rounded-3xl p-12 text-center">
             <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
               <.icon name="hero-shopping-cart" class="w-10 h-10 text-slate-600" />
@@ -20,120 +28,204 @@
               <.icon name="hero-arrow-left" class="w-5 h-5" /> Browse Shops
             </.link>
           </div>
+
         <% else %>
-          <div class="space-y-4">
-            <%= for cart_item <- @cart_items do %>
-              <div class="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-                <%!-- Product Image/Placeholder --%>
-                <div class="w-20 h-20 bg-slate-800 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  <%= if cart_item.product.images != [] and List.first(cart_item.product.images) do %>
-                    <img src={List.first(cart_item.product.images).url} alt={cart_item.product_name} class="w-20 h-20 rounded-xl object-cover"/>
-                  <% else %>
-                    <.icon name="hero-shopping-bag" class="w-8 h-8 text-slate-600" />
+          <%!-- Group items visually by shop --%>
+          <% items_by_shop = Enum.group_by(@cart_items, fn item -> item.product.shop end) %>
+          <div class="space-y-6">
+            <%= for {shop, items} <- items_by_shop do %>
+              <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                <%!-- Shop header --%>
+                <div class="px-5 py-3 border-b border-white/10 flex items-center gap-2">
+                  <.icon name="hero-storefront" class="w-4 h-4 text-violet-400" />
+                  <span class="text-sm font-semibold text-violet-400"><%= shop.name %></span>
+                </div>
+
+                <%!-- Items for this shop --%>
+                <div class="divide-y divide-white/5">
+                  <%= for cart_item <- items do %>
+                    <div class="flex items-center gap-4 p-5">
+                      <%!-- Thumbnail --%>
+                      <div class="w-16 h-16 bg-slate-800 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <%= if cart_item.product.images != [] do %>
+                          <img
+                            src={List.first(cart_item.product.images).url}
+                            alt={cart_item.product_name}
+                            class="w-full h-full object-cover"
+                          />
+                        <% else %>
+                          <.icon name="hero-shopping-bag" class="w-7 h-7 text-slate-600" />
+                        <% end %>
+                      </div>
+
+                      <%!-- Product info --%>
+                      <div class="flex-1 min-w-0">
+                        <h3 class="font-semibold text-white truncate"><%= cart_item.product_name %></h3>
+                        <p class="text-violet-400 font-bold mt-0.5">KES <%= cart_item.unit_price %></p>
+                      </div>
+
+                      <%!-- Quantity stepper --%>
+                      <div class="flex items-center gap-2">
+                        <button
+                          phx-click="update_quantity"
+                          phx-value-id={cart_item.id}
+                          phx-value-quantity={cart_item.quantity - 1}
+                          class="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors"
+                          aria-label="Decrease quantity"
+                        >
+                          <.icon name="hero-minus" class="w-4 h-4" />
+                        </button>
+                        <span class="w-8 text-center font-semibold tabular-nums">
+                          <%= cart_item.quantity %>
+                        </span>
+                        <button
+                          phx-click="update_quantity"
+                          phx-value-id={cart_item.id}
+                          phx-value-quantity={cart_item.quantity + 1}
+                          class="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors"
+                          aria-label="Increase quantity"
+                        >
+                          <.icon name="hero-plus" class="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <%!-- Line total --%>
+                      <div class="text-right min-w-[80px]">
+                        <p class="font-bold text-white tabular-nums">KES <%= cart_item.line_total %></p>
+                      </div>
+
+                      <%!-- Remove --%>
+                      <button
+                        phx-click="remove_item"
+                        phx-value-id={cart_item.id}
+                        class="p-2 text-slate-500 hover:text-red-400 transition-colors"
+                        aria-label="Remove item"
+                      >
+                        <.icon name="hero-x-mark" class="w-5 h-5" />
+                      </button>
+                    </div>
                   <% end %>
                 </div>
-
-                <%!-- Product Info --%>
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-semibold text-white truncate"><%= cart_item.product_name %></h3>
-                  <p class="text-sm text-slate-500"><%= cart_item.product.shop.name %></p>
-                  <p class="text-violet-400 font-bold mt-1">Ksh <%= cart_item.unit_price %></p>
-                </div>
-
-                <%!-- Quantity Controls --%>
-                <div class="flex items-center gap-2">
-                  <button
-                    phx-click="update_quantity"
-                    phx-value-id={cart_item.id}
-                    phx-value-quantity={max(1, cart_item.quantity - 1)}
-                    class="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors"
-                  >
-                    <.icon name="hero-minus" class="w-4 h-4" />
-                  </button>
-                  <span class="w-8 text-center font-semibold"><%= cart_item.quantity %></span>
-                  <button
-                    phx-click="update_quantity"
-                    phx-value-id={cart_item.id}
-                    phx-value-quantity={cart_item.quantity + 1}
-                    class="w-8 h-8 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center transition-colors"
-                  >
-                    <.icon name="hero-plus" class="w-4 h-4" />
-                  </button>
-                </div>
-
-                <%!-- Line Total --%>
-                <div class="text-right min-w-[80px]">
-                  <p class="font-bold text-white">Ksh <%= cart_item.line_total %></p>
-                </div>
-
-                <%!-- Remove Button --%>
-                <button
-                  phx-click="remove_item"
-                  phx-value-id={cart_item.id}
-                  class="p-2 text-slate-400 hover:text-red-400 transition-colors"
-                  title="Remove item"
-                >
-                  <.icon name="hero-x-mark" class="w-5 h-5" />
-                </button>
               </div>
             <% end %>
           </div>
         <% end %>
       </div>
 
-      <%!-- Checkout Sidebar --%>
+      <%!-- ── Order summary + checkout ──────────────────────────────────── --%>
       <div class="lg:col-span-1">
         <div class="bg-white/5 border border-white/10 rounded-3xl p-6 sticky top-24">
           <h2 class="text-xl font-bold mb-6">Order Summary</h2>
 
-          <%!-- Total --%>
-          <div class="flex items-center justify-between mb-6 pb-6 border-b border-white/10">
-            <span class="text-slate-400">Total</span>
-            <span class="text-2xl font-bold text-white">Ksh <%= @cart_total %></span>
-          </div>
-
+          <%!-- Subtotals per shop --%>
           <%= if @cart_items != [] do %>
-            <%!-- Checkout Form --%>
-            <.form for={@checkout_form} phx-submit="checkout" id="checkout-form">
-              <div class="space-y-6 mb-8">
-                <.input
-                  field={@checkout_form[:full_name]}
-                  type="text"
-                  label="Full Name"
-                  placeholder="John Doe"
-                  class="bg-white/5 border border-white/10 text-white placeholder:text-slate-500 backdrop-blur-md rounded-2xl p-4 focus:bg-white/10 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
-                  required
-                />
-
-                <.input
-                  field={@checkout_form[:phone_number]}
-                  type="tel"
-                  label="Phone Number"
-                  placeholder="+254 7XX XXX XXX"
-                  class="bg-white/5 border border-white/10 text-white placeholder:text-slate-500 backdrop-blur-md rounded-2xl p-4 focus:bg-white/10 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
-                  required
-                />
+            <% items_by_shop = Enum.group_by(@cart_items, fn i -> i.product.shop end) %>
+            <div class="space-y-2 mb-4">
+              <%= for {shop, items} <- items_by_shop do %>
+                <% shop_total = Cart.calculate_cart_total(items) %>
+                <div class="flex justify-between text-sm text-slate-400">
+                  <span><%= shop.name %></span>
+                  <span class="tabular-nums">KES <%= shop_total %></span>
+                </div>
+              <% end %>
+            </div>
+            <div class="border-t border-white/10 pt-4 mb-6">
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-slate-300">Total</span>
+                <span class="text-2xl font-bold text-white tabular-nums">KES <%= @cart_total %></span>
               </div>
-
-              <button
-                type="submit"
-                class="w-full py-4 bg-violet-500 hover:bg-violet-400 text-white rounded-xl font-bold text-lg transition-all shadow-lg shadow-violet-500/20"
-              >
-                Proceed to Checkout
-              </button>
-            </.form>
+            </div>
+          <% else %>
+            <div class="border-t border-white/10 pt-4 mb-6">
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-slate-300">Total</span>
+                <span class="text-2xl font-bold text-white">KES 0.00</span>
+              </div>
+            </div>
           <% end %>
 
-          <%!-- Continue Shopping Link --%>
+          <%!-- Checkout form — only when cart has items --%>
+          <%= if @cart_items != [] do %>
+            <.form for={@checkout_form} phx-submit="checkout" id="checkout-form">
+              <div class="space-y-4 mb-6">
+                <%!-- Full name --%>
+                <div class="space-y-1.5">
+                  <label class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold">
+                    Full Name
+                  </label>
+                  <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-violet-400 transition-colors">
+                      <.icon name="hero-user" class="w-4 h-4" />
+                    </div>
+                    <input
+                      type="text"
+                      name="full_name"
+                      value={@checkout_form[:full_name].value}
+                      placeholder="Jane Mwangi"
+                      required
+                      class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all text-sm"
+                    />
+                  </div>
+                </div>
+
+                <%!-- Phone --%>
+                <div class="space-y-1.5">
+                  <label class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold">
+                    Phone Number
+                  </label>
+                  <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-violet-400 transition-colors">
+                      <.icon name="hero-phone" class="w-4 h-4" />
+                    </div>
+                    <input
+                      type="tel"
+                      name="phone_number"
+                      value={@checkout_form[:phone_number].value}
+                      placeholder="+254 7XX XXX XXX"
+                      required
+                      class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <%!-- Submit --%>
+              <button
+                type="submit"
+                disabled={@checking_out}
+                class={[
+                  "w-full py-4 rounded-xl font-bold text-white text-base transition-all",
+                  "flex items-center justify-center gap-2",
+                  if(@checking_out,
+                    do: "bg-violet-500/50 cursor-not-allowed",
+                    else: "bg-violet-500 hover:bg-violet-400 shadow-lg shadow-violet-500/20 active:scale-[0.98]"
+                  )
+                ]}
+              >
+                <%= if @checking_out do %>
+                  <span class="loading loading-spinner loading-sm"></span>
+                  Placing order…
+                <% else %>
+                  <.icon name="hero-credit-card" class="w-5 h-5" />
+                  Place Order
+                <% end %>
+              </button>
+            </.form>
+
+            <p class="text-center mt-3 text-xs text-slate-600">
+              By placing your order you agree to our terms of service
+            </p>
+          <% end %>
+
           <.link
             navigate="/"
-            class="block text-center mt-4 text-violet-400 hover:text-violet-300 font-medium transition-colors"
+            class="block text-center mt-4 text-violet-400 hover:text-violet-300 font-medium transition-colors text-sm"
           >
-            Continue Shopping
+            ← Continue Shopping
           </.link>
         </div>
       </div>
+
     </div>
   </div>
 </div>
-</Layouts.app>
