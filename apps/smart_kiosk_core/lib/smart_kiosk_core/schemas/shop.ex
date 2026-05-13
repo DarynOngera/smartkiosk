@@ -33,7 +33,7 @@ defmodule SmartKioskCore.Schemas.Shop do
     field(:plan, Ecto.Enum, values: @plans, default: :kiosk)
     field(:status, Ecto.Enum, values: @statuses, default: :pending_review)
     field(:category, Ecto.Enum, values: @categories, default: :general_shop)
-    field(:business_type, :string, default: "general")
+    # field(:business_type, :string, default: "general")
     field(:logo_url, :string)
     field(:description, :string)
     field(:owner_id, :binary_id)
@@ -52,7 +52,7 @@ defmodule SmartKioskCore.Schemas.Shop do
   end
 
   @required ~w(name phone)a
-  @optional ~w(slug email address city country lat lng plan status category business_type logo_url description settings)a
+  @optional ~w(slug email address city country lat lng plan status category  logo_url description settings)a
 
   def changeset(shop, attrs) do
     shop

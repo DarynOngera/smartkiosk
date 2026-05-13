@@ -8,8 +8,8 @@ defmodule SmartKioskWeb.HomeLive do
   alias SmartKioskCore.Repo
   alias SmartKioskCore.Accounts
   alias SmartKioskCore.Cart
-  import SmartKioskWeb.Navbar
   import SmartKioskWeb.Sidebar
+  import SmartKioskWeb.SearchBar
   import Ecto.Query
 
   @featured_categories [
@@ -58,30 +58,52 @@ defmodule SmartKioskWeb.HomeLive do
      |> assign(:filtered_shops, nil)
      |> assign(:user_shop, user_shop)
      |> assign(:cart_count, cart_count)
-     |> assign(:session_id, session_id)}
+     |> assign(:session_id, session_id)
+     |> assign(:search_query, "")
+     |> assign(:search_results, [])
+     |> assign(:search_loading, false)}
   end
 
   def handle_params(params, _uri, socket) do
     category = params["category"]
+    search_query = params["search"]
 
-    if category && category != "" do
-      # Filter mode: show shops in this category
-      filtered_shops = fetch_shops_by_category(category)
+    cond do
+      search_query && search_query != "" ->
+        # Search mode: show search results
+        decoded_query = URI.decode(search_query)
+        search_results = perform_search(decoded_query)
 
-      {:noreply,
-       socket
-       |> assign(:selected_category, category)
-       |> assign(:filtered_shops, filtered_shops)
-       |> assign(:products_by_category, nil)}
-    else
-      # Default mode: show products by category
-      products_by_category = fetch_products_by_categories()
+        {:noreply,
+         socket
+         |> assign(:selected_category, nil)
+         |> assign(:filtered_shops, nil)
+         |> assign(:products_by_category, nil)
+         |> assign(:search_query, decoded_query)
+         |> assign(:search_results, search_results)
+         |> assign(:search_loading, false)}
 
-      {:noreply,
-       socket
-       |> assign(:selected_category, nil)
-       |> assign(:filtered_shops, nil)
-       |> assign(:products_by_category, products_by_category)}
+      category && category != "" ->
+        # Filter mode: show shops in this category
+        filtered_shops = fetch_shops_by_category(category)
+
+        {:noreply,
+         socket
+         |> assign(:selected_category, category)
+         |> assign(:filtered_shops, filtered_shops)
+         |> assign(:products_by_category, nil)
+         |> assign(:search_results, [])}
+
+      true ->
+        # Default mode: show products by category
+        products_by_category = fetch_products_by_categories()
+
+        {:noreply,
+         socket
+         |> assign(:selected_category, nil)
+         |> assign(:filtered_shops, nil)
+         |> assign(:products_by_category, products_by_category)
+         |> assign(:search_results, [])}
     end
   end
 
@@ -117,6 +139,26 @@ defmodule SmartKioskWeb.HomeLive do
 
   def handle_event("clear_filter", _params, socket) do
     {:noreply, push_patch(socket, to: ~p"/")}
+  end
+
+  def handle_event("search", %{"query" => query}, socket) do
+    if String.trim(query) == "" do
+      {:noreply,
+        socket
+        |> assign(:search_query, "")
+        |> assign(:search_results, [])
+        |> assign(:search_loading, false)}
+    else
+      {:noreply,
+        socket
+        |> assign(:search_query, query)
+        |> assign(:search_loading, true)
+        |> push_patch(to: ~p"/?search=#{URI.encode(query)}")}
+    end
+  end
+
+  def handle_event("search_submit", %{"query" => query}, socket) do
+    handle_event("search", %{"query" => query}, socket)
   end
 
   # Helper functions
@@ -168,4 +210,40 @@ defmodule SmartKioskWeb.HomeLive do
     )
     |> Repo.all()
   end
+
+  defp perform_search(query) when is_binary(query) do
+    search_term = "%#{query}%"
+
+    # Search products
+    products =
+      from(p in Product,
+        join: s in assoc(p, :shop),
+        where: ilike(p.name, ^search_term) or ilike(p.description, ^search_term),
+        where: p.status == :active,
+        where: p.stock_qty > 0,
+        where: s.status == :active,
+        preload: [:shop, :images],
+        limit: 10,
+        order_by: [desc: p.inserted_at]
+      )
+      |> Repo.all()
+      |> Enum.map(&Map.put(&1, :type, :product))
+
+    # Search shops
+    shops =
+      from(s in Shop,
+        where: ilike(s.name, ^search_term) or ilike(s.description, ^search_term),
+        where: s.status == :active,
+        limit: 5,
+        order_by: [desc: s.inserted_at]
+      )
+      |> Repo.all()
+      |> Enum.map(&Map.put(&1, :type, :shop))
+
+    # Combine and sort results
+    (products ++ shops)
+    |> Enum.sort_by(& &1.inserted_at, :desc)
+  end
+
+  defp perform_search(_), do: []
 end

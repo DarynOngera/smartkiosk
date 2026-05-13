@@ -81,9 +81,9 @@ defmodule SmartKioskWeb.Router do
         SmartKioskWeb.ShopAuth,
         {SmartKioskWeb.ShopAuth, :require_shop}
       ] do
-      live "/inventory", InventoryLive.Index, :index
-      live "/inventory/new", InventoryLive.New, :new
-      live "/inventory/:id/edit", InventoryLive.Edit, :edit
+      live "/inventory", Inventory.InventoryLive.Index, :index
+      live "/inventory/new", Inventory.InventoryLive.New, :new
+      live "/inventory/:id/edit", Inventory.InventoryLive.Edit, :edit
       live "/orders", OrdersLive.Index, :index
       live "/orders/:id", OrdersLive.Show, :show
       live "/pos", POSLive.Index, :index
@@ -94,15 +94,12 @@ defmodule SmartKioskWeb.Router do
   end
 
   # ── Platform admin ────────────────────────────────────────────────────────────
-  scope "/admin", SmartKioskWeb.Admin do
+  scope "/admin", SmartKioskWeb do
     pipe_through [:browser, :require_auth, :require_admin]
 
     live_session :admin,
-      on_mount: [{SmartKioskWeb.UserAuth, :ensure_authenticated}, SmartKioskWeb.AdminAuth] do
-      live "/", AdminDashboardLive, :index
-      live "/shops", AdminShopsLive.Index, :index
-      live "/shops/:id", AdminShopsLive.Show, :show
-      live "/users", AdminUsersLive.Index, :index
+      on_mount: [{SmartKioskWeb.UserAuth, :ensure_authenticated}] do
+      live "/", AdminLive, :index
     end
   end
 

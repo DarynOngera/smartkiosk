@@ -9,7 +9,9 @@ defmodule SmartKioskWeb.StorefrontLive.Index do
     session_id = get_connect_params(socket)["session_id"]
 
     if shop do
-      products = Catalogue.list_products(shop, status: :active)
+      products =
+        Catalogue.list_products(shop, status: :active)
+        |> SmartKioskCore.Repo.preload(:images)
 
       {:ok,
        assign(socket,
