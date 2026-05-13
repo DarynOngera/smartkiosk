@@ -24,7 +24,12 @@ defmodule SmartKioskWeb.SearchBar do
   def search_bar(assigns) do
     ~H"""
     <div class="relative max-w-2xl mx-auto w-full">
-      <form phx-target={@phx_target} phx-change={@phx_change} phx-submit={@phx_submit} class="relative">
+      <form
+        phx-target={@phx_target}
+        phx-change={@phx_change}
+        phx-submit={@phx_submit}
+        class="relative"
+      >
         <div class="relative">
           <input
             type="text"
@@ -62,7 +67,8 @@ defmodule SmartKioskWeb.SearchBar do
       <%= if @loading do %>
         <div class="p-6 text-center">
           <div class="inline-flex items-center gap-2">
-            <div class="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+            <div class="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin">
+            </div>
             <span class="text-slate-400">Searching...</span>
           </div>
         </div>

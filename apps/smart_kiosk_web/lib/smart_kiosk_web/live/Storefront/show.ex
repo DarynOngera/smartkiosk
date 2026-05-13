@@ -2,11 +2,12 @@ defmodule SmartKioskWeb.StorefrontLive.Show do
   use SmartKioskWeb, :live_view
 
   alias SmartKioskCore.Accounts
+  alias SmartKioskCore.Shops
   alias SmartKioskCore.Catalogue
   alias SmartKioskCore.Cart
 
   def mount(%{"slug" => slug, "id" => id}, _session, socket) do
-    shop = Accounts.get_shop_by_slug(slug)
+    shop = Shops.get_shop_by_slug(slug)
     session_id = get_connect_params(socket)["session_id"]
 
     if shop do

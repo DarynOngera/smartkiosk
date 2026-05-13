@@ -1,28 +1,33 @@
-defmodule SmartKioskWeb.Inventory.New do
+defmodule SmartKioskWeb.UI.Inventory.InventoryLive.New do
   alias SmartKioskCore.Catalogue
   alias SmartKioskCore.Schemas.Product
   use SmartKioskWeb, :live_view
 
   def mount(_params, _session, socket) do
     shop = socket.assigns.current_shop
-
-    changeset = Product.changeset(%Product{}, %{})
+    changeset = Product.changeset(%Product{shop_id: shop.id}, %{})
+    form = to_form(changeset, as: "product")
+    categories = Catalogue.list_categories()
 
     {:ok,
      socket
      |> assign(:page_title, "New Product")
      |> assign(:shop, shop)
-     |> assign(:changeset, changeset)
-     |> assign(:categories, Catalogue.list_categories())}
+     |> assign(:form, form)
+     |> assign(:categories, categories)
+     |> allow_upload(:images, accept: ~w(.jpg .jpeg .png), max_entries: 5)}
   end
 
   def handle_event("validate", %{"product" => product_params}, socket) do
+    shop = socket.assigns.shop
+
     changeset =
-      %Product{}
+      %Product{shop_id: shop.id}
       |> Product.changeset(product_params)
       |> Map.put(:action, :validate)
 
-    {:noreply, assign(socket, :changeset, changeset)}
+    form = to_form(changeset, as: "product")
+    {:noreply, assign(socket, form: form)}
   end
 
   def handle_event("save", %{"product" => product_params}, socket) do
@@ -35,8 +40,9 @@ defmodule SmartKioskWeb.Inventory.New do
          |> put_flash(:info, "Product created successfully!")
          |> push_navigate(to: ~p"/inventory")}
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, :changeset, changeset)}
+      {:error, changeset} ->
+        form = to_form(changeset, as: "product", action: :insert)
+        {:noreply, assign(socket, form: form)}
     end
   end
 

@@ -62,7 +62,6 @@ defmodule SmartKioskWeb.UserSettingsLive do
       case params do
         %{"email" => %{} = nested} -> nested["email"]
         %{"email" => email} -> email
-        %{"email" => _, "current_password" => _} -> params["email"]
       end
 
     changeset = Accounts.change_user_email(user, %{"email" => email_value})
@@ -82,9 +81,6 @@ defmodule SmartKioskWeb.UserSettingsLive do
 
         %{"email" => email, "current_password" => password} ->
           {email, password || ""}
-
-        %{"email" => _, "current_password" => _} ->
-          {params["email"], params["current_password"] || ""}
       end
 
     case Accounts.update_user_email(user, %{"email" => email_value}, password) do

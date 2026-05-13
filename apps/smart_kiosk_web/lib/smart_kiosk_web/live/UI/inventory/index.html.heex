@@ -6,7 +6,10 @@
           <h1 class="text-3xl font-bold">Inventory</h1>
           <p class="text-slate-400 mt-1">Manage products for <%= @current_shop.name %></p>
         </div>
-        <.link navigate={~p"/inventory/new"} class="px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+        <.link
+          navigate={~p"/inventory/new"}
+          class="px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-xl text-sm font-semibold transition flex items-center gap-2"
+        >
           <.icon name="hero-plus" class="w-4 h-4" /> Add Product
         </.link>
       </div>
@@ -30,7 +33,11 @@
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-violet-500/20 to-indigo-500/10 rounded-lg flex items-center justify-center">
                       <%= if product.images != [] and List.first(product.images) do %>
-                        <img src={List.first(product.images).url} alt={product.name} class="w-full h-full object-cover rounded-lg" />
+                        <img
+                          src={List.first(product.images).url}
+                          alt={product.name}
+                          class="w-full h-full object-cover rounded-lg"
+                        />
                       <% else %>
                         <.icon name="hero-cube" class="w-5 h-5 text-violet-400" />
                       <% end %>
@@ -48,8 +55,10 @@
                 <td class="px-6 py-4">
                   <span class={[
                     "px-2 py-1 rounded-full text-xs font-medium",
-                    product.stock_qty > product.low_stock_threshold && "bg-green-500/20 text-green-400",
-                    product.stock_qty > 0 && product.stock_qty <= product.low_stock_threshold && "bg-yellow-500/20 text-yellow-400",
+                    product.stock_qty > product.low_stock_threshold &&
+                      "bg-green-500/20 text-green-400",
+                    product.stock_qty > 0 && product.stock_qty <= product.low_stock_threshold &&
+                      "bg-yellow-500/20 text-yellow-400",
                     product.stock_qty == 0 && "bg-red-500/20 text-red-400"
                   ]}>
                     <%= product.stock_qty %>
@@ -77,7 +86,7 @@
                       <.icon name="hero-pencil" class="w-4 h-4" />
                     </button>
                     <button
-                      phx-click="remove_product"
+                      phx-click="archive_product"
                       phx-value-product_id={product.id}
                       class="p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors"
                       title="Archive"
@@ -94,8 +103,8 @@
 
       <%= if @edit_product do %>
         <.live_component
-          module={SmartKioskWeb.Inventory.EditModal}
-          id="edit-modal"
+          module={SmartKioskWeb.UI.Inventory.InventoryLive.EditModal}
+          id={"edit-product-#{@edit_product.id}"}
           product={@edit_product}
           shop={@current_shop}
         />
@@ -103,4 +112,3 @@
     </div>
   </div>
 </Layouts.app>
- 

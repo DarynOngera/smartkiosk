@@ -5,7 +5,6 @@ defmodule SmartKioskWeb.CartLive do
   use SmartKioskWeb, :live_view
 
   alias SmartKioskCore.Cart
-  import SmartKioskWeb.Navbar
 
   def mount(_params, _session, socket) do
     current_user = socket.assigns[:current_user]

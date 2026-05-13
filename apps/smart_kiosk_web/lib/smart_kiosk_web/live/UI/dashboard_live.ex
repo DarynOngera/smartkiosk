@@ -5,7 +5,6 @@ defmodule SmartKioskWeb.UI.DashboardLive do
   use SmartKioskWeb, :live_view
 
   alias SmartKioskCore.Catalogue
-  import SmartKioskWeb.Navbar
   import SmartKioskWeb.Components.ProductCard
 
   def mount(_params, _session, socket) do

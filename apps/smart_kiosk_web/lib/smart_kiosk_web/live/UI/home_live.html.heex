@@ -3,11 +3,9 @@
     <%!-- Search Bar --%>
     <div class="px-4 sm:px-6 lg:px-8 py-6">
       <div class="relative">
-        <.search_bar 
-          value={@search_query}
-        />
+        <.search_bar value={@search_query} />
         <%= if @search_query != "" do %>
-          <.search_results 
+          <.search_results
             results={@search_results}
             loading={@search_loading}
             query={@search_query}
@@ -21,121 +19,125 @@
       <%!-- Sidebar Component --%>
       <.sidebar shop_categories={@shop_categories} selected_category={@selected_category} />
 
-    <%!-- Center Content --%>
-    <main class="flex-1 min-h-[calc(100vh-8rem)]">
-      <%= if @filtered_shops do %>
-        <%!-- Filtered Shops View --%>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div class="flex items-center gap-4 mb-8">
-            <button
-              phx-click="clear_filter"
-              class="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
-            >
-              <.icon name="hero-arrow-left" class="w-5 h-5" />
-            </button>
-            <h1 class="text-2xl font-bold">
-              <%= selected_category_label(@shop_categories, @selected_category) %>
-            </h1>
-            <span class="px-3 py-1 bg-violet-500/20 text-violet-400 text-sm font-medium rounded-full">
-              <%= length(@filtered_shops) %> shops
-            </span>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <%= for shop <- @filtered_shops do %>
-              <a
-                href={~p"/shop/#{shop.slug}"}
-                class="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/30 hover:bg-white/[0.07] transition-all"
+      <%!-- Center Content --%>
+      <main class="flex-1 min-h-[calc(100vh-8rem)]">
+        <%= if @filtered_shops do %>
+          <%!-- Filtered Shops View --%>
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex items-center gap-4 mb-8">
+              <button
+                phx-click="clear_filter"
+                class="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
               >
-                <div class="h-32 bg-gradient-to-br from-violet-500/20 to-indigo-500/10 flex items-center justify-center">
-                  <.icon name="hero-storefront" class="w-12 h-12 text-violet-400/50" />
-                </div>
-                <div class="p-4">
-                  <h3 class="font-semibold text-white group-hover:text-violet-400 transition-colors">
-                    <%= shop.name %>
-                  </h3>
-                  <p class="text-sm text-slate-500 mt-1">
-                    <%= Shop.category_labels()[shop.category] || "Shop" %>
-                  </p>
-                  <%= if shop.description do %>
-                    <p class="text-xs text-slate-600 mt-2 line-clamp-2">
-                      <%= shop.description %>
-                    </p>
-                  <% end %>
-                </div>
-              </a>
-            <% end %>
-          </div>
-        </div>
-      <% else %>
-        <%!-- Products by Category View --%>
-        <%= if @products_by_category do %>
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-            <%= for {category, products} <- @products_by_category do %>
-              <section>
-                <div class="flex items-center justify-between mb-6">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-violet-500/10 rounded-xl flex items-center justify-center">
-                      <.icon name={category_icon(category)} class="w-5 h-5 text-violet-400" />
-                    </div>
-                    <h2 class="text-xl font-bold">
-                      <%= @shop_categories[category] || format_category_name(category) %>
-                    </h2>
-                  </div>
-                  <button
-                    phx-click="filter_category"
-                    phx-value-category={category}
-                    class="text-sm text-violet-400 hover:text-violet-300 font-medium flex items-center gap-1 transition-colors"
-                  >
-                    View All <.icon name="hero-arrow-right" class="w-4 h-4" />
-                  </button>
-                </div>
+                <.icon name="hero-arrow-left" class="w-5 h-5" />
+              </button>
+              <h1 class="text-2xl font-bold">
+                <%= selected_category_label(@shop_categories, @selected_category) %>
+              </h1>
+              <span class="px-3 py-1 bg-violet-500/20 text-violet-400 text-sm font-medium rounded-full">
+                <%= length(@filtered_shops) %> shops
+              </span>
+            </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  <%= for product <- products do %>
-                    <div class="group bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-violet-500/30 hover:bg-white/[0.07] transition-all">
-                      <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center relative overflow-hidden">
-                        <%= if product.images != [] && List.first(product.images) do %>
-                          <img
-                            src={List.first(product.images).url}
-                            alt={product.name}
-                            class="w-full h-full object-cover"
-                          />
-                        <% else %>
-                          <.icon name="hero-photo" class="w-12 h-12 text-slate-600" />
-                        <% end %>
-                        <%= if product.stock_qty == 0 do %>
-                          <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                            <span class="px-3 py-1 bg-red-500/80 text-white text-xs font-bold rounded-full">
-                              Out of Stock
-                            </span>
-                          </div>
-                        <% end %>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <%= for shop <- @filtered_shops do %>
+                <a
+                  href={~p"/shop/#{shop.slug}"}
+                  class="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/30 hover:bg-white/[0.07] transition-all"
+                >
+                  <div class="h-32 bg-gradient-to-br from-violet-500/20 to-indigo-500/10 flex items-center justify-center">
+                    <.icon name="hero-storefront" class="w-12 h-12 text-violet-400/50" />
+                  </div>
+                  <div class="p-4">
+                    <h3 class="font-semibold text-white group-hover:text-violet-400 transition-colors">
+                      <%= shop.name %>
+                    </h3>
+                    <p class="text-sm text-slate-500 mt-1">
+                      <%= Shop.category_labels()[shop.category] || "Shop" %>
+                    </p>
+                    <%= if shop.description do %>
+                      <p class="text-xs text-slate-600 mt-2 line-clamp-2">
+                        <%= shop.description %>
+                      </p>
+                    <% end %>
+                  </div>
+                </a>
+              <% end %>
+            </div>
+          </div>
+        <% else %>
+          <%!-- Products by Category View --%>
+          <%= if @products_by_category do %>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+              <%= for {category, products} <- @products_by_category do %>
+                <section>
+                  <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 bg-violet-500/10 rounded-xl flex items-center justify-center">
+                        <.icon name={category_icon(category)} class="w-5 h-5 text-violet-400" />
                       </div>
-                      <div class="p-3">
-                        <h4 class="text-sm font-medium text-white truncate"><%= product.name %></h4>
-                        <p class="text-xs text-slate-500 truncate"><%= product.shop.name %></p>
-                        <div class="flex items-center justify-between mt-2">
-                          <span class="text-violet-400 font-bold">Ksh <%= product.price %></span>
-                          <%= if product.stock_qty > 0 do %>
-                            <button
-                              phx-click="add_to_cart"
-                              phx-value-product_id={product.id}
-                              class="p-1.5 bg-violet-500/20 hover:bg-violet-500 text-violet-400 hover:text-white rounded-lg transition-all"
-                            >
-                              <.icon name="hero-plus" class="w-4 h-4" />
-                            </button>
+                      <h2 class="text-xl font-bold">
+                        <%= @shop_categories[category] || format_category_name(category) %>
+                      </h2>
+                    </div>
+                    <button
+                      phx-click="filter_category"
+                      phx-value-category={category}
+                      class="text-sm text-violet-400 hover:text-violet-300 font-medium flex items-center gap-1 transition-colors"
+                    >
+                      View All <.icon name="hero-arrow-right" class="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <%= for product <- products do %>
+                      <div class="group bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-violet-500/30 hover:bg-white/[0.07] transition-all">
+                        <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center relative overflow-hidden">
+                          <%= if product.images != [] && List.first(product.images) do %>
+                            <img
+                              src={List.first(product.images).url}
+                              alt={product.name}
+                              class="w-full h-full object-cover"
+                            />
+                          <% else %>
+                            <.icon name="hero-photo" class="w-12 h-12 text-slate-600" />
+                          <% end %>
+                          <%= if product.stock_qty == 0 do %>
+                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                              <span class="px-3 py-1 bg-red-500/80 text-white text-xs font-bold rounded-full">
+                                Out of Stock
+                              </span>
+                            </div>
                           <% end %>
                         </div>
+                        <div class="p-3">
+                          <h4 class="text-sm font-medium text-white truncate">
+                            <%= product.name %>
+                          </h4>
+                          <p class="text-xs text-slate-500 truncate"><%= product.shop.name %></p>
+                          <div class="flex items-center justify-between mt-2">
+                            <span class="text-violet-400 font-bold">
+                              Ksh <%= product.price %>
+                            </span>
+                            <%= if product.stock_qty > 0 do %>
+                              <button
+                                phx-click="add_to_cart"
+                                phx-value-product_id={product.id}
+                                class="p-1.5 bg-violet-500/20 hover:bg-violet-500 text-violet-400 hover:text-white rounded-lg transition-all"
+                              >
+                                <.icon name="hero-plus" class="w-4 h-4" />
+                              </button>
+                            <% end %>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  <% end %>
-                </div>
-              </section>
-            <% end %>
-          </div>
+                    <% end %>
+                  </div>
+                </section>
+              <% end %>
+            </div>
+          <% end %>
         <% end %>
-      <% end %>
       </main>
     </div>
   </div>

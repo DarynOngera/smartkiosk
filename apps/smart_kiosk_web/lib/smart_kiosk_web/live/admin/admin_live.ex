@@ -2,7 +2,6 @@ defmodule SmartKioskWeb.AdminLive do
   use SmartKioskWeb, :live_view
 
   alias SmartKioskCore.Accounts
-  import SmartKioskWeb.Navbar
 
   @impl true
   def mount(_params, _session, socket) do
