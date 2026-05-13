@@ -1,70 +1,70 @@
-<div class="min-h-screen bg-[#0B0F1A]">
-  <.navbar current_user={@current_user} user_shop={@current_shop} cart_count={0} />
+<Layouts.app flash={@flash} current_path="/dashboard" current_user={@current_user}>
+  <div class="min-h-screen bg-[#0B0F1A]">
+    <div class="p-6 lg:p-10">
+      <div class="max-w-7xl mx-auto">
+        <header class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h1 class="text-3xl font-bold text-white tracking-tight">
+              Welcome back, <%= @current_user.full_name || (@current_shop && @current_shop.name) ||
+                "User" %>
+            </h1>
+            <p class="text-slate-500 mt-2">
+              <%= if @current_shop do %>
+                Managing
+                <span class="text-violet-400 font-semibold"><%= @current_shop.name %></span>
+              <% else %>
+                Your personal shopping activity and account overview.
+              <% end %>
+            </p>
+          </div>
 
-  <div class="p-6 lg:p-10">
-    <div class="max-w-7xl mx-auto">
-      <header class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 class="text-3xl font-bold text-white tracking-tight">
-            Welcome back, <%= @current_user.full_name || (@current_shop && @current_shop.name) ||
-              "User" %>
-          </h1>
-          <p class="text-slate-500 mt-2">
+          <div class="flex items-center gap-3">
             <%= if @current_shop do %>
-              Managing
-              <span class="text-violet-400 font-semibold"><%= @current_shop.name %></span>
+              <.link
+                navigate="/pos"
+                class="px-5 py-2.5 bg-violet-500 hover:bg-violet-400 text-white rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/20 flex items-center gap-2"
+              >
+                <.icon name="hero-calculator" class="w-5 h-5" /> Soft POS
+              </.link>
             <% else %>
-              Your personal shopping activity and account overview.
+              <.link
+                navigate="/"
+                class="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold transition-all border border-white/10 flex items-center gap-2"
+              >
+                <.icon name="hero-shopping-cart" class="w-5 h-5" /> Browse Shops
+              </.link>
             <% end %>
-          </p>
-        </div>
+          </div>
+        </header>
 
-        <div class="flex items-center gap-3">
-          <%= if @current_shop do %>
+        <%!-- Dashboard Content --%>
+        <%= if @current_shop do %>
+          <.merchant_view
+            sales_today={@sales_today}
+            inventory_count={@inventory_count}
+            pending_orders={@pending_orders}
+            products={@products}
+          />
+        <% else %>
+          <div class="bg-white/5 border border-white/10 rounded-3xl p-12 text-center mb-10">
+            <h2 class="text-2xl font-bold text-white mb-4">Ready to start selling?</h2>
+            <p class="text-slate-400 mb-8 max-w-md mx-auto">
+              Create your shop today and start managing your inventory, orders, and sales in one place.
+            </p>
             <.link
-              navigate="/pos"
-              class="px-5 py-2.5 bg-violet-500 hover:bg-violet-400 text-white rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/20 flex items-center gap-2"
+              navigate="/create-shop"
+              class="px-8 py-3 bg-violet-500 hover:bg-violet-400 text-white rounded-xl font-bold transition-all"
             >
-              <.icon name="hero-calculator" class="w-5 h-5" /> Soft POS
+              Create Your Shop
             </.link>
-          <% else %>
-            <.link
-              navigate="/"
-              class="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold transition-all border border-white/10 flex items-center gap-2"
-            >
-              <.icon name="hero-shopping-cart" class="w-5 h-5" /> Browse Shops
-            </.link>
-          <% end %>
-        </div>
-      </header>
-
-      <%!-- Dashboard Content --%>
-      <%= if @current_shop do %>
-        <.merchant_view
-          sales_today={@sales_today}
-          inventory_count={@inventory_count}
-          pending_orders={@pending_orders}
-          products={@products}
-        />
-      <% else %>
-        <div class="bg-white/5 border border-white/10 rounded-3xl p-12 text-center mb-10">
-          <h2 class="text-2xl font-bold text-white mb-4">Ready to start selling?</h2>
-          <p class="text-slate-400 mb-8 max-w-md mx-auto">
-            Create your shop today and start managing your inventory, orders, and sales in one place.
-          </p>
-          <.link
-            navigate="/create-shop"
-            class="px-8 py-3 bg-violet-500 hover:bg-violet-400 text-white rounded-xl font-bold transition-all"
-          >
-            Create Your Shop
-          </.link>
-        </div>
-        <.customer_view
-          total_spent={@total_spent}
-          orders_count={@orders_count}
-          loyalty_points={@loyalty_points}
-        />
-      <% end %>
+          </div>
+          <.customer_view
+            total_spent={@total_spent}
+            orders_count={@orders_count}
+            loyalty_points={@loyalty_points}
+          />
+        <% end %>
+      </div>
     </div>
   </div>
-</div>
+</Layouts.app>

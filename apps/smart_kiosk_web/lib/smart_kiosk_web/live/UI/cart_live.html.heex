@@ -1,8 +1,7 @@
-<div class="min-h-screen bg-[#0B0F1A] text-white">
-  <.navbar current_user={@current_user} cart_count={@cart_count} />
-
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<Layouts.app flash={@flash} current_path="/cart" current_user={@current_user}>
+  <div class="min-h-screen bg-[#0B0F1A] text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <%!-- Cart Items --%>
       <div class="lg:col-span-2">
         <h1 class="text-3xl font-bold mb-8">Shopping Cart</h1>
@@ -26,8 +25,12 @@
             <%= for cart_item <- @cart_items do %>
               <div class="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
                 <%!-- Product Image/Placeholder --%>
-                <div class="w-20 h-20 bg-slate-800 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <.icon name="hero-shopping-bag" class="w-8 h-8 text-slate-600" />
+                <div class="w-20 h-20 bg-slate-800 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <%= if cart_item.product.images != [] and List.first(cart_item.product.images) do %>
+                    <img src={List.first(cart_item.product.images).url} alt={cart_item.product_name} class="w-20 h-20 rounded-xl object-cover"/>
+                  <% else %>
+                    <.icon name="hero-shopping-bag" class="w-8 h-8 text-slate-600" />
+                  <% end %>
                 </div>
 
                 <%!-- Product Info --%>
@@ -133,3 +136,4 @@
     </div>
   </div>
 </div>
+</Layouts.app>

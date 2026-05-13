@@ -202,6 +202,12 @@ defmodule SmartKioskCore.Accounts do
     Repo.all(Shop)
   end
 
+  # get shop by the id
+
+  def get_shop!(id) do
+    Repo.get_by(Shop, id: id)
+  end
+
   @doc "Gets a shop by name."
   def get_shop_by_name(name) when is_binary(name) do
     Repo.get_by(Shop, name: name)
@@ -211,8 +217,31 @@ defmodule SmartKioskCore.Accounts do
   def get_shop_for_user(%User{shop_id: nil}), do: nil
   def get_shop_for_user(%User{shop_id: shop_id}), do: Repo.get(Shop, shop_id)
 
+  @spec get_pending_status() :: any()
   @doc "Gets a shop by slug (used for public storefront URLs)."
   def get_shop_by_slug(slug), do: Repo.get_by(Shop, slug: slug, status: :active)
+
+  # =================for admin side =========================
+  # check for status:pending review
+  def get_pending_status do
+    Shop
+    |> where([s], s.status == :pending_review)
+    |> Repo.all()
+  end
+
+  # approve the shop
+  def approve_shop(%Shop{} = shop) do
+    shop
+    |> Ecto.Changeset.change(status: :active)
+    |> Repo.update()
+  end
+
+  # reget the status
+  def reject_shop(%Shop{} = shop) do
+    shop
+    |> Ecto.Changeset.change(status: :suspended)
+    |> Repo.update()
+  end
 
   # defp create_initial_subscription(shop) do
   #   %SmartKioskCore.Schemas.Subscription{}
