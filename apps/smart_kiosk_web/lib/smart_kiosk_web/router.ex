@@ -87,6 +87,7 @@ defmodule SmartKioskWeb.Router do
       live "/orders", OrdersLive.Index, :index
       live "/orders/:id", OrdersLive.Show, :show
       live "/pos", POSLive.Index, :index
+      live "/settings", SettingsLive.Index, :index
       live "/customers", CustomersLive.Index, :index
       live "/analytics", AnalyticsLive.Index, :index
       live "/campaigns", CampaignsLive.Index, :index

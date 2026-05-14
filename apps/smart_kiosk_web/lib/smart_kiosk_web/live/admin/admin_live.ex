@@ -1,15 +1,15 @@
 defmodule SmartKioskWeb.AdminLive do
   use SmartKioskWeb, :live_view
 
-  alias SmartKioskCore.Accounts
+  alias SmartKioskCore.Shops
 
   @impl true
   def mount(_params, _session, socket) do
     current_user = socket.assigns[:current_user]
-    current_shop = current_user && Accounts.get_shop_for_user(current_user)
+    current_shop = current_user && Shops.get_shop_for_user(current_user)
 
-    pending_approval = Accounts.get_pending_status()
-    shops = Accounts.list_shops()
+    pending_approval = Shops.get_pending_status()
+    shops = Shops.list_shops()
 
     # Calculate stats
     total_shops = length(shops)
@@ -27,6 +27,7 @@ defmodule SmartKioskWeb.AdminLive do
     # TODO: Accounts.list_hotspots()
     hotspots = []
 
+    
     {:ok,
      socket
      |> assign(:current_shop, current_shop)

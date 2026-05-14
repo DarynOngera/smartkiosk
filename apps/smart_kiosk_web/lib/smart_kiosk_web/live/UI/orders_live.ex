@@ -160,7 +160,7 @@ defmodule SmartKioskWeb.UI.OrdersLive.Index do
   defp status_bg_class(:cancelled), do: "bg-red-100 text-red-800"
 
   defp format_money(decimal) do
-    "$#{Decimal.to_string(decimal)}"
+    "KSH #{Decimal.to_string(decimal)}"
   end
 
   defp format_date(datetime) do
