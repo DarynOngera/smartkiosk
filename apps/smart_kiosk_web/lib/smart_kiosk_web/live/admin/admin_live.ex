@@ -27,6 +27,7 @@ defmodule SmartKioskWeb.AdminLive do
     # TODO: Accounts.list_hotspots()
     hotspots = []
 
+    
     {:ok,
      socket
      |> assign(:current_shop, current_shop)
