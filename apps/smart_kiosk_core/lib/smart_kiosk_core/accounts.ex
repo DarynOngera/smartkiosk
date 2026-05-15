@@ -205,6 +205,11 @@ defmodule SmartKioskCore.Accounts do
 
   # ── User profile ──────────────────────────────────────────────────────────────
 
+  @doc "Returns a changeset for updating the user's profile."
+  def change_user_profile(%User{} = user, attrs \\ %{}) do
+    User.profile_changeset(user, attrs)
+  end
+
   @doc "Updates user profile (name, phone, avatar)."
   def update_user_profile(%User{} = user, attrs) do
     user
