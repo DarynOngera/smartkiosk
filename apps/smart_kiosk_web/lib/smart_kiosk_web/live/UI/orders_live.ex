@@ -37,7 +37,7 @@ defmodule SmartKioskWeb.UI.OrdersLive.Index do
   @spec render(any()) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_shop}>
+    <Layouts.app flash={@flash} current_scope={@current_shop} current_user={@current_user} cart_count={@cart_count}>
       <div class="container mx-auto px-4 py-8">
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-3xl font-bold text-gray-900">Orders</h1>
@@ -213,7 +213,7 @@ defmodule SmartKioskWeb.UI.OrdersLive.Show do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_shop}>
+    <Layouts.app flash={@flash} current_scope={@current_shop} current_user={@current_user} cart_count={@cart_count}>
       <div class="container mx-auto px-4 py-8">
         <div class="mb-6">
           <.link navigate={~p"/orders"} class="text-blue-600 hover:text-blue-900 mb-4 inline-block">

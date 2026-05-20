@@ -46,7 +46,9 @@ defmodule SmartKioskWeb.Layouts do
     ~H"""
     <% current_path =
       @current_path || (assigns[:conn] && Phoenix.Controller.current_path(assigns.conn)) %>
-    <%= if current_path not in ["/login", "/register"] do %>
+
+    <%= if current_path not in ["/login", "/register", "/reset-password"] and
+            not String.starts_with?(current_path || "", "/reset-password/") do %>
       <.navbar current_user={@current_user} user_shop={@current_shop} cart_count={@cart_count} />
     <% end %>
 
@@ -54,8 +56,6 @@ defmodule SmartKioskWeb.Layouts do
       <.flash_group flash={@flash} />
       <%= render_slot(@inner_block) %>
     </main>
-
-    <.flash_group flash={@flash} />
     """
   end
 

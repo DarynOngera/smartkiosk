@@ -12,9 +12,9 @@ defmodule SmartKioskWeb.CartLive do
   alias SmartKioskCore.{Cart, Orders}
   import SmartKioskWeb.Navbar
 
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
     current_user = socket.assigns[:current_user]
-    session_id = get_connect_params(socket)["session_id"]
+    session_id = session["session_id"] || (get_connect_params(socket) || %{})["session_id"]
 
     # Get cart items
     cart_items = load_cart(current_user, session_id)
@@ -60,7 +60,7 @@ defmodule SmartKioskWeb.CartLive do
   end
 
   # checkout
-  def handle_event("checkout", %{"full_name" => name, "phone" => phone}, socket) do
+  def handle_event("checkout", %{"full_name" => name, "phone_number" => phone}, socket) do
     cart_items = socket.assigns.cart_items
 
     if cart_items == [] do

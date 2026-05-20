@@ -5,6 +5,7 @@ defmodule SmartKioskWeb.UI.DashboardLive do
   use SmartKioskWeb, :live_view
 
   alias SmartKioskCore.Catalogue
+  alias SmartKioskCore.Orders
   import SmartKioskWeb.Components.ProductCard
 
   def mount(_params, _session, socket) do
@@ -12,17 +13,22 @@ defmodule SmartKioskWeb.UI.DashboardLive do
     shop = socket.assigns.current_shop
 
     products = if shop, do: Catalogue.list_products(shop, limit: 10), else: []
+    pending = if shop, do: Orders.get_pending_orders(shop), else: []
 
-    # In a real app, you'd fetch stats/data here
     socket =
       if shop do
+        if connected?(socket) do
+          Phoenix.PubSub.subscribe(SmartKiosk.PubSub, "shop:#{shop.id}:inventory")
+        end
+
         # Merchant Stats
         socket
         |> assign(:page_title, "Merchant Dashboard")
         |> assign(:sales_today, "KES 0.00")
         |> assign(:inventory_count, Catalogue.count_products(shop))
-        |> assign(:pending_orders, 0)
+        |> assign(:pending_orders, pending |> Enum.count())
         |> assign(:products, products)
+        |> assign(:low_stock_products, Catalogue.list_low_stock_products(shop))
       else
         # Customer Stats
         socket
@@ -33,6 +39,12 @@ defmodule SmartKioskWeb.UI.DashboardLive do
       end
 
     {:ok, socket}
+  end
+
+  def handle_info({:low_stock, _product}, socket) do
+    shop = socket.assigns.current_shop
+
+    {:noreply, assign(socket, :low_stock_products, Catalogue.list_low_stock_products(shop))}
   end
 
   def merchant_view(assigns) do
@@ -116,6 +128,35 @@ defmodule SmartKioskWeb.UI.DashboardLive do
           </.link>
         </div>
       </div>
+    </div>
+
+    <div class="mt-8 bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-white">Low Stock Alerts</h2>
+        <span class="text-sm text-slate-400"><%= length(@low_stock_products) %> items</span>
+      </div>
+
+      <%= if @low_stock_products == [] do %>
+        <div class="text-slate-500 text-sm">All good — no products are below their threshold.</div>
+      <% else %>
+        <div class="divide-y divide-white/10">
+          <div
+            :for={product <- @low_stock_products}
+            class="py-3 flex items-center justify-between gap-4"
+          >
+            <div class="min-w-0">
+              <div class="font-medium text-white truncate"><%= product.name %></div>
+              <div class="text-xs text-slate-500 truncate"><%= product.sku || "No SKU" %></div>
+            </div>
+            <div class="shrink-0 text-right">
+              <div class="text-sm font-semibold text-amber-300">
+                <%= product.stock_qty %> / <%= product.low_stock_threshold %>
+              </div>
+              <div class="text-xs text-slate-500">in stock</div>
+            </div>
+          </div>
+        </div>
+      <% end %>
     </div>
     """
   end

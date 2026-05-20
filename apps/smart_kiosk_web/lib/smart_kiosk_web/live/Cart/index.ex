@@ -3,10 +3,9 @@ defmodule SmartKioskWeb.CartLive.Index do
 
   alias SmartKioskCore.Cart
 
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
     current_user = socket.assigns[:current_user]
-    # Assuming session_id is passed in params
-    session_id = get_connect_params(socket)["session_id"]
+    session_id = session["session_id"] || (get_connect_params(socket) || %{})["session_id"]
 
     # Calculate initial cart count
     cart_count =

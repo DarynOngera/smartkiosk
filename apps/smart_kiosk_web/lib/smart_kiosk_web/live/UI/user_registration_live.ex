@@ -5,6 +5,7 @@ defmodule SmartKioskWeb.UserRegistrationLive do
   use SmartKioskWeb, :live_view
 
   alias SmartKioskCore.Accounts
+  alias SmartKioskCore.Shops
   alias SmartKioskCore.Schemas.User
 
   def render(assigns) do
@@ -330,7 +331,7 @@ defmodule SmartKioskWeb.UserRegistrationLive do
   end
 
   def mount(_params, _session, socket) do
-    changeset = Accounts.change_registration(%{})
+    changeset = Shops.change_registration(%{})
 
     category_options =
       SmartKioskCore.Schemas.Shop.category_labels()
@@ -369,7 +370,7 @@ defmodule SmartKioskWeb.UserRegistrationLive do
         "plan" => "kiosk"
       }
 
-      case Accounts.register_shop_owner(shop_attrs, user_attrs) do
+      case Shops.register_shop_owner(shop_attrs, user_attrs) do
         {:ok, _shop, _user} ->
           {:noreply, put_flash(socket, :info, "Shop created!") |> redirect(to: ~p"/login")}
 

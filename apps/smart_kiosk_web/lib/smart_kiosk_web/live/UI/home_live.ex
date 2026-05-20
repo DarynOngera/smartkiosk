@@ -9,6 +9,7 @@ defmodule SmartKioskWeb.HomeLive do
   alias SmartKioskCore.Accounts
   alias SmartKioskCore.Shops
   alias SmartKioskCore.Cart
+  import SmartKioskWeb.Navbar
   import SmartKioskWeb.Sidebar
   import SmartKioskWeb.SearchBar
   import Ecto.Query
@@ -16,17 +17,23 @@ defmodule SmartKioskWeb.HomeLive do
   @featured_categories [
     {:electronics, "Electronics"},
     {:groceries, "Groceries"},
-    {:fruits, "Fresh Fruits"},
+    {:fruits, "Fruits"},
     {:vegetables, "Vegetables"},
     {:bakery, "Bakery"},
     {:restaurant, "Restaurants"},
     {:pharmacy, "Pharmacy"},
-    {:cosmetics, "Cosmetics"}
+    {:cosmetics, "Cosmetics"},
+    {:hardware, "Hardware"},
+    {:furniture, "Furniture"},
+    {:services, "Services"},
+    {:textiles, "Textiles"},
+    {:garage, "Garage"}
+
   ]
 
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
     current_user = socket.assigns[:current_user]
-    session_id = get_connect_params(socket)["session_id"]
+    session_id = session["session_id"] || (get_connect_params(socket) || %{})["session_id"]
 
     # Fetch user's shop if they have one assigned
     user_shop =
@@ -67,44 +74,32 @@ defmodule SmartKioskWeb.HomeLive do
 
   def handle_params(params, _uri, socket) do
     category = params["category"]
-    search_query = params["search"]
 
-    cond do
-      search_query && search_query != "" ->
-        # Search mode: show search results
-        decoded_query = URI.decode(search_query)
-        search_results = perform_search(decoded_query)
+    if category && category != "" do
+      # Filter mode: show shops in this category
+      filtered_shops = fetch_shops_by_category(category)
 
-        {:noreply,
-         socket
-         |> assign(:selected_category, nil)
-         |> assign(:filtered_shops, nil)
-         |> assign(:products_by_category, nil)
-         |> assign(:search_query, decoded_query)
-         |> assign(:search_results, search_results)
-         |> assign(:search_loading, false)}
+      {:noreply,
+       socket
+       |> assign(:selected_category, String.to_existing_atom(category))
+       |> assign(:filtered_shops, filtered_shops)
+       |> assign(:search_query, "")}
+    else
+      # Home mode: show products by category
+      {:noreply,
+       socket
+       |> assign(:selected_category, nil)
+       |> assign(:filtered_shops, nil)
+       |> assign(:search_query, "")}
+    end
+  end
 
-      category && category != "" ->
-        # Filter mode: show shops in this category
-        filtered_shops = fetch_shops_by_category(category)
-
-        {:noreply,
-         socket
-         |> assign(:selected_category, category)
-         |> assign(:filtered_shops, filtered_shops)
-         |> assign(:products_by_category, nil)
-         |> assign(:search_results, [])}
-
-      true ->
-        # Default mode: show products by category
-        products_by_category = fetch_products_by_categories()
-
-        {:noreply,
-         socket
-         |> assign(:selected_category, nil)
-         |> assign(:filtered_shops, nil)
-         |> assign(:products_by_category, products_by_category)
-         |> assign(:search_results, [])}
+  def handle_event("search", %{"query" => query}, socket) do
+    if String.length(query) >= 2 do
+      results = perform_search(query)
+      {:noreply, assign(socket, search_query: query, search_results: results)}
+    else
+      {:noreply, assign(socket, search_query: query, search_results: [])}
     end
   end
 
@@ -135,31 +130,13 @@ defmodule SmartKioskWeb.HomeLive do
       end
 
     {:noreply,
-     assign(socket, :cart_count, cart_count) |> put_flash(:info, "Added #{product.name} to cart")}
+     socket
+     |> assign(:cart_count, cart_count)
+     |> put_flash(:info, "Added #{product.name} to cart")}
   end
 
   def handle_event("clear_filter", _params, socket) do
     {:noreply, push_patch(socket, to: ~p"/")}
-  end
-
-  def handle_event("search", %{"query" => query}, socket) do
-    if String.trim(query) == "" do
-      {:noreply,
-       socket
-       |> assign(:search_query, "")
-       |> assign(:search_results, [])
-       |> assign(:search_loading, false)}
-    else
-      {:noreply,
-       socket
-       |> assign(:search_query, query)
-       |> assign(:search_loading, true)
-       |> push_patch(to: ~p"/?search=#{URI.encode(query)}")}
-    end
-  end
-
-  def handle_event("search_submit", %{"query" => query}, socket) do
-    handle_event("search", %{"query" => query}, socket)
   end
 
   # Helper functions
@@ -167,39 +144,31 @@ defmodule SmartKioskWeb.HomeLive do
   defp format_category_name(atom) do
     atom
     |> to_string()
-    |> String.replace("_", " ")
-    |> String.split(" ")
+    |> String.split("_")
     |> Enum.map(&String.capitalize/1)
     |> Enum.join(" ")
   end
 
-  defp selected_category_label(shop_categories, selected_category)
-       when is_map(shop_categories) and is_binary(selected_category) do
-    Enum.find_value(shop_categories, "Shops", fn {cat_key, label} ->
-      if Atom.to_string(cat_key) == selected_category, do: label, else: nil
-    end)
+  defp selected_category_label(categories, category) do
+    categories[category] || format_category_name(category)
   end
 
-  defp selected_category_label(_shop_categories, _selected_category), do: "Shops"
-
   defp fetch_products_by_categories do
-    @featured_categories
-    |> Enum.map(fn {category, _label} ->
+    Enum.map(@featured_categories, fn {cat_slug, _label} ->
       products =
-        from(p in Product,
-          join: s in assoc(p, :shop),
-          where: s.category == ^category,
-          where: p.status == :active,
-          where: p.stock_qty > 0,
-          preload: [:shop, :images],
-          limit: 5,
-          order_by: [desc: p.inserted_at]
-        )
+        Product
+        |> join(:inner, [p], s in Shop, on: s.id == p.shop_id)
+        |> where([p, s], s.category == ^cat_slug)
+        |> where([p, s], p.status == :active)
+        |> where([p, s], p.stock_qty > 0)
+        |> order_by([p, s], desc: p.inserted_at)
+        |> limit(5)
+        |> preload([:images, :shop])
         |> Repo.all()
 
-      {category, products}
+      {cat_slug, products}
     end)
-    |> Enum.reject(fn {_cat, products} -> products == [] end)
+    |> Enum.reject(fn {_cat, products} -> Enum.empty?(products) end)
   end
 
   defp fetch_shops_by_category(category) do
@@ -212,32 +181,24 @@ defmodule SmartKioskWeb.HomeLive do
     |> Repo.all()
   end
 
-  defp perform_search(query) when is_binary(query) do
-    search_term = "%#{query}%"
+  defp perform_search(query) do
+    term = "%#{query}%"
 
-    # Search products
+    # Search Products
     products =
-      from(p in Product,
-        join: s in assoc(p, :shop),
-        where: ilike(p.name, ^search_term) or ilike(p.description, ^search_term),
-        where: p.status == :active,
-        where: p.stock_qty > 0,
-        where: s.status == :active,
-        preload: [:shop, :images],
-        limit: 10,
-        order_by: [desc: p.inserted_at]
-      )
+      Product
+      |> where([p], ilike(p.name, ^term) or ilike(p.description, ^term) or ilike(p.sku, ^term))
+      |> where([p], p.status == :active)
+      |> preload([:images, :shop])
       |> Repo.all()
       |> Enum.map(&Map.put(&1, :type, :product))
 
-    # Search shops
+    # Search Shops
     shops =
-      from(s in Shop,
-        where: ilike(s.name, ^search_term) or ilike(s.description, ^search_term),
-        where: s.status == :active,
-        limit: 5,
-        order_by: [desc: s.inserted_at]
-      )
+      Shop
+      |> where([s], ilike(s.name, ^term) or ilike(s.description, ^term))
+      |> where([s], s.status == :active)
+      |> order_by([s], desc: s.inserted_at)
       |> Repo.all()
       |> Enum.map(&Map.put(&1, :type, :shop))
 
@@ -245,6 +206,4 @@ defmodule SmartKioskWeb.HomeLive do
     (products ++ shops)
     |> Enum.sort_by(& &1.inserted_at, :desc)
   end
-
-  defp perform_search(_), do: []
 end

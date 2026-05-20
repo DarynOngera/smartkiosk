@@ -11,7 +11,8 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.Index do
      socket
      |> assign(:products, products)
      |> assign(:page_title, "Inventory")
-     |> assign(:edit_product, nil)}
+     |> assign(:edit_product, nil)
+     |> assign(:adjust_stock_product, nil)}
   end
 
   @impl true
@@ -31,6 +32,14 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.Index do
       end
 
     {:noreply, assign(socket, edit_product: edit_product)}
+  end
+
+  @impl true
+  def handle_event("adjust_stock", %{"product_id" => product_id}, socket) do
+    shop = socket.assigns.current_shop
+    product = Catalogue.get_product!(shop, product_id)
+
+    {:noreply, assign(socket, :adjust_stock_product, product)}
   end
 
   # handlers for adding items to inventory
@@ -95,6 +104,23 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.Index do
      socket
      |> assign(:edit_product, nil)
      |> push_patch(to: ~p"/inventory")}
+  end
+
+  @impl true
+  def handle_info(:close_adjust_stock, socket) do
+    {:noreply, assign(socket, :adjust_stock_product, nil)}
+  end
+
+  @impl true
+  def handle_info({:stock_adjusted, _product_id}, socket) do
+    shop = socket.assigns.current_shop
+    products = Catalogue.list_products(shop)
+
+    {:noreply,
+     socket
+     |> assign(:products, products)
+     |> assign(:adjust_stock_product, nil)
+     |> put_flash(:info, "Stock updated successfully.")}
   end
 
   @impl true
