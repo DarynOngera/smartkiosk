@@ -2,6 +2,7 @@ defmodule SmartKioskWeb.UserSettingsLive do
   use SmartKioskWeb, :live_view
 
   alias SmartKioskCore.Accounts
+  alias SmartKioskWeb.LocalUploads
 
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
@@ -12,10 +13,15 @@ defmodule SmartKioskWeb.UserSettingsLive do
      |> assign(:tab, "profile")
      |> assign(
        :profile_form,
-       to_form(SmartKioskCore.Schemas.User.profile_changeset(user, %{}), as: "profile")
+       to_form(Accounts.change_user_profile(user), as: "profile")
      )
      |> assign(:email_form, to_form(%{"email" => user.email}))
-     |> assign(:password_form, to_form(%{}, as: :password))}
+     |> assign(:password_form, to_form(%{}, as: :password))
+     |> allow_upload(:avatar,
+       accept: ~w(.jpg .jpeg .png .webp),
+       max_entries: 1,
+       max_file_size: 5_000_000
+     )}
   end
 
   def handle_params(%{"tab" => tab}, _url, socket) do
@@ -28,7 +34,11 @@ defmodule SmartKioskWeb.UserSettingsLive do
 
   def handle_event("validate_profile", %{"profile" => params}, socket) do
     user = socket.assigns.current_user
-    changeset = Accounts.update_user_profile(user, params)
+
+    changeset =
+      user
+      |> Accounts.change_user_profile(params)
+      |> Map.put(:action, :validate)
 
     {:noreply,
      socket
@@ -37,18 +47,19 @@ defmodule SmartKioskWeb.UserSettingsLive do
 
   def handle_event("save_profile", %{"profile" => params}, socket) do
     user = socket.assigns.current_user
+    params = put_uploaded_avatar(socket, params)
 
     case Accounts.update_user_profile(user, params) do
-      {:ok, _user} ->
+      {:ok, user} ->
         {:noreply,
          socket
          |> put_flash(:info, "Profile updated successfully.")
+         |> assign(:current_user, user)
          |> assign(
            :profile_form,
-           to_form(SmartKioskCore.Schemas.User.profile_changeset(user, %{}), as: "profile")
+           to_form(Accounts.change_user_profile(user), as: "profile")
          )
-         |> push_navigate(to: ~p"/dashboard")
-        }
+         |> push_navigate(to: ~p"/dashboard")}
 
       {:error, changeset} ->
         {:noreply,
@@ -150,6 +161,13 @@ defmodule SmartKioskWeb.UserSettingsLive do
          socket
          |> put_flash(:error, "Email change link is invalid or has expired.")
          |> push_navigate(to: ~p"/users/settings?tab=email")}
+    end
+  end
+
+  defp put_uploaded_avatar(socket, params) do
+    case LocalUploads.consume(socket, :avatar, "avatars") do
+      [avatar_url] -> Map.put(params, "avatar_url", avatar_url)
+      [] -> params
     end
   end
 end

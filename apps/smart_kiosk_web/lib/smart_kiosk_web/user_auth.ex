@@ -117,6 +117,31 @@ defmodule SmartKioskWeb.UserAuth do
     {:cont, mount_current_user(socket, session)}
   end
 
+  def on_mount(:load_cart_count, _params, session, socket) do
+    current_user = socket.assigns[:current_user]
+    
+    # Try to get session_id from session first (standard HTTP)
+    session_id = session["session_id"]
+    
+    # If not in session, it might be in connect_params (WebSocket)
+    session_id = session_id || (Phoenix.LiveView.get_connect_params(socket) || %{})["session_id"]
+
+    cart_count =
+      cond do
+        current_user -> 
+          SmartKioskCore.Cart.get_user_cart_count(current_user)
+        session_id -> 
+          SmartKioskCore.Cart.get_session_cart_count(session_id)
+        true -> 
+          0
+      end
+
+    {:cont, 
+     socket 
+     |> Phoenix.Component.assign(:session_id, session_id)
+     |> Phoenix.Component.assign(:cart_count, cart_count)}
+  end
+
   # ---------------------------------------------------------------------------
   # Session helpers (used by UserSessionController)
   # ---------------------------------------------------------------------------

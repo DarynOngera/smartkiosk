@@ -1,6 +1,9 @@
 defmodule SmartKioskCore.Schemas.Shop do
   @moduledoc """
   The top-level tenant. One shop = one account.
+    @plans ~w(kiosk duka biashara enterprise)a
+  @plans ~w(kiosk duka biashara enterprise)a
+│  To resume this session: gemini --resume 838adb7f-f763-4dfd-83fc-bb6a34fe1bb8                                     │
 
   `plan` drives feature gating: :kiosk | :duka | :biashara | :enterprise
   `status` lifecycle:  :pending_review | :active | :suspended | :closed

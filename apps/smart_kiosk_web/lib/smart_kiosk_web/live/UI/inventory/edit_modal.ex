@@ -3,6 +3,7 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.EditModal do
 
   alias SmartKioskCore.Catalogue
   alias SmartKioskCore.Schemas.Product
+  alias SmartKioskWeb.LocalUploads
 
   def update(%{product: product, shop: shop}, socket) do
     changeset = Product.changeset(product, %{})
@@ -15,7 +16,8 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.EditModal do
      |> assign(:product, product)
      |> assign(:shop, shop)
      |> assign(:form, form)
-     |> assign(:category_options, category_options)}
+     |> assign(:category_options, category_options)
+     |> maybe_allow_image_upload()}
   end
 
   def handle_event("validate", %{"product" => product_params}, socket) do
@@ -33,7 +35,20 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.EditModal do
     product = socket.assigns.product
 
     case Catalogue.update_product(product, product_params) do
-      {:ok, _updated_product} ->
+      {:ok, updated_product} ->
+        existing_count = length(product.images || [])
+
+        socket
+        |> LocalUploads.consume(:images, "products")
+        |> Enum.with_index(existing_count)
+        |> Enum.each(fn {url, position} ->
+          Catalogue.add_product_image(updated_product, %{
+            url: url,
+            alt_text: updated_product.name,
+            position: position
+          })
+        end)
+
         send(self(), {:product_updated, product.id})
 
         {:noreply,
@@ -53,5 +68,17 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.EditModal do
      socket
      |> assign(:edit_product, nil)
      |> push_patch(to: ~p"/inventory")}
+  end
+
+  defp maybe_allow_image_upload(socket) do
+    if Map.has_key?(socket.assigns[:uploads] || %{}, :images) do
+      socket
+    else
+      allow_upload(socket, :images,
+        accept: ~w(.jpg .jpeg .png .webp),
+        max_entries: 5,
+        max_file_size: 5_000_000
+      )
+    end
   end
 end

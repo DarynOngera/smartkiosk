@@ -1,6 +1,7 @@
 defmodule SmartKioskWeb.UI.Inventory.InventoryLive.New do
   alias SmartKioskCore.Catalogue
   alias SmartKioskCore.Schemas.Product
+  alias SmartKioskWeb.LocalUploads
   use SmartKioskWeb, :live_view
 
   def mount(_params, _session, socket) do
@@ -15,7 +16,11 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.New do
      |> assign(:shop, shop)
      |> assign(:form, form)
      |> assign(:categories, categories)
-     |> allow_upload(:images, accept: ~w(.jpg .jpeg .png), max_entries: 5)}
+     |> allow_upload(:images,
+       accept: ~w(.jpg .jpeg .png .webp),
+       max_entries: 5,
+       max_file_size: 5_000_000
+     )}
   end
 
   def handle_event("validate", %{"product" => product_params}, socket) do
@@ -34,7 +39,18 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.New do
     shop = socket.assigns.shop
 
     case Catalogue.create_product(shop, product_params) do
-      {:ok, _product} ->
+      {:ok, product} ->
+        socket
+        |> LocalUploads.consume(:images, "products")
+        |> Enum.with_index()
+        |> Enum.each(fn {url, position} ->
+          Catalogue.add_product_image(product, %{
+            url: url,
+            alt_text: product.name,
+            position: position
+          })
+        end)
+
         {:noreply,
          socket
          |> put_flash(:info, "Product created successfully!")

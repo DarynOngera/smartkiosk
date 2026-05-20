@@ -1,4 +1,9 @@
-<Layouts.app flash={@flash} current_path="/inventory/new" current_user={@current_user}>
+<Layouts.app
+  flash={@flash}
+  current_path="/inventory/new"
+  current_user={@current_user}
+  cart_count={@cart_count}
+>
   <div class="min-h-screen bg-[#0B0F1A] text-white p-6">
     <div class="max-w-3xl mx-auto">
       <div class="mb-8">
@@ -140,6 +145,43 @@
               />
               <span class="text-sm text-slate-300">Featured Product</span>
             </label>
+          </div>
+
+          <div class="space-y-3 md:col-span-2">
+            <label class="block text-sm font-medium text-slate-300">Product Images</label>
+            <div class="rounded-2xl border border-dashed border-white/15 bg-white/[0.03] p-4">
+              <.live_file_input
+                upload={@uploads.images}
+                class="block w-full text-sm text-slate-300 file:mr-4 file:rounded-lg file:border-0 file:bg-violet-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-violet-500"
+              />
+              <p class="mt-2 text-xs text-slate-500">Upload up to 5 JPG, PNG, or WebP images.</p>
+
+              <div
+                :if={@uploads.images.entries != []}
+                class="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-3"
+              >
+                <div
+                  :for={entry <- @uploads.images.entries}
+                  class="rounded-xl border border-white/10 bg-black/20 p-2"
+                >
+                  <.live_img_preview
+                    entry={entry}
+                    class="aspect-square w-full rounded-lg object-cover"
+                  />
+                  <div class="mt-2 h-1.5 rounded-full bg-white/10">
+                    <div
+                      class="h-full rounded-full bg-violet-500 transition-all"
+                      style={"width: #{entry.progress}%"}
+                    >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p :for={error <- upload_errors(@uploads.images)} class="mt-2 text-sm text-red-400">
+                <%= Phoenix.Naming.humanize(error) %>
+              </p>
+            </div>
           </div>
         </div>
 

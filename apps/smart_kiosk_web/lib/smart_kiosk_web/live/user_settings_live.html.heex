@@ -1,5 +1,10 @@
 <div class="min-h-screen bg-[#0B0F1A]">
-  <Layouts.app flash={@flash} current_path="/users/settings">
+  <Layouts.app
+    flash={@flash}
+    current_path="/users/settings"
+    current_user={@current_user}
+    cart_count={@cart_count}
+  >
     <div class="max-w-4xl mx-auto p-6 lg:p-10">
       <header class="mb-8">
         <h1 class="text-3xl font-bold text-white tracking-tight">Account Settings</h1>
@@ -67,12 +72,51 @@
                 >
                   <div class="space-y-5">
                     <div>
+                      <span class="label mb-1">Profile Picture</span>
+                      <div class="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                        <div class="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                          <%= if @current_user.avatar_url do %>
+                            <img
+                              src={@current_user.avatar_url}
+                              alt={@current_user.full_name || @current_user.email}
+                              class="h-full w-full object-cover"
+                            />
+                          <% else %>
+                            <.icon name="hero-user" class="h-7 w-7 text-slate-500" />
+                          <% end %>
+                        </div>
+
+                        <div class="min-w-0 flex-1">
+                          <.live_file_input
+                            upload={@uploads.avatar}
+                            class="block w-full text-sm text-slate-300 file:mr-4 file:rounded-lg file:border-0 file:bg-violet-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-violet-500"
+                          />
+                          <p class="mt-2 text-xs text-slate-500">JPG, PNG, or WebP. Max 5MB.</p>
+                          <p
+                            :for={error <- upload_errors(@uploads.avatar)}
+                            class="mt-2 text-sm text-red-400"
+                          >
+                            <%= Phoenix.Naming.humanize(error) %>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
                       <span class="label mb-1">Full Name</span>
-                      <.input field={@profile_form[:full_name]} type="text" placeholder="Your full name" />
+                      <.input
+                        field={@profile_form[:full_name]}
+                        type="text"
+                        placeholder="Your full name"
+                      />
                     </div>
                     <div>
                       <span class="label mb-1">Phone Number</span>
-                      <.input field={@profile_form[:phone]} type="text" placeholder="+254 700 000 000" />
+                      <.input
+                        field={@profile_form[:phone]}
+                        type="text"
+                        placeholder="+254 700 000 000"
+                      />
                     </div>
                   </div>
                   <div class="mt-6 flex justify-end">
@@ -100,11 +144,19 @@
                   <div class="space-y-5">
                     <div>
                       <span class="label mb-1">New Email Address</span>
-                      <.input field={@email_form[:email]} type="email" placeholder="you@example.com" />
+                      <.input
+                        field={@email_form[:email]}
+                        type="email"
+                        placeholder="you@example.com"
+                      />
                     </div>
                     <div>
                       <span class="label mb-1">Current Password</span>
-                      <.input field={@email_form[:current_password]} type="password" placeholder="Enter your current password to confirm" />
+                      <.input
+                        field={@email_form[:current_password]}
+                        type="password"
+                        placeholder="Enter your current password to confirm"
+                      />
                     </div>
                   </div>
                   <div class="mt-6 flex justify-end">
@@ -129,15 +181,27 @@
                   <div class="space-y-5">
                     <div>
                       <span class="label mb-1">New Password</span>
-                      <.input field={@password_form[:password]} type="password" placeholder="At least 12 characters" />
+                      <.input
+                        field={@password_form[:password]}
+                        type="password"
+                        placeholder="At least 12 characters"
+                      />
                     </div>
                     <div>
                       <span class="label mb-1">Confirm New Password</span>
-                      <.input field={@password_form[:password_confirmation]} type="password" placeholder="Repeat your new password" />
+                      <.input
+                        field={@password_form[:password_confirmation]}
+                        type="password"
+                        placeholder="Repeat your new password"
+                      />
                     </div>
                     <div>
                       <span class="label mb-1">Current Password</span>
-                      <.input field={@password_form[:current_password]} type="password" placeholder="Enter your current password to confirm" />
+                      <.input
+                        field={@password_form[:current_password]}
+                        type="password"
+                        placeholder="Enter your current password to confirm"
+                      />
                     </div>
                   </div>
                   <div class="mt-6 flex justify-end">

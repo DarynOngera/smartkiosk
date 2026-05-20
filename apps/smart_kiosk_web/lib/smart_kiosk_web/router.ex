@@ -6,6 +6,7 @@ defmodule SmartKioskWeb.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
+    plug SmartKioskWeb.Plugs.EnsureSessionId
     plug :fetch_live_flash
     plug :put_root_layout, html: {SmartKioskWeb.Layouts, :root}
     plug :put_layout, html: false
@@ -31,7 +32,10 @@ defmodule SmartKioskWeb.Router do
     pipe_through :browser
 
     live_session :public,
-      on_mount: [{SmartKioskWeb.UserAuth, :current_user}] do
+      on_mount: [
+        {SmartKioskWeb.UserAuth, :current_user},
+        {SmartKioskWeb.UserAuth, :load_cart_count}
+      ] do
       live "/", HomeLive, :index
       live "/cart", CartLive, :index
 
@@ -46,7 +50,10 @@ defmodule SmartKioskWeb.Router do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
     live_session :redirect_if_authenticated,
-      on_mount: [{SmartKioskWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+      on_mount: [
+        {SmartKioskWeb.UserAuth, :redirect_if_user_is_authenticated},
+        {SmartKioskWeb.UserAuth, :load_cart_count}
+      ] do
       live "/register", UserRegistrationLive, :new
       live "/login", UserLoginLive, :new
       live "/reset-password", UserForgotPasswordLive, :new
@@ -61,7 +68,11 @@ defmodule SmartKioskWeb.Router do
     pipe_through [:browser, :require_auth]
 
     live_session :require_authenticated,
-      on_mount: [{SmartKioskWeb.UserAuth, :ensure_authenticated}, SmartKioskWeb.ShopAuth] do
+      on_mount: [
+        {SmartKioskWeb.UserAuth, :ensure_authenticated},
+        SmartKioskWeb.ShopAuth,
+        {SmartKioskWeb.UserAuth, :load_cart_count}
+      ] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm-email/:token", UserSettingsLive, :confirm_email
       live "/dashboard", UI.DashboardLive, :index
@@ -79,7 +90,8 @@ defmodule SmartKioskWeb.Router do
       on_mount: [
         {SmartKioskWeb.UserAuth, :ensure_authenticated},
         SmartKioskWeb.ShopAuth,
-        {SmartKioskWeb.ShopAuth, :require_shop}
+        {SmartKioskWeb.ShopAuth, :require_shop},
+        {SmartKioskWeb.UserAuth, :load_cart_count}
       ] do
       live "/inventory", Inventory.InventoryLive.Index, :index
       live "/inventory/new", Inventory.InventoryLive.New, :new

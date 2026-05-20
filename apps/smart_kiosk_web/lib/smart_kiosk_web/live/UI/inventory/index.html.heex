@@ -1,4 +1,9 @@
-<Layouts.app flash={@flash} current_path="/inventory" current_user={@current_user}>
+<Layouts.app
+  flash={@flash}
+  current_path="/inventory"
+  current_user={@current_user}
+  cart_count={@cart_count}
+>
   <div class="min-h-screen bg-[#0B0F1A] text-white p-6">
     <div class="max-w-7xl mx-auto">
       <div class="flex items-center justify-between mb-8">
@@ -78,6 +83,14 @@
                 <td class="px-6 py-4">
                   <div class="flex items-center justify-end gap-2">
                     <button
+                      phx-click="adjust_stock"
+                      phx-value-product_id={product.id}
+                      class="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                      title="Adjust stock"
+                    >
+                      <.icon name="hero-arrows-up-down" class="w-4 h-4" />
+                    </button>
+                    <button
                       phx-click="edit_product"
                       phx-value-product_id={product.id}
                       class="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
@@ -107,6 +120,15 @@
           id={"edit-product-#{@edit_product.id}"}
           product={@edit_product}
           shop={@current_shop}
+        />
+      <% end %>
+
+      <%= if @adjust_stock_product do %>
+        <.live_component
+          module={SmartKioskWeb.UI.Inventory.InventoryLive.AdjustStockComponent}
+          id={"adjust-stock-#{@adjust_stock_product.id}"}
+          product={@adjust_stock_product}
+          current_user={@current_user}
         />
       <% end %>
     </div>

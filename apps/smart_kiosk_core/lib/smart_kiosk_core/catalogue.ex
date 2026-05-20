@@ -10,7 +10,7 @@ defmodule SmartKioskCore.Catalogue do
   import SmartKioskCore.Tenant
 
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Schemas.{Category, Product, ProductImage, Shop}
+  alias SmartKioskCore.Schemas.{Category, Product, ProductImage, Shop, StockAdjustment, User}
 
   # ── Categories ───────────────────────────────────────────────────────────────
 
@@ -133,6 +133,44 @@ defmodule SmartKioskCore.Catalogue do
     |> Product.stock_changeset(qty_delta)
     |> Repo.update()
     |> tap(&maybe_broadcast_low_stock/1)
+  end
+
+  @doc """
+  Adjusts stock and records a stock adjustment event.
+
+  This is used for manual inventory edits (restocks/write-offs).
+  """
+  def adjust_stock_with_reason(%Product{} = product, qty_delta, attrs, actor \\ nil)
+      when is_integer(qty_delta) and is_map(attrs) do
+    reason = Map.get(attrs, "reason") || Map.get(attrs, :reason)
+    notes = Map.get(attrs, "notes") || Map.get(attrs, :notes)
+
+    multi =
+      Ecto.Multi.new()
+      |> Ecto.Multi.insert(:adjustment, fn _changes ->
+        StockAdjustment.changeset(%StockAdjustment{}, %{
+          shop_id: product.shop_id,
+          product_id: product.id,
+          user_id: (match?(%User{}, actor) && actor.id) || nil,
+          qty_delta: qty_delta,
+          reason: reason,
+          notes: notes
+        })
+      end)
+      |> Ecto.Multi.update(:product, Product.stock_changeset(product, qty_delta))
+
+    Repo.transaction(multi)
+    |> case do
+      {:ok, %{product: updated_product}} ->
+        _ = maybe_broadcast_low_stock({:ok, updated_product})
+        {:ok, updated_product}
+
+      {:error, :product, changeset, _} ->
+        {:error, changeset}
+
+      {:error, :adjustment, changeset, _} ->
+        {:error, changeset}
+    end
   end
 
   @doc """

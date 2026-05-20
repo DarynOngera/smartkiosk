@@ -341,7 +341,7 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
 
           <%= if @show_payment do %>
             <%!-- Payment Details --%>
-            <div class="p-4">
+            <div>
               <label class="text-sm text-slate-400 mb-3 block">Amount Due</label>
               <div class="bg-white/5 border border-white/10 rounded-xl p-4">
                 <p class="text-3xl font-bold text-violet-400">
@@ -350,7 +350,7 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
               </div>
             </div>
 
-            <%!-- Order Summary (single correct block) --%>
+            <%!-- Order Summary --%>
             <div class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
               <h3 class="font-semibold mb-3">Order Summary</h3>
               <%= for item <- @cart do %>
@@ -358,9 +358,7 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                   <span class="text-slate-400"><%= item.product.name %> x<%= item.quantity %></span>
                   <span>
                     KES <%= :erlang.float_to_binary(
-                      Decimal.to_float(item.product.price) * item.quantity,
-                      decimals: 2
-                    ) %>
+                      Decimal.to_float(item.product.price) * item.quantity, decimals: 2) %>
                   </span>
                 </div>
               <% end %>
@@ -372,7 +370,7 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
               </button>
             </div>
           <% else %>
-            <%!-- Cart View (your existing cart view code) --%>
+            <%!-- Cart View --%>
             <div class="flex-1 overflow-y-auto p-6 space-y-4">
               <%= for item <- @cart do %>
                 <div class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
