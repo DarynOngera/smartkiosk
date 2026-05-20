@@ -210,7 +210,8 @@ defmodule SmartKioskCore.Schemas.Subscription do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @plans ~w(kiosk duka biashara enterprise)a
+  # include canonical and legacy plan atoms so subscription inserts accept both
+  @plans ~w(basic pro enterprise kiosk duka biashara)a
   @statuses ~w(trialing active past_due cancelled)a
 
   schema "subscriptions" do

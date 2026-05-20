@@ -95,4 +95,16 @@ defmodule SmartKioskCore.Cart do
       |> Repo.insert()
     end
   end
+
+  @doc "Clears all items from a user's cart."
+  def clear_user_cart(%User{id: user_id}) do
+    from(c in CartItem, where: c.user_id == ^user_id)
+    |> Repo.delete_all()
+  end
+
+  @doc "Clears all items from a guest session cart."
+  def clear_session_cart(session_id) when is_binary(session_id) do
+    from(c in CartItem, where: c.session_id == ^session_id)
+    |> Repo.delete_all()
+  end
 end

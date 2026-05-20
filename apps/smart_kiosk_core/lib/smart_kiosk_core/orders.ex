@@ -11,8 +11,8 @@ defmodule SmartKioskCore.Orders do
   import SmartKioskCore.Tenant
 
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Schemas.{Customer, Order, OrderItem, Product, Shop}
-  alias SmartKioskCore.Catalogue
+  alias SmartKioskCore.Schemas.{Customer, Order, OrderItem, Product, Shop, Transaction}
+  alias SmartKioskCore.{Catalogue, Cart}
 
   # ── Order queries ─────────────────────────────────────────────────────────────
 
@@ -138,6 +138,71 @@ defmodule SmartKioskCore.Orders do
       broadcast_order_event(shop, {:new_order, order})
 
       order
+    end)
+  end
+
+  @doc """
+  Processes a POS payment: creates an order, records a transaction, and optionally clears the cart.
+
+  Accepts:
+    - shop: %Shop{}
+    - items: list of {%Product{}, quantity}
+    - payment_attrs: %{payment_method: :cash|:mpesa_stk|:card, amount: decimal, user_id: cashier_id, ...}
+    - opts:
+        - user: %User{} (to clear cart)
+        - session_id: string (to clear cart)
+        - clear_cart: boolean
+
+  Returns {:ok, %{order: order, transaction: transaction}} or {:error, reason}.
+  """
+  def process_pos_payment(%Shop{} = shop, items, payment_attrs, opts \\ []) do
+    Repo.transaction(fn ->
+      # 1. Create the order (this handles stock deduction and broadcasting)
+      order =
+        case create_order(shop, items, Keyword.put(opts, :channel, :pos)) do
+          {:ok, order} -> order
+          {:error, reason} -> Repo.rollback(reason)
+        end
+
+      # 2. Prepare transaction attributes
+      # For now, cash is completed immediately, others start as pending
+      txn_status = if payment_attrs[:payment_method] == :cash, do: :completed, else: :pending
+
+      txn_attrs =
+        payment_attrs
+        |> Map.merge(%{
+          shop_id: shop.id,
+          order_id: order.id,
+          type: :pos_payment,
+          status: txn_status,
+          currency: payment_attrs[:currency] || "KES"
+        })
+
+      # 3. Insert transaction
+      transaction =
+        %Transaction{}
+        |> Transaction.changeset(txn_attrs)
+        |> Repo.insert()
+        |> case do
+          {:ok, txn} -> txn
+          {:error, changeset} -> Repo.rollback(changeset)
+        end
+
+      # 4. Clear cart if requested
+      if opts[:clear_cart] do
+        case {opts[:user], opts[:session_id]} do
+          {%SmartKioskCore.Schemas.User{} = user, _} ->
+            Cart.clear_user_cart(user)
+
+          {_, session_id} when is_binary(session_id) ->
+            Cart.clear_session_cart(session_id)
+
+          _ ->
+            :ok
+        end
+      end
+
+      %{order: order, transaction: transaction}
     end)
   end
 

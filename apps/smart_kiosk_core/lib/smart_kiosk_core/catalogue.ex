@@ -101,10 +101,31 @@ defmodule SmartKioskCore.Catalogue do
       attrs
       |> Map.delete(:shop_id)
       |> Map.delete("shop_id")
+    # enforce plan product limits
+    plan_slug = (shop.plan && Atom.to_string(shop.plan)) || "basic"
+    plan = SmartKioskCore.Plans.list_plans() |> Enum.find(fn p -> p.slug == plan_slug end)
+    max_allowed = (plan && plan.max_products) || nil
 
-    %Product{shop_id: shop.id}
-    |> Product.changeset(attrs)
-    |> Repo.insert()
+    if is_integer(max_allowed) do
+      current_count = count_products(shop)
+
+      if current_count >= max_allowed do
+        changeset =
+          %Product{shop_id: shop.id}
+          |> Product.changeset(attrs)
+          |> Ecto.Changeset.add_error(:base, "product limit reached for your plan (#{max_allowed})")
+
+        {:error, changeset}
+      else
+        %Product{shop_id: shop.id}
+        |> Product.changeset(attrs)
+        |> Repo.insert()
+      end
+    else
+      %Product{shop_id: shop.id}
+      |> Product.changeset(attrs)
+      |> Repo.insert()
+    end
   end
 
   @doc "Updates a product."
