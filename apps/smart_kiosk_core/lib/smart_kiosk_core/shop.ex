@@ -221,7 +221,7 @@ defmodule SmartKioskCore.Shops do
   defp unwrap_or_rollback({:ok, value}), do: value
   defp unwrap_or_rollback({:error, reason}), do: Repo.rollback(reason)
   # defp wrap_with_user(%User{} = user), do: {user, nil}
-  defp wrap_with_user(nil), do: {nil, nil}
+  # defp wrap_with_user(nil), do: {nil, nil}
 
   # defp verify_source_user(user, _token) do
   #   {:ok, user}
