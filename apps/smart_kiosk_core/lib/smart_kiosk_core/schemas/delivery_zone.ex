@@ -1,8 +1,6 @@
 defmodule SmartKioskCore.Schemas.DeliveryZone do
   @moduledoc """
-  Geographic delivery zone. The boundary is a PostGIS geometry stored
-  as a GeoJSON-compatible map in JSONB for now (Phase 1 simplification).
-  Phase 3 will promote this to a proper PostGIS geometry column.
+  Geographic delivery zone.
   """
   use Ecto.Schema
   import Ecto.Changeset

@@ -63,6 +63,7 @@ defmodule SmartKioskCore.Accounts do
       email: :string,
       password: :string,
       phone: :string,
+      plan: :string,
       shop_category: :string,
       address: :string,
       city: :string
@@ -81,6 +82,10 @@ defmodule SmartKioskCore.Accounts do
     |> Ecto.Changeset.validate_inclusion(
       :shop_category,
       Enum.map(Shop.categories(), &to_string/1)
+    )
+    |> Ecto.Changeset.validate_inclusion(
+      :plan,
+      Enum.map(SmartKioskCore.Plans.list_plans(), & &1.slug)
     )
   end
 

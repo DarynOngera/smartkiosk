@@ -95,16 +95,44 @@ defmodule SmartKioskCore.Catalogue do
     |> Repo.get!(id)
   end
 
+  @doc "Gets a product by id (internal use)."
+  def get_product_by_id(id) do
+    Repo.get(Product, id)
+  end
+
   @doc "Creates a product for a shop."
   def create_product(%Shop{} = shop, attrs) do
     attrs =
       attrs
       |> Map.delete(:shop_id)
       |> Map.delete("shop_id")
+    # enforce plan product limits
+    plan_slug = shop.plan |> SmartKioskCore.Schemas.Shop.canonical_plan() |> Atom.to_string()
+    plan = SmartKioskCore.Plans.list_plans() |> Enum.find(fn p -> p.slug == plan_slug end)
+    max_allowed = (plan && plan.max_products) || nil
 
-    %Product{shop_id: shop.id}
-    |> Product.changeset(attrs)
-    |> Repo.insert()
+    if is_integer(max_allowed) do
+      current_count = count_products(shop)
+
+      if current_count >= max_allowed do
+        changeset =
+          %Product{shop_id: shop.id}
+          |> Product.changeset(attrs)
+          |> Ecto.Changeset.add_error(:base, "product limit reached for your plan (#{max_allowed})")
+
+        {:error, changeset}
+      else
+        %Product{shop_id: shop.id}
+        |> Product.changeset(attrs)
+        |> Repo.insert()
+        |> tap(&enqueue_search_indexing(&1, "product"))
+      end
+    else
+      %Product{shop_id: shop.id}
+      |> Product.changeset(attrs)
+      |> Repo.insert()
+      |> tap(&enqueue_search_indexing(&1, "product"))
+    end
   end
 
   @doc "Updates a product."
@@ -112,6 +140,7 @@ defmodule SmartKioskCore.Catalogue do
     product
     |> Product.changeset(attrs)
     |> Repo.update()
+    |> tap(&enqueue_search_indexing(&1, "product"))
   end
 
   @doc "Archives a product (soft delete)."
@@ -119,6 +148,27 @@ defmodule SmartKioskCore.Catalogue do
     product
     |> Product.changeset(%{status: :archived})
     |> Repo.update()
+    |> tap(&enqueue_search_indexing(&1, "product"))
+  end
+
+  defp enqueue_search_indexing({:ok, %{id: id}}, type) do
+    %{type: type, id: id}
+    |> SmartKioskCore.Workers.SearchIndexWorker.new()
+    |> Oban.insert()
+  end
+
+  defp enqueue_search_indexing(_, _), do: :ok
+
+  @doc "Lists products across all shops (centralized search)."
+  def list_products_centralized(search) do
+    term = "%#{search}%"
+
+    Product
+    |> join(:inner, [p], s in Shop, on: s.id == p.shop_id)
+    |> where([p, s], ilike(p.name, ^term))
+    |> where([p, s], p.status == :active and s.status == :active)
+    |> preload([:images, :shop])
+    |> Repo.all()
   end
 
   # ── Inventory ─────────────────────────────────────────────────────────────────
