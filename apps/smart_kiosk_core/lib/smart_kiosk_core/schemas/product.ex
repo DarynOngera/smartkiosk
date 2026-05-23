@@ -28,6 +28,7 @@ defmodule SmartKioskCore.Schemas.Product do
     field(:attributes, :map, default: %{})
     field(:status, Ecto.Enum, values: @statuses, default: :active)
     field(:is_featured, :boolean, default: false)
+    field(:type, :any, virtual: true, default: :product)
 
     belongs_to(:shop, SmartKioskCore.Schemas.Shop)
     belongs_to(:category, SmartKioskCore.Schemas.Category)

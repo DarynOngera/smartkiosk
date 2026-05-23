@@ -5,7 +5,7 @@ defmodule SmartKioskCore.Plans do
   """
 
   defmodule Plan do
-    defstruct [:name, :slug, :price_cents, :max_products, :max_staff, :max_orders_per_month, :features]
+    defstruct [:name, :slug, :price_cents, :max_products, :max_staff, :max_riders, :max_orders_per_month, :features]
   end
 
   @plans [
@@ -15,6 +15,7 @@ defmodule SmartKioskCore.Plans do
       price_cents: 0,
       max_products: 50,
       max_staff: 1,
+      max_riders: 1,
       max_orders_per_month: 100,
       features: %{"analytics" => false, "api_access" => false, "priority_support" => false}
     },
@@ -24,6 +25,7 @@ defmodule SmartKioskCore.Plans do
       price_cents: 1999,
       max_products: 1000,
       max_staff: 5,
+      max_riders: 5,
       max_orders_per_month: 10_000,
       features: %{"analytics" => true, "api_access" => true, "priority_support" => false}
     },
@@ -33,6 +35,7 @@ defmodule SmartKioskCore.Plans do
       price_cents: 9999,
       max_products: 100_000,
       max_staff: 50,
+      max_riders: 15,
       max_orders_per_month: 1_000_000,
       features: %{"analytics" => true, "api_access" => true, "priority_support" => true}
     }

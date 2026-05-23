@@ -58,8 +58,12 @@ defmodule SmartKioskCore.Shops do
       end)
 
     case Repo.transaction(multi) do
-      {:ok, %{shop: shop, user: user}} -> {:ok, shop, user}
-      {:error, _step, changeset, _changes} -> {:error, changeset}
+      {:ok, %{shop: shop, user: user}} ->
+        enqueue_search_indexing({:ok, shop}, "shop")
+        {:ok, shop, user}
+
+      {:error, _step, changeset, _changes} ->
+        {:error, changeset}
     end
   end
 
@@ -102,8 +106,12 @@ defmodule SmartKioskCore.Shops do
       end)
 
     case Repo.transaction(multi) do
-      {:ok, %{shop: shop, updated_user: user}} -> {:ok, shop, user}
-      {:error, _step, changeset, _changes} -> {:error, changeset}
+      {:ok, %{shop: shop, updated_user: user}} ->
+        enqueue_search_indexing({:ok, shop}, "shop")
+        {:ok, shop, user}
+
+      {:error, _step, changeset, _changes} ->
+        {:error, changeset}
     end
   end
 
@@ -133,6 +141,7 @@ defmodule SmartKioskCore.Shops do
     shop
     |> Shop.changeset(attrs)
     |> Repo.update()
+    |> tap(&enqueue_search_indexing(&1, "shop"))
   end
 
   @doc "Lists all shops."
@@ -140,11 +149,28 @@ defmodule SmartKioskCore.Shops do
     Repo.all(Shop)
   end
 
+  @doc "Gets a shop by id."
+  def get_shop(id) do
+    Repo.get(Shop, id)
+  end
+
   # get shop by the id
 
   def get_shop!(id) do
     Repo.get_by(Shop, id: id)
   end
+
+  defp enqueue_search_indexing({:ok, %{id: id}}, type) do
+    %{type: type, id: id}
+    |> SmartKioskCore.Workers.SearchIndexWorker.new()
+    |> Oban.insert()
+  end
+
+  defp enqueue_search_indexing({:ok, shop, _user}, type) do
+    enqueue_search_indexing({:ok, shop}, type)
+  end
+
+  defp enqueue_search_indexing(_, _), do: :ok
 
   @doc "Gets a shop by name."
   def get_shop_by_name(name) when is_binary(name) do
@@ -159,6 +185,18 @@ defmodule SmartKioskCore.Shops do
   @doc "Gets a shop by slug (used for public storefront URLs)."
   def get_shop_by_slug(slug), do: Repo.get_by(Shop, slug: slug, status: :active)
 
+  @doc "Searches shops by name or description."
+  def search_shops(query) do
+    term = "%#{query}%"
+
+    from(s in Shop,
+      where: ilike(s.name, ^term),
+      where: s.status == :active,
+      order_by: [desc: s.inserted_at]
+    )
+    |> Repo.all()
+  end
+
   # =================for admin side =========================
   # check for status:pending review
   def get_pending_status do
@@ -172,6 +210,7 @@ defmodule SmartKioskCore.Shops do
     shop
     |> Ecto.Changeset.change(status: :active)
     |> Repo.update()
+    |> tap(&enqueue_search_indexing(&1, "shop"))
   end
 
   # reget the status
@@ -179,6 +218,7 @@ defmodule SmartKioskCore.Shops do
     shop
     |> Ecto.Changeset.change(status: :suspended)
     |> Repo.update()
+    |> tap(&enqueue_search_indexing(&1, "shop"))
   end
 
   # defp create_initial_subscription(shop) do
@@ -216,6 +256,55 @@ defmodule SmartKioskCore.Shops do
         |> Ecto.Changeset.add_error(:role_id, "missing system role #{role_slug}")
         |> then(&{:error, &1})
     end
+  end
+
+  @doc """
+  Registers a new rider user and their profile under a specific shop.
+  Enforces plan-based rider limits.
+  """
+  def register_rider(%Shop{} = shop, user_attrs, rider_attrs) do
+    # 1. Enforce plan limits
+    plan_slug = shop.plan |> SmartKioskCore.Schemas.Shop.canonical_plan() |> Atom.to_string()
+    plan = SmartKioskCore.Plans.list_plans() |> Enum.find(fn p -> p.slug == plan_slug end)
+    max_allowed = (plan && plan.max_riders) || 1
+
+    current_count = count_riders(shop)
+
+    if current_count >= max_allowed do
+      %SmartKioskCore.Schemas.Rider{}
+      |> SmartKioskCore.Schemas.Rider.changeset(%{})
+      |> Ecto.Changeset.add_error(:base, "Rider limit reached for your plan (#{max_allowed})")
+      |> then(&{:error, &1})
+    else
+      multi =
+        Ecto.Multi.new()
+        |> Ecto.Multi.insert(:user, fn _changes ->
+          %User{role: :rider, shop_id: shop.id}
+          |> User.registration_changeset(user_attrs)
+        end)
+        |> Ecto.Multi.insert(:rider, fn %{user: user} ->
+          %SmartKioskCore.Schemas.Rider{user_id: user.id}
+          |> SmartKioskCore.Schemas.Rider.changeset(rider_attrs)
+        end)
+        |> Ecto.Multi.run(:system_role, fn repo, %{user: user} ->
+          assign_system_role(repo, user, "rider", shop)
+        end)
+
+      case Repo.transaction(multi) do
+        {:ok, %{user: user, rider: rider}} -> {:ok, user, rider}
+        {:error, _step, changeset, _changes} -> {:error, changeset}
+      end
+    end
+  end
+
+  @doc "Counts active riders for a shop."
+  def count_riders(%Shop{id: shop_id}) do
+    from(r in SmartKioskCore.Schemas.Rider,
+      join: u in User,
+      on: r.user_id == u.id,
+      where: u.shop_id == ^shop_id
+    )
+    |> Repo.aggregate(:count, :id)
   end
 
   defp unwrap_or_rollback({:ok, value}), do: value

@@ -1,11 +1,8 @@
 defmodule SmartKioskCore.Schemas.Shop do
   @moduledoc """
   The top-level tenant. One shop = one account.
-    @plans ~w(kiosk duka biashara enterprise)a
-  @plans ~w(kiosk duka biashara enterprise)a
-│  To resume this session: gemini --resume 838adb7f-f763-4dfd-83fc-bb6a34fe1bb8                                     │
 
-  `plan` drives feature gating: :kiosk | :duka | :biashara | :enterprise
+  `plan` drives feature gating: :basic | :pro | :enterprise
   `status` lifecycle:  :pending_review | :active | :suspended | :closed
   """
   use Ecto.Schema
@@ -42,6 +39,7 @@ defmodule SmartKioskCore.Schemas.Shop do
     field(:description, :string)
     field(:owner_id, :binary_id)
     field(:settings, :map, default: %{})
+    field(:type, :any, virtual: true, default: :shop)
 
     has_many(:users, SmartKioskCore.Schemas.User)
     has_many(:products, SmartKioskCore.Schemas.Product)
