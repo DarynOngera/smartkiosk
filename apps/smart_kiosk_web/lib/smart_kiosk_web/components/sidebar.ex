@@ -1,11 +1,14 @@
 defmodule SmartKioskWeb.Sidebar do
   @moduledoc """
-  Sidebar component with category filters.
+  Responsive sidebar component with category filters.
+
+  On desktop (lg+): Shows a sticky sidebar on the left.
+  On mobile: Shows a horizontal scrollable category bar at the top of the content.
   """
   use SmartKioskWeb, :html
 
   @doc """
-  Renders the category filter sidebar.
+  Renders the category filter sidebar / mobile category bar.
 
   ## Attributes
 
@@ -13,12 +16,28 @@ defmodule SmartKioskWeb.Sidebar do
   * `selected_category` - Currently selected category (optional)
   """
   attr :shop_categories, :map, required: true
-  attr :selected_category, :string, default: nil
+  attr :selected_category, :atom, default: nil
 
   def sidebar(assigns) do
     ~H"""
-    <aside class="hidden lg:block w-64 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto border-r border-white/5 bg-[#0B0F1A]/50 backdrop-blur-sm">
-      <div class="p-6">
+    <%!-- Mobile Horizontal Category Bar --%>
+    <div class="lg:hidden px-4 py-3 border-b border-white/5 bg-[#0B0F1A]">
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 snap-x snap-mandatory scrollbar-thin">
+        <.mobile_category_chip cat_key={nil} label="All" is_selected={is_nil(@selected_category)} />
+
+        <%= for {cat_key, label} <- @shop_categories do %>
+          <.mobile_category_chip
+            cat_key={cat_key}
+            label={label}
+            is_selected={@selected_category == cat_key}
+          />
+        <% end %>
+      </div>
+    </div>
+
+    <%!-- Desktop Sticky Sidebar --%>
+    <aside class="hidden lg:block w-72 xl:w-80 shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto border-r border-white/5 bg-[#0B0F1A]/50 backdrop-blur-sm">
+      <div class="p-5">
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">
           Shop Categories
         </h2>
@@ -26,13 +45,13 @@ defmodule SmartKioskWeb.Sidebar do
         <%= if @selected_category do %>
           <button
             phx-click="clear_filter"
-            class="w-full mb-4 flex items-center gap-2 px-4 py-3 rounded-xl bg-violet-500/10 border border-violet-500/30 text-violet-400 text-sm font-medium hover:bg-violet-500/20 transition-colors"
+            class="w-full mb-4 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-500/10 border border-violet-500/30 text-violet-400 text-sm font-medium hover:bg-violet-500/20 transition-colors"
           >
             <.icon name="hero-x-mark" class="w-4 h-4" /> Clear Filter
           </button>
         <% end %>
 
-        <div class="space-y-1">
+        <div class="space-y-0.5">
           <.category_button
             cat_key={nil}
             label="All Shops"
@@ -45,7 +64,7 @@ defmodule SmartKioskWeb.Sidebar do
               cat_key={cat_key}
               label={label}
               icon={category_icon(cat_key)}
-              is_selected={@selected_category == to_string(cat_key)}
+              is_selected={@selected_category == cat_key}
             />
           <% end %>
         </div>
@@ -55,9 +74,9 @@ defmodule SmartKioskWeb.Sidebar do
   end
 
   @doc """
-  Renders a single category filter button.
+  Renders a single category filter button for desktop sidebar.
   """
-  attr :cat_key, :atom, required: true
+  attr :cat_key, :atom
   attr :label, :string, required: true
   attr :icon, :string, required: true
   attr :is_selected, :boolean, default: false
@@ -68,12 +87,36 @@ defmodule SmartKioskWeb.Sidebar do
       phx-click={if @cat_key, do: "filter_category", else: "clear_filter"}
       phx-value-category={@cat_key}
       class={[
-        "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all",
+        "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left text-sm font-medium transition-all",
         @is_selected && "bg-violet-500/20 text-violet-400 border border-violet-500/30",
         !@is_selected && "text-slate-400 hover:text-white hover:bg-white/5"
       ]}
     >
-      <.icon name={@icon} class="w-5 h-5" />
+      <.icon name={@icon} class="w-5 h-5 flex-shrink-0" />
+      <span class="truncate"><%= @label %></span>
+    </button>
+    """
+  end
+
+  @doc """
+  Renders a compact category chip for mobile horizontal scroll.
+  """
+  attr :cat_key, :atom
+  attr :label, :string, required: true
+  attr :is_selected, :boolean, default: false
+
+  def mobile_category_chip(assigns) do
+    ~H"""
+    <button
+      phx-click={if @cat_key, do: "filter_category", else: "clear_filter"}
+      phx-value-category={@cat_key}
+      class={[
+        "flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all snap-start",
+        @is_selected && "bg-violet-500/20 text-violet-400 border border-violet-500/30",
+        !@is_selected &&
+          "bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10 hover:text-white"
+      ]}
+    >
       <%= @label %>
     </button>
     """

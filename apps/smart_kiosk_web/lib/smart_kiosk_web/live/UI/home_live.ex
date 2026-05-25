@@ -6,10 +6,9 @@ defmodule SmartKioskWeb.HomeLive do
 
   alias SmartKioskCore.Schemas.{Shop, Product}
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Accounts
   alias SmartKioskCore.Shops
   alias SmartKioskCore.Cart
-  import SmartKioskWeb.Navbar
+  alias SmartKioskCore.Recommendations
   import SmartKioskWeb.Sidebar
   import SmartKioskWeb.SearchBar
   import Ecto.Query
@@ -28,7 +27,6 @@ defmodule SmartKioskWeb.HomeLive do
     {:services, "Services"},
     {:textiles, "Textiles"},
     {:garage, "Garage"}
-
   ]
 
   def mount(_params, session, socket) do
@@ -49,6 +47,10 @@ defmodule SmartKioskWeb.HomeLive do
     # Get products grouped by featured categories
     products_by_category = fetch_products_by_categories()
 
+    # Get precomputed recommendations
+    recommended_shops = Recommendations.list_recommended_shops()
+    recommended_products = Recommendations.list_recommended_products()
+
     # Get cart count
     cart_count =
       cond do
@@ -64,6 +66,8 @@ defmodule SmartKioskWeb.HomeLive do
      |> assign(:selected_category, nil)
      |> assign(:products_by_category, products_by_category)
      |> assign(:filtered_shops, nil)
+     |> assign(:recommended_shops, recommended_shops)
+     |> assign(:recommended_products, recommended_products)
      |> assign(:user_shop, user_shop)
      |> assign(:cart_count, cart_count)
      |> assign(:session_id, session_id)
