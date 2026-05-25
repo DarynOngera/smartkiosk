@@ -21,12 +21,12 @@
     </div>
 
     <%!-- Main Content --%>
-    <div class="flex">
+    <div class="flex overflow-x-hidden">
       <%!-- Sidebar Component --%>
       <.sidebar shop_categories={@shop_categories} selected_category={@selected_category} />
 
       <%!-- Center Content --%>
-      <main class="flex-1 min-h-[calc(100vh-8rem)]">
+      <main class="flex-1 min-w-0 min-h-[calc(100vh-8rem)]">
         <%= if @filtered_shops do %>
           <%!-- Filtered Shops View --%>
           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
