@@ -1,4 +1,10 @@
-<Layouts.app flash={@flash} current_path="/" current_user={@current_user} current_shop={@user_shop} cart_count={@cart_count}>
+<Layouts.app
+  flash={@flash}
+  current_path="/"
+  current_user={@current_user}
+  current_shop={@user_shop}
+  cart_count={@cart_count}
+>
   <div class="min-h-screen bg-[#0B0F1A] text-white">
     <%!-- Search Bar --%>
     <div class="px-4 sm:px-6 lg:px-8 py-6">
@@ -66,6 +72,122 @@
             </div>
           </div>
         <% else %>
+          <%!-- Recommendations Section --%>
+          <%= if @recommended_shops != [] || @recommended_products != [] do %>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 space-y-10">
+              <%!-- Recommended Shops --%>
+              <%= if @recommended_shops != [] do %>
+                <section>
+                  <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 bg-violet-500/10 rounded-xl flex items-center justify-center">
+                        <.icon name="hero-star" class="w-5 h-5 text-violet-400" />
+                      </div>
+                      <h2 class="text-xl font-bold">Recommended Shops</h2>
+                    </div>
+                  </div>
+                  <div class="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory ">
+                    <%= for rec <- @recommended_shops do %>
+                      <% shop = rec.shop %>
+                      <a
+                        href={~p"/shop/#{shop.slug}"}
+                        class="group flex-shrink-0 w-64 bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-violet-500/30 hover:bg-white/[0.07] transition-all snap-start"
+                      >
+                        <div class="h-28 bg-gradient-to-br from-violet-500/20 to-indigo-500/10 flex items-center justify-center">
+                          <.icon name="hero-storefront" class="w-10 h-10 text-violet-400/50" />
+                        </div>
+                        <div class="p-4">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-semibold text-white group-hover:text-violet-400 transition-colors truncate">
+                              <%= shop.name %>
+                            </h3>
+                            <%= if shop.plan in [:pro, :enterprise] do %>
+                              <span class="px-1.5 py-0.5 bg-violet-500/20 text-violet-400 text-[10px] font-bold uppercase rounded">
+                                <%= if shop.plan == :enterprise, do: "Ent", else: "Pro" %>
+                              </span>
+                            <% end %>
+                          </div>
+                          <p class="text-sm text-slate-500">
+                            <%= Shop.category_labels()[shop.category] || "Shop" %>
+                          </p>
+                          <%= if shop.description do %>
+                            <p class="text-xs text-slate-600 mt-1 line-clamp-2">
+                              <%= shop.description %>
+                            </p>
+                          <% end %>
+                        </div>
+                      </a>
+                    <% end %>
+                  </div>
+                </section>
+              <% end %>
+
+              <%!-- Trending Products --%>
+              <%= if @recommended_products != [] do %>
+                <section>
+                  <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center">
+                        <.icon name="hero-fire" class="w-5 h-5 text-amber-400" />
+                      </div>
+                      <h2 class="text-xl font-bold">Trending Products</h2>
+                    </div>
+                  </div>
+                  <div class="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory ">
+                    <%= for rec <- @recommended_products do %>
+                      <% product = rec.product %>
+                      <div class="group flex-shrink-0 w-56 bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-violet-500/30 hover:bg-white/[0.07] transition-all snap-start">
+                        <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center relative overflow-hidden">
+                          <%= if product.images != [] && List.first(product.images) do %>
+                            <img
+                              src={List.first(product.images).url}
+                              alt={product.name}
+                              class="w-full h-full object-cover"
+                            />
+                          <% else %>
+                            <.icon name="hero-photo" class="w-12 h-12 text-slate-600" />
+                          <% end %>
+                          <%= if product.stock_qty == 0 do %>
+                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                              <span class="px-3 py-1 bg-red-500/80 text-white text-xs font-bold rounded-full">
+                                Out of Stock
+                              </span>
+                            </div>
+                          <% end %>
+                          <%= if product.is_featured do %>
+                            <div class="absolute top-2 left-2 px-2 py-0.5 bg-amber-500/80 text-white text-[10px] font-bold uppercase rounded-full">
+                              Featured
+                            </div>
+                          <% end %>
+                        </div>
+                        <div class="p-3">
+                          <h4 class="text-sm font-medium text-white truncate">
+                            <%= product.name %>
+                          </h4>
+                          <p class="text-xs text-slate-500 truncate"><%= product.shop.name %></p>
+                          <div class="flex items-center justify-between mt-2">
+                            <span class="text-violet-400 font-bold">
+                              Ksh <%= product.price %>
+                            </span>
+                            <%= if product.stock_qty > 0 do %>
+                              <button
+                                phx-click="add_to_cart"
+                                phx-value-product_id={product.id}
+                                class="p-1.5 bg-violet-500/20 hover:bg-violet-500 text-violet-400 hover:text-white rounded-lg transition-all"
+                              >
+                                <.icon name="hero-plus" class="w-4 h-4" />
+                              </button>
+                            <% end %>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                </section>
+              <% end %>
+            </div>
+          <% end %>
+
           <%!-- Products by Category View --%>
           <%= if @products_by_category do %>
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">

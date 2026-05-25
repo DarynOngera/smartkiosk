@@ -398,7 +398,8 @@ defmodule SmartKioskWeb.UserRegistrationLive do
         "address" => registration_params["address"] || "Nairobi",
         "city" => registration_params["city"] || "Nairobi",
         "country" => "KE",
-        "plan" => registration_params["plan"] || default_plan
+        "plan" => "kiosk",
+        "status" => "active"
       }
 
       case Shops.register_shop_owner(shop_attrs, user_attrs) do

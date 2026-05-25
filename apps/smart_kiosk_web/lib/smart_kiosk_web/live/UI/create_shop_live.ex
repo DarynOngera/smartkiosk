@@ -41,6 +41,7 @@ defmodule SmartKioskWeb.UI.CreateShopLive do
 
   def handle_event("save", %{"shop" => shop_params}, socket) do
     user = socket.assigns.current_user
+    shop_params = Map.put(shop_params, "status", "active")
 
     case Shops.create_shop_for_user(user, shop_params) do
       {:ok, _shop, _user} ->
