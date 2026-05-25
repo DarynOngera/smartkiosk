@@ -17,6 +17,7 @@ defmodule SmartKioskWeb.UI.DeliveryZoneLive.Index do
 
   defp apply_action(socket, :edit, %{"id" => id}) do
     zone = Deliveries.get_delivery_zone!(id)
+
     socket
     |> assign(:page_title, "Edit Delivery Zone")
     |> assign(:zone, zone)
@@ -121,11 +122,7 @@ defmodule SmartKioskWeb.UI.DeliveryZoneLive.Index do
       </div>
 
       <%= if @live_action in [:new, :edit] do %>
-        <.modal
-          id="delivery-zone-modal"
-          show
-          on_cancel={JS.patch(~p"/delivery-zones")}
-        >
+        <.modal id="delivery-zone-modal" show on_cancel={JS.patch(~p"/delivery-zones")}>
           <.live_component
             module={SmartKioskWeb.UI.DeliveryZoneLive.FormComponent}
             id={@zone.id || :new}

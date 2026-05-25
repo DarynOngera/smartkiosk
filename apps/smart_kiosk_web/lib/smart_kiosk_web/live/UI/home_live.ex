@@ -45,7 +45,7 @@ defmodule SmartKioskWeb.HomeLive do
     shop_categories = Shop.category_labels()
 
     # Get products grouped by featured categories
-    products_by_category = fetch_products_by_categories()
+    _products_by_category = fetch_products_by_categories()
 
     # Get precomputed recommendations
     recommended_shops = Recommendations.list_recommended_shops()
@@ -107,7 +107,8 @@ defmodule SmartKioskWeb.HomeLive do
     else
       # Home mode: show products by category with pagination
       products_by_category = fetch_products_by_categories(page: page, limit: limit)
-      has_more = length(products_by_category) == limit # Simplified check
+      # Simplified check
+      has_more = length(products_by_category) == limit
 
       {:noreply,
        socket

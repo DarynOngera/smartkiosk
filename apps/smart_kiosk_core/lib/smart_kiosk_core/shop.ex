@@ -1,7 +1,7 @@
 defmodule SmartKioskCore.Shops do
   import Ecto.Query
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Schemas.{Role, Shop, Subscription, User, UserRole, UserToken}
+  alias SmartKioskCore.Schemas.{Role, Shop, Subscription, User, UserRole}
 
   def change_registration(attrs \\ %{}) do
     types = %{
@@ -29,7 +29,10 @@ defmodule SmartKioskCore.Shops do
       :shop_category,
       Enum.map(Shop.categories(), &to_string/1)
     )
-    |> Ecto.Changeset.validate_inclusion(:plan, Enum.map(SmartKioskCore.Plans.list_plans(), & &1.slug))
+    |> Ecto.Changeset.validate_inclusion(
+      :plan,
+      Enum.map(SmartKioskCore.Plans.list_plans(), & &1.slug)
+    )
   end
 
   # ── Shop operations ───────────────────────────────────────────────────────────
@@ -160,14 +163,12 @@ defmodule SmartKioskCore.Shops do
     Repo.get_by(Shop, id: id)
   end
 
-  defp enqueue_search_indexing({:ok, %{id: id}}, type) do
-    %{type: type, id: id}
-    |> SmartKioskCore.Workers.SearchIndexWorker.new()
-    |> Oban.insert()
+  defp enqueue_search_indexing({:ok, %{id: _id} = shop}, "shop") do
+    SmartKioskCore.Search.index_shop(shop)
   end
 
-  defp enqueue_search_indexing({:ok, shop, _user}, type) do
-    enqueue_search_indexing({:ok, shop}, type)
+  defp enqueue_search_indexing({:ok, shop, _user}, "shop") do
+    SmartKioskCore.Search.index_shop(shop)
   end
 
   defp enqueue_search_indexing(_, _), do: :ok
@@ -193,6 +194,14 @@ defmodule SmartKioskCore.Shops do
       where: ilike(s.name, ^term),
       where: s.status == :active,
       order_by: [desc: s.inserted_at]
+    )
+    |> Repo.all()
+  end
+
+  @doc "Gets multiple shops by their IDs."
+  def list_shops_by_ids(ids) when is_list(ids) do
+    from(s in Shop,
+      where: s.id in ^ids
     )
     |> Repo.all()
   end

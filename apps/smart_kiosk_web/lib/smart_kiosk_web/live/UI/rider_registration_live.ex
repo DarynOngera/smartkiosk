@@ -56,7 +56,10 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
           {:ok, _user, _rider} ->
             {:noreply,
              socket
-             |> put_flash(:info, "Registration successful! #{shop.name} will verify your documents.")
+             |> put_flash(
+               :info,
+               "Registration successful! #{shop.name} will verify your documents."
+             )
              |> push_navigate(to: ~p"/login")}
 
           {:error, %Ecto.Changeset{} = changeset} ->
@@ -67,13 +70,22 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
         end
 
       _ ->
-        {:noreply, put_flash(socket, :error, "Please upload both your License and National ID (PDF)")}
+        {:noreply,
+         put_flash(socket, :error, "Please upload both your License and National ID (PDF)")}
     end
   end
 
   defp consume_rider_uploads(socket, name) do
     consume_uploaded_entries(socket, name, fn %{path: path}, _entry ->
-      dest = Path.join([:code.priv_dir(:smart_kiosk_web), "static", "uploads", "riders", Path.basename(path) <> ".pdf"])
+      dest =
+        Path.join([
+          :code.priv_dir(:smart_kiosk_web),
+          "static",
+          "uploads",
+          "riders",
+          Path.basename(path) <> ".pdf"
+        ])
+
       File.mkdir_p!(Path.dirname(dest))
       File.cp!(path, dest)
       {:ok, "/uploads/riders/" <> Path.basename(dest)}
@@ -99,46 +111,86 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
           </div>
 
           <div class="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl shadow-2xl">
-            <.form for={@form} id="rider-registration-form" phx-submit="save" phx-change="validate" class="space-y-6">
+            <.form
+              for={@form}
+              id="rider-registration-form"
+              phx-submit="save"
+              phx-change="validate"
+              class="space-y-6"
+            >
               <div class="space-y-4">
-                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Personal Information</h3>
-                <.input field={@form[:full_name]} type="text" label="Full Name" placeholder="John Doe" required />
+                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                  Personal Information
+                </h3>
+                <.input
+                  field={@form[:full_name]}
+                  type="text"
+                  label="Full Name"
+                  placeholder="John Doe"
+                  required
+                />
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <.input field={@form[:email]} type="email" label="Email Address" placeholder="john@example.com" required />
-                  <.input field={@form[:phone]} type="tel" label="Phone Number" placeholder="+254 7XX XXX XXX" required />
+                  <.input
+                    field={@form[:email]}
+                    type="email"
+                    label="Email Address"
+                    placeholder="john@example.com"
+                    required
+                  />
+                  <.input
+                    field={@form[:phone]}
+                    type="tel"
+                    label="Phone Number"
+                    placeholder="+254 7XX XXX XXX"
+                    required
+                  />
                 </div>
                 <.input field={@form[:password]} type="password" label="Create Password" required />
               </div>
 
               <div class="space-y-4 pt-6 border-t border-white/5">
-                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Document Upload (PDF only)</h3>
+                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                  Document Upload (PDF only)
+                </h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Driving License</label>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                      Driving License
+                    </label>
                     <div class="relative border-2 border-dashed border-white/10 rounded-xl p-4 text-center hover:border-violet-500/50 transition-all">
-                      <.live_file_input upload={@uploads.license} class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                      <.live_file_input
+                        upload={@uploads.license}
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
                       <div class="space-y-1">
                         <.icon name="hero-document-text" class="w-6 h-6 text-slate-500 mx-auto" />
                         <p class="text-[10px] text-slate-400">Click to upload License</p>
                       </div>
                     </div>
                     <%= for entry <- @uploads.license.entries do %>
-                      <div class="mt-2 text-[10px] text-violet-400 font-medium">Selected: <%= entry.client_name %></div>
+                      <div class="mt-2 text-[10px] text-violet-400 font-medium">
+                        Selected: <%= entry.client_name %>
+                      </div>
                     <% end %>
                   </div>
 
                   <div>
                     <label class="block text-sm font-medium text-slate-300 mb-2">National ID</label>
                     <div class="relative border-2 border-dashed border-white/10 rounded-xl p-4 text-center hover:border-violet-500/50 transition-all">
-                      <.live_file_input upload={@uploads.national_id} class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                      <.live_file_input
+                        upload={@uploads.national_id}
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
                       <div class="space-y-1">
                         <.icon name="hero-identification" class="w-6 h-6 text-slate-500 mx-auto" />
                         <p class="text-[10px] text-slate-400">Click to upload ID</p>
                       </div>
                     </div>
                     <%= for entry <- @uploads.national_id.entries do %>
-                      <div class="mt-2 text-[10px] text-violet-400 font-medium">Selected: <%= entry.client_name %></div>
+                      <div class="mt-2 text-[10px] text-violet-400 font-medium">
+                        Selected: <%= entry.client_name %>
+                      </div>
                     <% end %>
                   </div>
                 </div>
@@ -158,7 +210,10 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
 
           <div class="text-center mt-8">
             <p class="text-slate-500 text-sm">
-              Already have an account? <.link navigate={~p"/login"} class="text-violet-400 font-semibold hover:text-violet-300">Sign in</.link>
+              Already have an account?
+              <.link navigate={~p"/login"} class="text-violet-400 font-semibold hover:text-violet-300">
+                Sign in
+              </.link>
             </p>
           </div>
         </div>

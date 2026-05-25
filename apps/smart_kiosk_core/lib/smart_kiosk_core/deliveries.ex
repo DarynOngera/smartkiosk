@@ -6,7 +6,7 @@ defmodule SmartKioskCore.Deliveries do
 
   import Ecto.Query
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Schemas.{DeliveryZone, Rider, Delivery}
+  alias SmartKioskCore.Schemas.{DeliveryZone, Rider}
 
   # ── Delivery Zones ───────────────────────────────────────────────────────────
 
