@@ -94,12 +94,24 @@ defmodule SmartKioskCore.Schemas.Shop do
 
   def canonical_plan(plan) when is_binary(plan) do
     case String.downcase(plan) do
-      "kiosk" -> :basic
-      "duka" -> :pro
-      "biashara" -> :enterprise
-      "basic" -> :basic
-      "pro" -> :pro
-      "enterprise" -> :enterprise
+      "kiosk" ->
+        :basic
+
+      "duka" ->
+        :pro
+
+      "biashara" ->
+        :enterprise
+
+      "basic" ->
+        :basic
+
+      "pro" ->
+        :pro
+
+      "enterprise" ->
+        :enterprise
+
       other ->
         try do
           String.to_existing_atom(other)

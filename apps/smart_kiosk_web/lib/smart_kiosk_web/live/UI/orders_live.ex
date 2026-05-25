@@ -60,12 +60,12 @@ defmodule SmartKioskWeb.UI.OrdersLive.Index do
       cart_count={@cart_count}
     >
       <div class="container mx-auto px-4 py-8">
-          <.back
-            href={~p"/dashboard"}
-            class="inline-flex items-center gap-1 text-sm text-black hover:text-blue-500 transition-colors mb-4 cursor-pointer"
-          >
-            Back to Dashboard
-          </.back>
+        <.back
+          href={~p"/dashboard"}
+          class="inline-flex items-center gap-1 text-sm text-black hover:text-blue-500 transition-colors mb-4 cursor-pointer"
+        >
+          Back to Dashboard
+        </.back>
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-3xl font-bold text-gray-900">Orders</h1>
           <div class="flex gap-2">
@@ -238,7 +238,7 @@ defmodule SmartKioskWeb.UI.OrdersLive.Show do
   def handle_info(_other, socket), do: {:noreply, socket}
 
   def handle_event("transition_status", %{"status" => status}, socket) do
-    shop = socket.assigns.current_shop
+    _shop = socket.assigns.current_shop
     order = socket.assigns.order
     new_status = String.to_atom(status)
 

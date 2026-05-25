@@ -1,6 +1,6 @@
 defmodule SmartKioskWeb.UI.Inventory.InventoryLive.Index do
   alias SmartKioskCore.Catalogue
-  
+
   use SmartKioskWeb, :live_view
 
   @impl true

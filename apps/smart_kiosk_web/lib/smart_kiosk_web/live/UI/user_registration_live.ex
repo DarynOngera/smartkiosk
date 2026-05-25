@@ -284,7 +284,11 @@ defmodule SmartKioskWeb.UserRegistrationLive do
                       class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-violet-500/50 transition-all text-sm"
                     >
                       <%= for {label, slug} <- @plan_options do %>
-                        <option value={slug} selected={@form[:plan].value == slug} class="bg-slate-900">
+                        <option
+                          value={slug}
+                          selected={@form[:plan].value == slug}
+                          class="bg-slate-900"
+                        >
                           <%= label %>
                         </option>
                       <% end %>
@@ -303,8 +307,6 @@ defmodule SmartKioskWeb.UserRegistrationLive do
                   <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-violet-400 transition-colors">
                       <.icon name="hero-lock-closed" class="w-5 h-5" />
-
-                      
                     </div>
                     <input
                       type="password"
@@ -354,10 +356,11 @@ defmodule SmartKioskWeb.UserRegistrationLive do
   def mount(_params, _session, socket) do
     plan_options = SmartKioskCore.Plans.select_options()
 
-    default_plan = case plan_options do
-      [{_, slug} | _] -> slug
-      _ -> "basic"
-    end
+    default_plan =
+      case plan_options do
+        [{_, slug} | _] -> slug
+        _ -> "basic"
+      end
 
     changeset = Shops.change_registration(%{"plan" => default_plan})
 
@@ -386,10 +389,11 @@ defmodule SmartKioskWeb.UserRegistrationLive do
     user_attrs = Map.take(registration_params, ["full_name", "email", "password", "phone"])
 
     if socket.assigns.reg_type == "shop" do
-      default_plan = case socket.assigns.plan_options do
-        [{_, slug} | _] -> slug
-        _ -> "basic"
-      end
+      _default_plan =
+        case socket.assigns.plan_options do
+          [{_, slug} | _] -> slug
+          _ -> "basic"
+        end
 
       shop_attrs = %{
         "name" => registration_params["full_name"] <> "'s Shop",

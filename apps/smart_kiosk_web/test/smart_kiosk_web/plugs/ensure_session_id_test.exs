@@ -22,4 +22,3 @@ defmodule SmartKioskWeb.Plugs.EnsureSessionIdTest do
     assert get_session(conn, :session_id) == "existing"
   end
 end
-

@@ -3,7 +3,11 @@
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
     <%= if @show_receipt && @order do %>
-      <div id="receipt-container" phx-hook="PrintReceipt" class="digital-receipt bg-white text-black rounded-lg p-4 max-w-sm mx-auto font-mono mb-6">
+      <div
+        id="receipt-container"
+        phx-hook="PrintReceipt"
+        class="digital-receipt bg-white text-black rounded-lg p-4 max-w-sm mx-auto font-mono mb-6"
+      >
         <div class="text-sm mb-2">
           <div class="font-semibold"><%= @order.shop.name %></div>
           <div><%= DateTime.utc_now() |> DateTime.to_string() %></div>
@@ -39,14 +43,15 @@
         <div class="text-sm mt-3">Thank you for your purchase!</div>
 
         <div class="flex gap-2 mt-4">
-          <button phx-click="print_receipt" phx-value-order-id={@order.id} class="btn no-print">Print Receipt</button>
+          <button phx-click="print_receipt" phx-value-order-id={@order.id} class="btn no-print">
+            Print Receipt
+          </button>
           <button phx-click="share_receipt" class="btn no-print">Share Receipt</button>
           <button phx-click="new_order" class="btn no-print">New Order</button>
         </div>
       </div>
     <% end %>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
       <%!-- ── Cart items ─────────────────────────────────────────────────── --%>
       <div class="lg:col-span-2">
         <h1 class="text-3xl font-bold mb-8">
@@ -71,7 +76,6 @@
               <.icon name="hero-arrow-left" class="w-5 h-5" /> Browse Shops
             </.link>
           </div>
-
         <% else %>
           <%!-- Group items visually by shop --%>
           <% items_by_shop = Enum.group_by(@cart_items, fn item -> item.product.shop end) %>
@@ -103,8 +107,12 @@
 
                       <%!-- Product info --%>
                       <div class="flex-1 min-w-0">
-                        <h3 class="font-semibold text-white truncate"><%= cart_item.product_name %></h3>
-                        <p class="text-violet-400 font-bold mt-0.5">KES <%= cart_item.unit_price %></p>
+                        <h3 class="font-semibold text-white truncate">
+                          <%= cart_item.product_name %>
+                        </h3>
+                        <p class="text-violet-400 font-bold mt-0.5">
+                          KES <%= cart_item.unit_price %>
+                        </p>
                       </div>
 
                       <%!-- Quantity stepper --%>
@@ -134,7 +142,9 @@
 
                       <%!-- Line total --%>
                       <div class="text-right min-w-[80px]">
-                        <p class="font-bold text-white tabular-nums">KES <%= cart_item.line_total %></p>
+                        <p class="font-bold text-white tabular-nums">
+                          KES <%= cart_item.line_total %>
+                        </p>
                       </div>
 
                       <%!-- Remove --%>
@@ -175,7 +185,9 @@
             <div class="border-t border-white/10 pt-4 mb-6">
               <div class="flex items-center justify-between">
                 <span class="font-semibold text-slate-300">Total</span>
-                <span class="text-2xl font-bold text-white tabular-nums">KES <%= @cart_total %></span>
+                <span class="text-2xl font-bold text-white tabular-nums">
+                  KES <%= @cart_total %>
+                </span>
               </div>
             </div>
           <% else %>
@@ -241,16 +253,15 @@
                   "flex items-center justify-center gap-2",
                   if(@checking_out,
                     do: "bg-violet-500/50 cursor-not-allowed",
-                    else: "bg-violet-500 hover:bg-violet-400 shadow-lg shadow-violet-500/20 active:scale-[0.98]"
+                    else:
+                      "bg-violet-500 hover:bg-violet-400 shadow-lg shadow-violet-500/20 active:scale-[0.98]"
                   )
                 ]}
               >
                 <%= if @checking_out do %>
-                  <span class="loading loading-spinner loading-sm"></span>
-                  Placing order…
+                  <span class="loading loading-spinner loading-sm"></span> Placing order…
                 <% else %>
-                  <.icon name="hero-credit-card" class="w-5 h-5" />
-                  Place Order
+                  <.icon name="hero-credit-card" class="w-5 h-5" /> Place Order
                 <% end %>
               </button>
             </.form>
@@ -268,7 +279,6 @@
           </.link>
         </div>
       </div>
-
     </div>
   </div>
 </div>

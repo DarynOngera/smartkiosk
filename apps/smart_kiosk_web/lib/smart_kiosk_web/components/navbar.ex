@@ -24,14 +24,12 @@ defmodule SmartKioskWeb.Navbar do
         <div class="flex items-center justify-between h-16">
           <%!-- Logo --%>
           <.link navigate={~p"/"}>
-          <div class="flex items-center gap-3">
-
-            <div class="w-9 h-9 bg-gradient-to-tr from-violet-500 to-indigo-400 rounded-lg flex items-center justify-center shadow-lg shadow-violet-500/20">
-              <.icon name="hero-shopping-bag-solid" class="w-5 h-5 text-white" />
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 bg-gradient-to-tr from-violet-500 to-indigo-400 rounded-lg flex items-center justify-center shadow-lg shadow-violet-500/20">
+                <.icon name="hero-shopping-bag-solid" class="w-5 h-5 text-white" />
+              </div>
+              <span class="text-xl text-white font-bold tracking-tight">SmartKiosk</span>
             </div>
-            <span class="text-xl text-white font-bold tracking-tight">SmartKiosk</span>
-
-          </div>
           </.link>
 
           <%!-- Right Side Actions --%>

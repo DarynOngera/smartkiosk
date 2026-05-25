@@ -64,19 +64,37 @@ defmodule SmartKioskWeb.UI.DeliveryZoneLive.FormComponent do
     <div class="p-4">
       <h2 class="text-xl font-bold text-white mb-6"><%= @title %></h2>
 
-      <.form for={@form} id="delivery-zone-form" phx-target={@myself} phx-change="validate" phx-submit="save">
+      <.form
+        for={@form}
+        id="delivery-zone-form"
+        phx-target={@myself}
+        phx-change="validate"
+        phx-submit="save"
+      >
         <div class="space-y-6">
-          <.input field={@form[:name]} type="text" label="Zone Name" placeholder="e.g. Westlands & Parklands" />
+          <.input
+            field={@form[:name]}
+            type="text"
+            label="Zone Name"
+            placeholder="e.g. Westlands & Parklands"
+          />
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <.input field={@form[:base_fee]} type="number" label="Base Delivery Fee (KES)" step="0.01" />
+            <.input
+              field={@form[:base_fee]}
+              type="number"
+              label="Base Delivery Fee (KES)"
+              step="0.01"
+            />
             <div class="pt-8">
               <.input field={@form[:active]} type="checkbox" label="Active" />
             </div>
           </div>
 
           <div class="bg-violet-900/10 border border-violet-500/20 rounded-xl p-4">
-            <label class="block text-sm font-medium text-slate-400 mb-2">Boundary Definition (GeoJSON)</label>
+            <label class="block text-sm font-medium text-slate-400 mb-2">
+              Boundary Definition (GeoJSON)
+            </label>
             <p class="text-[10px] text-slate-500 mb-3 italic">
               Phase 3 Tip: Paste a GeoJSON Polygon here. In the next update, we will add a map drawing tool.
             </p>

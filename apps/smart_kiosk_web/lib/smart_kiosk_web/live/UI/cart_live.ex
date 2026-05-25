@@ -130,11 +130,20 @@ defmodule SmartKioskWeb.CartLive do
         ]
 
         case Orders.create_order(shop, order_items, opts) do
-          {:ok, order} -> {:ok, shop, order}
-          {:error, :invalid_cart} -> {:error, shop, "Your cart is invalid."}
-          {:error, {:insufficient_stock, _id}} -> {:error, shop, "Sorry, one or more items in your #{shop.name} cart are out of stock."}
-          {:error, {:invalid_product, _id}} -> {:error, shop, "A product from #{shop.name} is no longer available."}
-          {:error, _} -> {:error, shop, "Something went wrong placing your #{shop.name} order."}
+          {:ok, order} ->
+            {:ok, shop, order}
+
+          {:error, :invalid_cart} ->
+            {:error, shop, "Your cart is invalid."}
+
+          {:error, {:insufficient_stock, _id}} ->
+            {:error, shop, "Sorry, one or more items in your #{shop.name} cart are out of stock."}
+
+          {:error, {:invalid_product, _id}} ->
+            {:error, shop, "A product from #{shop.name} is no longer available."}
+
+          {:error, _} ->
+            {:error, shop, "Something went wrong placing your #{shop.name} order."}
         end
       end)
 
@@ -233,7 +242,13 @@ defmodule SmartKioskWeb.CartLive do
     lines =
       []
       |> then(fn l ->
-        ["Shop: #{order.shop.name}", "Date: #{DateTime.utc_now() |> DateTime.to_string()}", "Order: #{String.slice(order.id, 0, 8)}", "", "Items:"] ++
+        [
+          "Shop: #{order.shop.name}",
+          "Date: #{DateTime.utc_now() |> DateTime.to_string()}",
+          "Order: #{String.slice(order.id, 0, 8)}",
+          "",
+          "Items:"
+        ] ++
           l
       end)
 
