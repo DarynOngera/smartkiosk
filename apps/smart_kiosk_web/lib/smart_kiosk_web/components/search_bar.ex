@@ -97,10 +97,11 @@ defmodule SmartKioskWeb.SearchBar do
     """
   end
 
-  defp search_result_item(%{result: %{type: :product}} = assigns) do
+  defp search_result_item(%{result: %{type: :product, shop: shop}} = assigns) do
+    assigns = assign(assigns, :shop_slug, shop.slug)
     ~H"""
     <.link
-      navigate={~p"/shop/#{@result.shop.slug}/product/#{@result.id}"}
+      navigate={~p"/shop/#{@shop_slug}/product/#{@result.id}"}
       class="flex items-center gap-4 p-4 hover:bg-white/5 transition-colors"
     >
       <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">

@@ -18,16 +18,15 @@ defmodule SmartKioskWeb.AdminLive do
 
     # Placeholder data for features not yet implemented
     # TODO: Replace with actual queries when schemas are created
-    # TODO: Accounts.list_riders()
+    # TODO: Shops.list_riders()
     riders = []
-    # TODO: Accounts.list_customer_reports()
+    # TODO: Shops.list_customer_reports()
     customer_reports = []
-    # TODO: Accounts.list_pickup_points()
+    # TODO: Shops.list_pickup_points()
     pickup_points = []
-    # TODO: Accounts.list_hotspots()
+    # TODO: Shops.list_hotspots()
     hotspots = []
 
-    
     {:ok,
      socket
      |> assign(:current_shop, current_shop)
@@ -40,17 +39,18 @@ defmodule SmartKioskWeb.AdminLive do
      |> assign(:customer_reports, customer_reports)
      |> assign(:pickup_points, pickup_points)
      |> assign(:hotspots, hotspots)
-     |> assign(:page_title, "Admin Dashboard")}
+     |> assign(:page_title, "Admin Dashboard")
+     |> assign(:cart_count, 0)}
   end
 
   @impl true
   def handle_event("approve_shop", %{"shop_id" => shop_id}, socket) do
-    shop = Accounts.get_shop!(shop_id)
+    shop = Shops.get_shop!(shop_id)
 
-    case Accounts.approve_shop(shop) do
+    case Shops.approve_shop(shop) do
       {:ok, _shop} ->
-        pending_approval = Accounts.get_pending_status()
-        shops = Accounts.list_shops()
+        pending_approval = Shops.get_pending_status()
+        shops = Shops.list_shops()
 
         {:noreply,
          socket
@@ -68,12 +68,12 @@ defmodule SmartKioskWeb.AdminLive do
 
   @impl true
   def handle_event("reject_shop", %{"shop_id" => shop_id}, socket) do
-    shop = Accounts.get_shop!(shop_id)
+    shop = Shops.get_shop!(shop_id)
 
-    case Accounts.reject_shop(shop) do
+    case Shops.reject_shop(shop) do
       {:ok, _shop} ->
-        pending_approval = Accounts.get_pending_status()
-        shops = Accounts.list_shops()
+        pending_approval = Shops.get_pending_status()
+        shops = Shops.list_shops()
 
         {:noreply,
          socket
