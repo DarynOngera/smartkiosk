@@ -59,6 +59,22 @@ const ThemeToggle = {
   }
 }
 
+// PrintReceipt hook: handles print and share events
+const PrintReceipt = {
+  mounted() {
+    this.handleEvent("print_receipt", () => window.print())
+    this.handleEvent("share", ({text}) => {
+      if (navigator.share) {
+        try { navigator.share({ title: "Receipt", text }) } catch (e) { console.error(e) }
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => alert("Receipt copied to clipboard"))
+      } else {
+        alert("Sharing not supported on this device")
+      }
+    })
+  }
+}
+
 // Initialize theme on page load
 const savedTheme = localStorage.getItem("theme") || "light"
 document.documentElement.setAttribute("data-theme", savedTheme)
@@ -66,7 +82,7 @@ document.documentElement.setAttribute("data-theme", savedTheme)
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {ThemeToggle},
+  hooks: {ThemeToggle, PrintReceipt},
 })
 
 // Show progress bar on live navigation and form submits

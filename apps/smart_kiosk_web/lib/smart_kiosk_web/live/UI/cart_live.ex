@@ -12,6 +12,7 @@ defmodule SmartKioskWeb.CartLive do
   alias SmartKioskCore.{Cart, Orders}
   import SmartKioskWeb.Navbar
 
+  @impl true
   def mount(_params, session, socket) do
     current_user = socket.assigns[:current_user]
     session_id = session["session_id"] || (get_connect_params(socket) || %{})["session_id"]
@@ -21,11 +22,10 @@ defmodule SmartKioskWeb.CartLive do
     cart_total = Cart.calculate_cart_total(cart_items)
 
     # Pre-fill checkout form if user is logged in
-    initial_checkout_params =
-      %{
-        "full_name" => (current_user && current_user.full_name) || "",
-        "phone_number" => (current_user && current_user.phone) || ""
-      }
+    initial_checkout_params = %{
+      "full_name" => (current_user && current_user.full_name) || "",
+      "phone_number" => (current_user && current_user.phone) || ""
+    }
 
     {:ok,
      socket
@@ -35,11 +35,14 @@ defmodule SmartKioskWeb.CartLive do
      |> assign(:cart_count, length(cart_items))
      |> assign(:session_id, session_id)
      |> assign(:checkout_form, to_form(initial_checkout_params))
-     |> assign(:checking_out, false)}
+     |> assign(:checking_out, false)
+     |> assign(:show_receipt, false)
+     |> assign(:order, nil)}
   end
 
-  # cart mutations
+  # ── Events ──────────────────────────────────────────────────────────────────
 
+  @impl true
   def handle_event("update_quantity", %{"id" => id, "quantity" => quantity}, socket) do
     quantity = String.to_integer(quantity)
     cart_item = Cart.get_cart_item!(id)
@@ -53,13 +56,14 @@ defmodule SmartKioskWeb.CartLive do
     {:noreply, reload_cart(socket)}
   end
 
+  @impl true
   def handle_event("remove_item", %{"id" => id}, socket) do
     id |> Cart.get_cart_item!() |> Cart.remove_cart_item()
 
     {:noreply, reload_cart(socket)}
   end
 
-  # checkout
+  @impl true
   def handle_event("checkout", %{"full_name" => name, "phone_number" => phone}, socket) do
     cart_items = socket.assigns.cart_items
 
@@ -71,16 +75,41 @@ defmodule SmartKioskWeb.CartLive do
     end
   end
 
-  # checkout logic
+  @impl true
+  def handle_event("print_receipt", %{"order-id" => _order_id}, socket) do
+    push_event(socket, "print_receipt", %{})
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("share_receipt", _params, socket) do
+    order = socket.assigns[:order]
+    text = build_text_receipt(order)
+    push_event(socket, "share", %{text: text})
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("new_order", _params, socket) do
+    # reset cart view and navigate to POS
+    {:noreply,
+     socket
+     |> assign(:cart_items, [])
+     |> assign(:cart_total, Decimal.new("0"))
+     |> assign(:cart_count, 0)
+     |> assign(:show_receipt, false)
+     |> push_navigate(to: ~p"/pos")}
+  end
+
+  # ── Internal Helpers ─────────────────────────────────────────────────────────
+
   # Group items by shop, create one order per group, clear cart only on
   # full success. Returns {:noreply, socket}.
   defp do_checkout(socket, cart_items, name, phone) do
     current_user = socket.assigns[:current_user]
 
     # Group cart items by shop struct (items are preloaded with product: :shop)
-    items_by_shop =
-      cart_items
-      |> Enum.group_by(fn item -> item.product.shop end)
+    items_by_shop = Enum.group_by(cart_items, fn item -> item.product.shop end)
 
     results =
       Enum.map(items_by_shop, fn {shop, items} ->
@@ -88,7 +117,7 @@ defmodule SmartKioskWeb.CartLive do
         customer_id =
           case Orders.find_or_create_customer(shop, %{name: name, phone: phone}) do
             {:ok, customer} -> customer.id
-            _               -> nil
+            _ -> nil
           end
 
         # Build the {product, qty} pairs Orders.create_order/3 expects
@@ -96,21 +125,21 @@ defmodule SmartKioskWeb.CartLive do
 
         opts = [
           customer_id: customer_id,
-          channel:     :online,
-          user_id:     current_user && current_user.id
+          channel: :online,
+          user_id: current_user && current_user.id
         ]
 
         case Orders.create_order(shop, order_items, opts) do
-          {:ok, order}                           -> {:ok, shop, order}
-          {:error, :invalid_cart}                -> {:error, shop, "Your cart is invalid."}
-          {:error, {:insufficient_stock, _id}}   -> {:error, shop, "Sorry, one or more items in your #{shop.name} cart are out of stock."}
-          {:error, {:invalid_product, _id}}      -> {:error, shop, "A product from #{shop.name} is no longer available."}
-          {:error, _}                            -> {:error, shop, "Something went wrong placing your #{shop.name} order."}
+          {:ok, order} -> {:ok, shop, order}
+          {:error, :invalid_cart} -> {:error, shop, "Your cart is invalid."}
+          {:error, {:insufficient_stock, _id}} -> {:error, shop, "Sorry, one or more items in your #{shop.name} cart are out of stock."}
+          {:error, {:invalid_product, _id}} -> {:error, shop, "A product from #{shop.name} is no longer available."}
+          {:error, _} -> {:error, shop, "Something went wrong placing your #{shop.name} order."}
         end
       end)
 
-    errors  = Enum.filter(results, fn {status, _, _} -> status == :error end)
-    success = Enum.filter(results, fn {status, _, _} -> status == :ok    end)
+    errors = Enum.filter(results, fn {status, _, _} -> status == :error end)
+    success = Enum.filter(results, fn {status, _, _} -> status == :ok end)
 
     socket = assign(socket, :checking_out, false)
 
@@ -148,10 +177,10 @@ defmodule SmartKioskWeb.CartLive do
         {:noreply,
          socket
          |> reload_cart()
-         |> put_flash(:info,  "Orders placed: #{order_numbers}.")
+         |> put_flash(:info, "Orders placed: #{order_numbers}.")
          |> put_flash(:error, error_msg)}
 
-      # All succeeded — clear entire cart and redirect
+      # All succeeded — clear entire cart and show receipt
       true ->
         Enum.each(cart_items, fn item -> Cart.remove_cart_item(item) end)
 
@@ -160,18 +189,23 @@ defmodule SmartKioskWeb.CartLive do
           |> Enum.map(fn {:ok, _shop, order} -> "##{String.slice(order.id, 0, 8)}" end)
           |> Enum.join(", ")
 
+        # pick first order to show receipt (for multi-shop orders you may want to aggregate)
+        {_status, _shop, first_order} = List.first(success)
+
         {:noreply,
          socket
-         |> assign(:cart_items,    [])
-         |> assign(:cart_total,    Decimal.new("0"))
-         |> assign(:cart_count,    0)
-         |> put_flash(:info, "🎉 Order#{if length(success) > 1, do: "s", else: ""} placed! #{order_numbers}")
-         |> push_navigate(to: ~p"/")}
+         |> assign(:cart_items, [])
+         |> assign(:cart_total, Decimal.new("0"))
+         |> assign(:cart_count, 0)
+         |> assign(:order, first_order)
+         |> assign(:show_receipt, true)
+         |> put_flash(
+           :info,
+           "🎉 Order#{if length(success) > 1, do: "s", else: ""} placed! #{order_numbers}"
+         )}
     end
   end
 
-
-  # helper functions
   defp load_cart(current_user, session_id) do
     cond do
       current_user -> Cart.get_user_cart(current_user)
@@ -191,5 +225,25 @@ defmodule SmartKioskWeb.CartLive do
     |> assign(:cart_items, cart_items)
     |> assign(:cart_total, cart_total)
     |> assign(:cart_count, length(cart_items))
+  end
+
+  defp build_text_receipt(nil), do: ""
+
+  defp build_text_receipt(order) do
+    lines =
+      []
+      |> then(fn l ->
+        ["Shop: #{order.shop.name}", "Date: #{DateTime.utc_now() |> DateTime.to_string()}", "Order: #{String.slice(order.id, 0, 8)}", "", "Items:"] ++
+          l
+      end)
+
+    item_lines =
+      Enum.map(order.items || [], fn it ->
+        "#{it.product_name} x#{it.quantity}  KES #{it.line_total}"
+      end)
+
+    total = "\nTotal: KES #{order.total}"
+
+    Enum.join(lines ++ item_lines, "\n") <> total <> "\n\nThank you for your purchase!"
   end
 end

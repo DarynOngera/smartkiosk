@@ -42,6 +42,7 @@ defmodule SmartKioskWeb.Router do
       # Shop public storefront (accessed by consumers)
       live "/shop/:slug", StorefrontLive.Index, :index
       live "/shop/:slug/product/:id", StorefrontLive.Show, :show
+      live "/shop/:slug/rider/register", RiderRegistrationLive, :new
     end
   end
 
@@ -99,6 +100,9 @@ defmodule SmartKioskWeb.Router do
       live "/orders", OrdersLive.Index, :index
       live "/orders/:id", OrdersLive.Show, :show
       live "/pos", POSLive.Index, :index
+      live "/delivery-zones", DeliveryZoneLive.Index, :index
+      live "/delivery-zones/new", DeliveryZoneLive.Index, :new
+      live "/delivery-zones/:id/edit", DeliveryZoneLive.Index, :edit
       live "/settings", SettingsLive.Index, :index
       live "/customers", CustomersLive.Index, :index
       live "/analytics", AnalyticsLive.Index, :index

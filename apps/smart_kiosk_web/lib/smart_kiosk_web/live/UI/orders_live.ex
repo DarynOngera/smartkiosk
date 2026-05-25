@@ -8,13 +8,29 @@ defmodule SmartKioskWeb.UI.OrdersLive.Index do
     shop = socket.assigns.current_shop
     orders = Orders.list_orders(shop)
 
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(SmartKiosk.PubSub, "shop:#{shop.id}:orders")
+    end
+
     {:ok,
      socket
      |> assign(:orders, orders)
      |> assign(:page_title, "Orders")
      |> assign(:status_filter, nil)
-      |> assign(:statuses, @statuses)
-    }
+     |> assign(:statuses, @statuses)}
+  end
+
+  def handle_info({:new_order, order}, socket) do
+    {:noreply, update(socket, :orders, fn orders -> [order | orders] end)}
+  end
+
+  def handle_info({:order_updated, updated_order}, socket) do
+    {:noreply,
+     update(socket, :orders, fn orders ->
+       Enum.map(orders, fn o ->
+         if o.id == updated_order.id, do: updated_order, else: o
+       end)
+     end)}
   end
 
   def handle_params(params, _url, socket) do
@@ -37,8 +53,19 @@ defmodule SmartKioskWeb.UI.OrdersLive.Index do
   @spec render(any()) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_shop} current_user={@current_user} cart_count={@cart_count}>
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_shop}
+      current_user={@current_user}
+      cart_count={@cart_count}
+    >
       <div class="container mx-auto px-4 py-8">
+          <.back
+            href={~p"/dashboard"}
+            class="inline-flex items-center gap-1 text-sm text-black hover:text-blue-500 transition-colors mb-4 cursor-pointer"
+          >
+            Back to Dashboard
+          </.back>
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-3xl font-bold text-gray-900">Orders</h1>
           <div class="flex gap-2">
@@ -186,12 +213,29 @@ defmodule SmartKioskWeb.UI.OrdersLive.Show do
     shop = socket.assigns.current_shop
     order = Orders.get_order!(shop, id)
 
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(SmartKiosk.PubSub, "shop:#{shop.id}:orders")
+    end
+
     {:ok,
      socket
      |> assign(:order, order)
      |> assign(:page_title, "Order #{String.slice(order.id, 0..7)}")
      |> assign(:allowed_transitions, Map.get(@valid_transitions, order.status, []))}
   end
+
+  def handle_info({:order_updated, updated_order}, socket) do
+    if updated_order.id == socket.assigns.order.id do
+      {:noreply,
+       socket
+       |> assign(:order, updated_order)
+       |> assign(:allowed_transitions, Map.get(@valid_transitions, updated_order.status, []))}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_info(_other, socket), do: {:noreply, socket}
 
   def handle_event("transition_status", %{"status" => status}, socket) do
     shop = socket.assigns.current_shop
@@ -213,7 +257,12 @@ defmodule SmartKioskWeb.UI.OrdersLive.Show do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_shop} current_user={@current_user} cart_count={@cart_count}>
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_shop}
+      current_user={@current_user}
+      cart_count={@cart_count}
+    >
       <div class="container mx-auto px-4 py-8">
         <div class="mb-6">
           <.link navigate={~p"/orders"} class="text-blue-600 hover:text-blue-900 mb-4 inline-block">

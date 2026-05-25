@@ -64,7 +64,7 @@ defmodule SmartKioskWeb.HomeLive do
      |> assign(:page_title, "SmartKiosk · Local Commerce")
      |> assign(:shop_categories, shop_categories)
      |> assign(:selected_category, nil)
-     |> assign(:products_by_category, products_by_category)
+     |> assign(:products_by_category, [])
      |> assign(:filtered_shops, nil)
      |> assign(:recommended_shops, recommended_shops)
      |> assign(:recommended_products, recommended_products)
@@ -73,37 +73,77 @@ defmodule SmartKioskWeb.HomeLive do
      |> assign(:session_id, session_id)
      |> assign(:search_query, "")
      |> assign(:search_results, [])
-     |> assign(:search_loading, false)}
+     |> assign(:search_loading, false)
+     |> assign(:page, 1)
+     |> assign(:has_more, false)}
   end
 
   def handle_params(params, _uri, socket) do
     category = params["category"]
+    page = String.to_integer(params["page"] || "1")
+    limit = 12
+
+    socket = assign(socket, page: page)
 
     if category && category != "" do
       # Filter mode: show shops in this category
-      filtered_shops = fetch_shops_by_category(category)
+      category_atom = safe_category_atom(category)
 
-      {:noreply,
-       socket
-       |> assign(:selected_category, String.to_existing_atom(category))
-       |> assign(:filtered_shops, filtered_shops)
-       |> assign(:search_query, "")}
+      if is_nil(category_atom) do
+        {:noreply,
+         socket
+         |> assign(:selected_category, nil)
+         |> assign(:filtered_shops, nil)
+         |> assign(:search_query, "")}
+      else
+        filtered_shops = fetch_shops_by_category(category_atom)
+
+        {:noreply,
+         socket
+         |> assign(:selected_category, category_atom)
+         |> assign(:filtered_shops, filtered_shops)
+         |> assign(:search_query, "")}
+      end
     else
-      # Home mode: show products by category
+      # Home mode: show products by category with pagination
+      products_by_category = fetch_products_by_categories(page: page, limit: limit)
+      has_more = length(products_by_category) == limit # Simplified check
+
       {:noreply,
        socket
        |> assign(:selected_category, nil)
        |> assign(:filtered_shops, nil)
+       |> assign(:products_by_category, products_by_category)
+       |> assign(:has_more, has_more)
        |> assign(:search_query, "")}
     end
   end
 
+  def handle_event("load-more", _params, socket) do
+    {:noreply, push_patch(socket, to: ~p"/?page=#{socket.assigns.page + 1}")}
+  end
+
   def handle_event("search", %{"query" => query}, socket) do
     if String.length(query) >= 2 do
-      results = perform_search(query)
+      results = SmartKioskCore.Search.query_products(query)
       {:noreply, assign(socket, search_query: query, search_results: results)}
     else
       {:noreply, assign(socket, search_query: query, search_results: [])}
+    end
+  end
+
+  def handle_event("search_submit", %{"query" => query}, socket) do
+    case SmartKioskCore.Search.query_products(query) do
+      [%{type: :product, shop: %{slug: shop_slug}} = first_result | _] ->
+        path = ~p"/shop/#{shop_slug}/product/#{first_result.id}"
+        {:noreply, push_navigate(socket, to: path)}
+
+      [%{type: :shop, slug: slug} | _] ->
+        path = ~p"/shop/#{slug}"
+        {:noreply, push_navigate(socket, to: path)}
+
+      [] ->
+        {:noreply, socket}
     end
   end
 
@@ -157,7 +197,19 @@ defmodule SmartKioskWeb.HomeLive do
     categories[category] || format_category_name(category)
   end
 
-  defp fetch_products_by_categories do
+  defp safe_category_atom(category) when is_binary(category) do
+    Shop.category_labels()
+    |> Map.keys()
+    |> Enum.find(fn key -> to_string(key) == category end)
+  end
+
+  defp safe_category_atom(_), do: nil
+
+  defp fetch_products_by_categories(opts \\ []) do
+    page = opts[:page] || 1
+    limit = opts[:limit] || 12
+    offset = (page - 1) * limit
+
     Enum.map(@featured_categories, fn {cat_slug, _label} ->
       products =
         Product
@@ -166,7 +218,8 @@ defmodule SmartKioskWeb.HomeLive do
         |> where([p, s], p.status == :active)
         |> where([p, s], p.stock_qty > 0)
         |> order_by([p, s], desc: p.inserted_at)
-        |> limit(5)
+        |> limit(^limit)
+        |> offset(^offset)
         |> preload([:images, :shop])
         |> Repo.all()
 
@@ -175,7 +228,7 @@ defmodule SmartKioskWeb.HomeLive do
     |> Enum.reject(fn {_cat, products} -> Enum.empty?(products) end)
   end
 
-  defp fetch_shops_by_category(category) do
+  defp fetch_shops_by_category(category) when is_atom(category) do
     from(s in Shop,
       where: s.category == ^category,
       where: s.status == :active,
@@ -183,31 +236,5 @@ defmodule SmartKioskWeb.HomeLive do
       limit: 20
     )
     |> Repo.all()
-  end
-
-  defp perform_search(query) do
-    term = "%#{query}%"
-
-    # Search Products
-    products =
-      Product
-      |> where([p], ilike(p.name, ^term) or ilike(p.description, ^term) or ilike(p.sku, ^term))
-      |> where([p], p.status == :active)
-      |> preload([:images, :shop])
-      |> Repo.all()
-      |> Enum.map(&Map.put(&1, :type, :product))
-
-    # Search Shops
-    shops =
-      Shop
-      |> where([s], ilike(s.name, ^term) or ilike(s.description, ^term))
-      |> where([s], s.status == :active)
-      |> order_by([s], desc: s.inserted_at)
-      |> Repo.all()
-      |> Enum.map(&Map.put(&1, :type, :shop))
-
-    # Combine and sort results
-    (products ++ shops)
-    |> Enum.sort_by(& &1.inserted_at, :desc)
   end
 end

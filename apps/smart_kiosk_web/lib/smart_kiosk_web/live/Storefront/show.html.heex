@@ -78,7 +78,13 @@
           </div>
 
           <div class="prose prose-invert prose-sm max-w-none text-slate-300 mb-8">
-            <p><%= @product.description || "No description available." %></p>
+            <p>
+              <%= if String.trim(to_string(@product.description || "")) != "" and not String.contains?(to_string(@product.description || ""), "Phoenix.HTML.Form.normalize_value") do %>
+                <%= @product.description %>
+              <% else %>
+                No description available.
+              <% end %>
+            </p>
           </div>
 
           <div class="bg-white/5 border border-white/10 rounded-2xl p-6">

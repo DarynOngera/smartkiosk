@@ -9,8 +9,8 @@ defmodule SmartKioskWeb.UI.DashboardLive do
   import SmartKioskWeb.Components.ProductCard
 
   def mount(_params, _session, socket) do
-    _user = socket.assigns.current_user
-    shop = socket.assigns.current_shop
+    _user = socket.assigns[:current_user]
+    shop = socket.assigns[:current_shop]
 
     products = if shop, do: Catalogue.list_products(shop, limit: 10), else: []
     pending = if shop, do: Orders.get_pending_orders(shop), else: []
@@ -125,6 +125,18 @@ defmodule SmartKioskWeb.UI.DashboardLive do
             />
             <p class="font-bold text-white">Orders & Deliveries</p>
             <p class="text-slate-500 text-xs mt-1">Track customer shipments</p>
+          </.link>
+
+          <.link
+            navigate="/delivery-zones"
+            class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
+          >
+            <.icon
+              name="hero-map"
+              class="w-8 h-8 text-emerald-400 mb-3 group-hover:scale-110 transition-transform"
+            />
+            <p class="font-bold text-white">Delivery Zones</p>
+            <p class="text-slate-500 text-xs mt-1">Manage geographic boundaries</p>
           </.link>
         </div>
       </div>
