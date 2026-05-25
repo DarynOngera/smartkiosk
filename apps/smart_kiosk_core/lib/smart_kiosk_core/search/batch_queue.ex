@@ -111,7 +111,13 @@ defmodule SmartKioskCore.Search.BatchQueue do
 
   @impl true
   def handle_call(:dequeue_all, _from, state) do
-    changes = Enum.reverse(state.changes)
+    # Deduplicate: keep only the last operation per document ID
+    # Reverse to get chronological order, then dedupe by keeping last
+    changes =
+      state.changes
+      |> Enum.reverse()
+      |> deduplicate_changes()
+
     new_state = %{state | changes: [], last_processed: DateTime.utc_now()}
     {:reply, changes, new_state}
   end
@@ -120,4 +126,24 @@ defmodule SmartKioskCore.Search.BatchQueue do
   def handle_call(:size, _from, state) do
     {:reply, length(state.changes), state}
   end
+
+  # ── Private Functions ───────────────────────────────────────────────────────
+
+  # Deduplicate changes by keeping only the last operation per document ID
+  # If a doc is inserted then updated, we only need to insert with final data
+  # If a doc is updated multiple times, we only need the last update
+  # If a doc is deleted, we can skip any previous operations
+  defp deduplicate_changes(changes) do
+    changes
+    |> Enum.group_by(&extract_doc_id/1)
+    |> Enum.map(fn {_doc_id, ops} ->
+      # Get the last operation for this doc_id
+      List.last(ops)
+    end)
+  end
+
+  # Extract document ID from a change operation
+  defp extract_doc_id({:insert, %{id: id}}), do: id
+  defp extract_doc_id({:update, %{id: id}}), do: id
+  defp extract_doc_id({:delete, id}), do: id
 end

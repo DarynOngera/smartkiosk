@@ -26,9 +26,6 @@ defmodule SmartKioskCore.Search.Engine do
           optional(:weight) => float()
         }
 
-  @typedoc "Search result with distance score"
-  @type search_result :: {doc_id :: term(), distance :: non_neg_integer()}
-
   # ── Public API ──────────────────────────────────────────────────────────────
 
   @doc """
@@ -77,39 +74,49 @@ defmodule SmartKioskCore.Search.Engine do
     remove_doc_id(tree, doc_id)
   end
 
+  @typedoc "Search result with distance and field information"
+  @type search_result :: {doc_id :: term(), distance :: non_neg_integer(), field :: atom()}
+
   @doc """
   Searches the Trie with fuzzy matching.
 
-  Returns a list of {doc_id, distance} tuples sorted by distance.
+  Returns a list of {doc_id, distance, field} tuples sorted by distance.
 
   ## Options
 
-    * `:max_typos` - Maximum edit distance allowed (default: calculated from query length)
-    * `:field_weights` - Map of field names to weight multipliers
+    * `:max_typos` - Override default typo budget calculation
 
   ## Examples
 
-      iex> tree = SmartKioskCore.Search.Engine.build_index([%{id: 1, text: "iPhone"}])
+      iex> tree = SmartKioskCore.Search.Engine.build_index([%{id: 1, text: "iPhone", field: :name}])
       iex> SmartKioskCore.Search.Engine.search(tree, "iphoen")
-      [{1, 1}]
+      [{1, 1, :name}]
   """
   @spec search(trie(), String.t(), keyword()) :: [search_result()]
   def search(tree, query, opts \\ []) do
     query_tokens = tokenize(query)
     max_typos = opts[:max_typos] || calculate_typo_budget(query)
 
+    # fuzzy_search_trie now returns %{doc_id => {distance, field}}
     results =
       Enum.reduce(query_tokens, %{}, fn token, acc ->
         matches = fuzzy_search_trie(tree, token, max_typos)
 
-        Enum.reduce(matches, acc, fn {doc_id, distance}, inner_acc ->
-          Map.update(inner_acc, doc_id, distance, &min(&1, distance))
+        # matches is now %{doc_id => {distance, field}}
+        Enum.reduce(matches, acc, fn {doc_id, {distance, field}}, inner_acc ->
+          Map.update(inner_acc, doc_id, {distance, field}, fn {existing_dist, existing_field} ->
+            if distance < existing_dist do
+              {distance, field}
+            else
+              {existing_dist, existing_field}
+            end
+          end)
         end)
       end)
 
     results
-    |> Enum.sort_by(fn {_doc_id, distance} -> distance end)
-    |> Enum.map(fn {doc_id, distance} -> {doc_id, distance} end)
+    |> Enum.sort_by(fn {_doc_id, {distance, _field}} -> distance end)
+    |> Enum.map(fn {doc_id, {distance, field}} -> {doc_id, distance, field} end)
   end
 
   @doc """
@@ -267,24 +274,88 @@ defmodule SmartKioskCore.Search.Engine do
   end
 
   # Initialize fuzzy search on the Trie
+  # Using tuple for O(1) row access instead of list
   defp fuzzy_search_trie(tree, target_word, max_typos) do
     target_len = String.length(target_word)
-    initial_row = Enum.to_list(0..target_len)
+    # Convert to tuple for O(1) access via elem/2
+    initial_row = List.to_tuple(Enum.to_list(0..target_len))
 
-    traverse_trie(tree, "", initial_row, target_word, max_typos, %{})
+    traverse_trie(tree, "", initial_row, target_word, max_typos, %{}, 0)
   end
 
   # DFS traversal with Levenshtein distance calculation and pruning
-  defp traverse_trie(node, _current_prefix, previous_row, target, max_typos, matches)
+  # Returns a map of doc_id => {distance, field}
+  # previous_row is now a tuple for O(1) access
+  # depth tracks how many characters we've traversed in the trie
+  defp traverse_trie(node, _current_prefix, previous_row, target, max_typos, matches, depth)
        when is_map(node) do
-    current_distance = List.last(previous_row)
+    target_len = tuple_size(previous_row) - 1
+
+    # For prefix matching: we want the query to match the BEGINNING of the trie path.
+    # 
+    # In Levenshtein terms: we look at row[target_len], which represents the cost
+    # to match the entire query against the current trie path.
+    #
+    # For "kili" matching "kilimani":
+    #   - row[4] (at column matching "kili") should be 0 for a perfect prefix match
+    #   - row[4] would be > 0 if "kili" doesn't match the start of the word
+    #
+    # Additionally, we require that the trie path is at least as long as the query
+    # (depth >= target_len), otherwise it can't be a valid prefix match.
+    standard_distance = elem(previous_row, target_len)
+
+    # For prefix matching: when depth >= target_len, check if query matches prefix
+    # by looking at the cell where the full query would align with the trie path
+    prefix_distance =
+      if depth >= target_len do
+        # The trie path is long enough - check exact alignment at target_len
+        elem(previous_row, target_len)
+      else
+        # Trie path is shorter than query - can't be a prefix match
+        # Use a high penalty
+        target_len
+      end
+
+    # Use the better distance, but with a penalty for non-prefix matches
+    current_distance = min(standard_distance, prefix_distance)
 
     matches =
       if node[:terminal] == true and current_distance <= max_typos do
         ids = node[:ids] || MapSet.new()
+        field_weights = node[:field_weights] || %{}
 
         Enum.reduce(ids, matches, fn doc_id, acc ->
-          Map.update(acc, doc_id, current_distance, &min(&1, current_distance))
+          # Get the primary field for this doc_id from field_weights
+          field = get_primary_field_from_weights(field_weights, doc_id)
+
+          Map.update(acc, doc_id, {current_distance, field}, fn {existing_dist, existing_field} ->
+            if current_distance < existing_dist do
+              {current_distance, field}
+            else
+              {existing_dist, existing_field}
+            end
+          end)
+        end)
+      else
+        matches
+      end
+
+    matches =
+      if node[:terminal] == true and current_distance <= max_typos do
+        ids = node[:ids] || MapSet.new()
+        field_weights = node[:field_weights] || %{}
+
+        Enum.reduce(ids, matches, fn doc_id, acc ->
+          # Get the primary field for this doc_id from field_weights
+          field = get_primary_field_from_weights(field_weights, doc_id)
+
+          Map.update(acc, doc_id, {current_distance, field}, fn {existing_dist, existing_field} ->
+            if current_distance < existing_dist do
+              {current_distance, field}
+            else
+              {existing_dist, existing_field}
+            end
+          end)
         end)
       else
         matches
@@ -304,8 +375,9 @@ defmodule SmartKioskCore.Search.Engine do
         char_str = <<char_code::utf8>>
         next_row = compute_next_levenshtein_row(previous_row, char_str, target)
 
-        if Enum.min(next_row) <= max_typos do
-          traverse_trie(sub_node, "", next_row, target, max_typos, acc)
+        # next_row is a tuple, use tuple_size and elem to find min
+        if min_in_tuple(next_row) <= max_typos do
+          traverse_trie(sub_node, "", next_row, target, max_typos, acc, depth + 1)
         else
           acc
         end
@@ -313,29 +385,61 @@ defmodule SmartKioskCore.Search.Engine do
   end
 
   # Catch-all for non-map nodes (nil, empty, etc.)
-  defp traverse_trie(_node, _current_prefix, _previous_row, _target, _max_typos, matches) do
+  defp traverse_trie(_node, _current_prefix, _previous_row, _target, _max_typos, matches, _depth) do
     matches
   end
 
+  # Extract primary field from field_weights map for a given doc_id
+  defp get_primary_field_from_weights(field_weights, doc_id) do
+    case Map.get(field_weights, doc_id) do
+      nil ->
+        :name
+
+      weights when is_map(weights) ->
+        weights |> Map.keys() |> List.first() || :name
+
+      _ ->
+        :name
+    end
+  end
+
+  # Find minimum value in a tuple (helper for pruning check)
+  defp min_in_tuple(tuple) do
+    size = tuple_size(tuple)
+    do_min_in_tuple(tuple, size - 1, elem(tuple, 0))
+  end
+
+  defp do_min_in_tuple(_tuple, -1, min_val), do: min_val
+
+  defp do_min_in_tuple(tuple, index, min_val) do
+    val = elem(tuple, index)
+    new_min = if val < min_val, do: val, else: min_val
+    do_min_in_tuple(tuple, index - 1, new_min)
+  end
+
   # Compute next row in Levenshtein matrix (space-optimized)
+  # previous_row is a tuple for O(1) access via elem/2
   defp compute_next_levenshtein_row(previous_row, char, target) do
     target_chars = String.graphemes(target)
-    first_cell = hd(previous_row) + 1
+    # previous_row is a tuple, first element is at index 0
+    first_cell = elem(previous_row, 0) + 1
 
-    {_, new_row} =
+    {_, new_row_list} =
       target_chars
       |> Enum.with_index()
       |> Enum.reduce({first_cell, [first_cell]}, fn {target_char, index}, {prev_cell, row_acc} ->
         substitution_cost = if char == target_char, do: 0, else: 1
 
-        deletion = Enum.at(previous_row, index + 1, 0) + 1
+        # Use elem/2 for O(1) tuple access instead of Enum.at on list
+        deletion = elem(previous_row, index + 1) + 1
         insertion = prev_cell + 1
-        substitution = Enum.at(previous_row, index, 0) + substitution_cost
+        substitution = elem(previous_row, index) + substitution_cost
 
         current_cell = Enum.min([deletion, insertion, substitution])
-        {current_cell, row_acc ++ [current_cell]}
+        {current_cell, [current_cell | row_acc]}
       end)
 
-    new_row
+    # Reverse to maintain correct order and convert to tuple
+    new_row_list |> Enum.reverse() |> List.to_tuple()
   end
 end

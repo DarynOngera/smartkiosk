@@ -147,11 +147,12 @@ defmodule SmartKioskCore.Search.Query do
     limit = opts[:limit] || @default_limit
     field_weights = opts[:field_weights] || @default_field_weights
 
+    # Engine.search now returns {doc_id, distance, field} tuples
     results = Engine.search(tree, query, max_typos: max_typos)
 
     results
-    |> Enum.map(fn {doc_id, distance} -> {doc_id, distance, %{}} end)
-    |> rank_results(tree, field_weights)
+    |> Enum.map(fn {doc_id, distance, field} -> {doc_id, distance, %{field: field}} end)
+    |> rank_results(field_weights)
     |> Enum.take(limit)
   end
 
@@ -161,6 +162,7 @@ defmodule SmartKioskCore.Search.Query do
     field_weights = opts[:field_weights] || @default_field_weights
 
     # Get results for each token
+    # Engine.search returns {doc_id, distance, field} tuples
     token_results =
       Enum.map(tokens, fn token ->
         typos = max_typos || Engine.calculate_typo_budget(token)
@@ -173,31 +175,32 @@ defmodule SmartKioskCore.Search.Query do
         []
 
       [first | rest] ->
-        first_ids = Map.new(first)
+        # Convert to map for intersection logic: doc_id => {distance, field}
+        first_map = Map.new(first, fn {id, dist, field} -> {id, {dist, field}} end)
 
         intersection =
-          Enum.reduce(rest, first_ids, fn results, acc ->
-            result_ids = Map.new(results)
+          Enum.reduce(rest, first_map, fn results, acc ->
+            result_map = Map.new(results, fn {id, dist, field} -> {id, {dist, field}} end)
 
             Map.filter(acc, fn {id, _} ->
-              Map.has_key?(result_ids, id)
+              Map.has_key?(result_map, id)
             end)
           end)
 
         intersection
-        |> Enum.map(fn {doc_id, distance} ->
-          {doc_id, distance, %{}}
+        |> Enum.map(fn {doc_id, {distance, field}} ->
+          {doc_id, distance, %{field: field}}
         end)
-        |> rank_results(tree, field_weights)
+        |> rank_results(field_weights)
         |> Enum.take(limit)
     end
   end
 
-  defp rank_results(results, tree, field_weights) do
+  defp rank_results(results, field_weights) do
     Enum.map(results, fn {doc_id, distance, metadata} ->
-      # Get field weights from the tree if available
-      field_weight = get_field_weight(tree, doc_id, field_weights)
-      field = get_primary_field(tree, doc_id)
+      # Field now comes from the search result tuple (extracted from terminal node)
+      field = metadata[:field] || :name
+      field_weight = Map.get(field_weights, field, 1.0)
 
       score = calculate_score(distance, field, field_weight)
 
@@ -211,26 +214,6 @@ defmodule SmartKioskCore.Search.Query do
       {doc_id, score, metadata}
     end)
     |> Enum.sort_by(fn {_id, score, _meta} -> score end)
-  end
-
-  defp get_field_weight(tree, doc_id, default_weights) do
-    case get_in(tree, [:field_weights, doc_id]) do
-      nil ->
-        default_weights[:name] || 1.0
-
-      weights when is_map(weights) ->
-        # Use the highest weight among all fields for this doc
-        weights
-        |> Map.values()
-        |> Enum.max(fn -> 1.0 end)
-    end
-  end
-
-  defp get_primary_field(tree, doc_id) do
-    case get_in(tree, [:field_weights, doc_id]) do
-      nil -> :unknown
-      weights -> weights |> Map.keys() |> List.first() || :unknown
-    end
   end
 
   defp log_metrics(result_count, token_count, start_time) do
