@@ -32,6 +32,75 @@ defmodule SmartKioskWeb.CoreComponents do
   alias Phoenix.LiveView.JS
 
   @doc """
+  Renders a modal.
+
+  ## Examples
+
+      <.modal id="confirm-modal">
+        This is a modal.
+      </.modal>
+
+  JS commands may be passed to the `:on_cancel` to configure
+  the closing/cancel event, for example:
+
+      <.modal id="confirm" on_cancel={JS.navigate(~p"/posts")}>
+        Is this ok?
+      </.modal>
+  """
+  attr :id, :string, required: true
+  attr :show, :boolean, default: false
+  attr :on_cancel, JS, default: %JS{}
+  slot :inner_block, required: true
+
+  def modal(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      phx-mounted={@show && show_modal(@id)}
+      phx-remove={hide_modal(@id)}
+      data-cancel={JS.exec(@on_cancel, "phx-remove")}
+      class="relative z-50 hidden"
+    >
+      <div id={"#{@id}-bg"} class="bg-slate-900/90 fixed inset-0 transition-opacity backdrop-blur-sm" aria-hidden="true" />
+      <div
+        class="fixed inset-0 overflow-y-auto"
+        aria-labelledby={"#{@id}-title"}
+        aria-describedby={"#{@id}-description"}
+        role="dialog"
+        aria-modal="true"
+        tabindex="-1"
+      >
+        <div class="flex min-h-full items-center justify-center">
+          <div class="w-full max-w-3xl p-4 sm:p-6 lg:py-8">
+            <.focus_wrap
+              id={"#{@id}-container"}
+              phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
+              phx-key="escape"
+              phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
+              class="relative hidden rounded-3xl bg-[#0B0F1A] border border-white/10 p-14 shadow-2xl shadow-violet-500/10 transition-all"
+            >
+              <div class="absolute top-6 right-5">
+                <button
+                  type="button"
+                  phx-click={JS.exec("data-cancel", to: "##{@id}")}
+                  class="flex-none p-3 opacity-20 hover:opacity-40 transition-opacity"
+                  aria-label={gettext("close")}
+                >
+                  <.icon name="hero-x-mark-solid" class="size-5" />
+                </button>
+              </div>
+              <div id={"#{@id}-content"}>
+                <%= render_slot(@inner_block) %>
+              </div>
+            </.focus_wrap>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
   Renders flash notices.
 
   ## Examples
@@ -39,13 +108,13 @@ defmodule SmartKioskWeb.CoreComponents do
       <.flash kind={:info} flash={@flash} />
       <.flash kind={:info} phx-mounted={show("#flash")}>Welcome Back!</.flash>
   """
-  attr :id, :string, doc: "the optional id of flash container"
-  attr :flash, :map, default: %{}, doc: "the map of flash messages to display"
-  attr :title, :string, default: nil
-  attr :kind, :atom, values: [:info, :error], doc: "used for styling and flash lookup"
-  attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
+  attr(:id, :string, doc: "the optional id of flash container")
+  attr(:flash, :map, default: %{}, doc: "the map of flash messages to display")
+  attr(:title, :string, default: nil)
+  attr(:kind, :atom, values: [:info, :error], doc: "used for styling and flash lookup")
+  attr(:rest, :global, doc: "the arbitrary HTML attributes to add to the flash container")
 
-  slot :inner_block, doc: "the optional inner block that renders the flash message"
+  slot(:inner_block, doc: "the optional inner block that renders the flash message")
 
   def flash(assigns) do
     assigns = assign_new(assigns, :id, fn -> "flash-#{assigns.kind}" end)
@@ -88,10 +157,10 @@ defmodule SmartKioskWeb.CoreComponents do
       <.button phx-click="go" variant="primary">Send!</.button>
       <.button navigate={~p"/"}>Home</.button>
   """
-  attr :rest, :global, include: ~w(href navigate patch method download name value disabled)
-  attr :class, :any
-  attr :variant, :string, values: ~w(primary)
-  slot :inner_block, required: true
+  attr(:rest, :global, include: ~w(href navigate patch method download name value disabled))
+  attr(:class, :any)
+  attr(:variant, :string, values: ~w(primary))
+  slot(:inner_block, required: true)
 
   def button(%{rest: rest} = assigns) do
     variants = %{"primary" => "btn-primary", nil => "btn-primary btn-soft"}
@@ -112,6 +181,43 @@ defmodule SmartKioskWeb.CoreComponents do
       <button class={@class} {@rest}>
         <%= render_slot(@inner_block) %>
       </button>
+      """
+    end
+  end
+
+  @doc """
+  Renders a small back link component with an arrow icon.
+
+  ## Examples
+
+      <.back navigate="/posts">Back</.back>
+      <.back href="/">Home</.back>
+  """
+  attr(:rest, :global, include: ~w(href navigate patch))
+  attr(:class, :any, default: nil)
+  slot(:inner_block, required: true)
+
+  def back(assigns) do
+    assigns =
+      assign_new(assigns, :class, fn ->
+        [
+          "inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+        ]
+      end)
+
+    if assigns[:href] || assigns[:navigate] || assigns[:patch] do
+      ~H"""
+      <.link class={@class} {@rest}>
+        <.icon name="hero-arrow-left" class="w-4 h-4 inline" />
+        <%= render_slot(@inner_block) %>
+      </.link>
+      """
+    else
+      ~H"""
+      <a class={@class} {@rest}>
+        <.icon name="hero-arrow-left" class="w-4 h-4 inline" />
+        <%= render_slot(@inner_block) %>
+      </a>
       """
     end
   end
@@ -156,30 +262,33 @@ defmodule SmartKioskWeb.CoreComponents do
   For more information on what kind of data can be passed to `options` see
   [`options_for_select`](https://hexdocs.pm/phoenix_html/Phoenix.HTML.Form.html#options_for_select/2).
   """
-  attr :id, :any, default: nil
-  attr :name, :any
-  attr :label, :string, default: nil
-  attr :value, :any
+  attr(:id, :any, default: nil)
+  attr(:name, :any)
+  attr(:label, :string, default: nil)
+  attr(:value, :any)
 
-  attr :type, :string,
+  attr(:type, :string,
     default: "text",
     values: ~w(checkbox color date datetime-local email file month number password
                search select tel text textarea time url week hidden)
+  )
 
-  attr :field, Phoenix.HTML.FormField,
+  attr(:field, Phoenix.HTML.FormField,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
+  )
 
-  attr :errors, :list, default: []
-  attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
-  attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
-  attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
-  attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
-  attr :class, :any, default: nil, doc: "the input class to use over defaults"
-  attr :error_class, :any, default: nil, doc: "the input error class to use over defaults"
+  attr(:errors, :list, default: [])
+  attr(:checked, :boolean, doc: "the checked flag for checkbox inputs")
+  attr(:prompt, :string, default: nil, doc: "the prompt for select inputs")
+  attr(:options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2")
+  attr(:multiple, :boolean, default: false, doc: "the multiple flag for select inputs")
+  attr(:class, :any, default: nil, doc: "the input class to use over defaults")
+  attr(:error_class, :any, default: nil, doc: "the input error class to use over defaults")
 
-  attr :rest, :global,
+  attr(:rest, :global,
     include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
                 multiple pattern placeholder readonly required rows size step)
+  )
 
   def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
     errors = field.errors
@@ -257,7 +366,7 @@ defmodule SmartKioskWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="label mb-1"><%= @label %></span>
         <textarea
           id={@id}
           name={@name}
@@ -266,7 +375,7 @@ defmodule SmartKioskWeb.CoreComponents do
             @errors != [] && (@error_class || "textarea-error")
           ]}
           {@rest}
-        >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
+        ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
       </label>
       <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
@@ -309,9 +418,9 @@ defmodule SmartKioskWeb.CoreComponents do
   @doc """
   Renders a header with title.
   """
-  slot :inner_block, required: true
-  slot :subtitle
-  slot :actions
+  slot(:inner_block, required: true)
+  slot(:subtitle)
+  slot(:actions)
 
   def header(assigns) do
     ~H"""
@@ -339,20 +448,21 @@ defmodule SmartKioskWeb.CoreComponents do
         <:col :let={user} label="username">{user.username}</:col>
       </.table>
   """
-  attr :id, :string, required: true
-  attr :rows, :list, required: true
-  attr :row_id, :any, default: nil, doc: "the function for generating the row id"
-  attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
+  attr(:id, :string, required: true)
+  attr(:rows, :list, required: true)
+  attr(:row_id, :any, default: nil, doc: "the function for generating the row id")
+  attr(:row_click, :any, default: nil, doc: "the function for handling phx-click on each row")
 
-  attr :row_item, :any,
+  attr(:row_item, :any,
     default: &Function.identity/1,
     doc: "the function for mapping each row before calling the :col and :action slots"
+  )
 
   slot :col, required: true do
-    attr :label, :string
+    attr(:label, :string)
   end
 
-  slot :action, doc: "the slot for showing user actions in the last table column"
+  slot(:action, doc: "the slot for showing user actions in the last table column")
 
   def table(assigns) do
     assigns =
@@ -403,7 +513,7 @@ defmodule SmartKioskWeb.CoreComponents do
       </.list>
   """
   slot :item, required: true do
-    attr :title, :string, required: true
+    attr(:title, :string, required: true)
   end
 
   def list(assigns) do
@@ -431,8 +541,8 @@ defmodule SmartKioskWeb.CoreComponents do
       <.icon name="hero-x-mark" />
       <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
   """
-  attr :name, :string, required: true
-  attr :class, :any, default: "size-4"
+  attr(:name, :string, required: true)
+  attr(:class, :any, default: "size-4")
 
   def icon(%{name: "hero-" <> _} = assigns) do
     {icon_name, style_assigns} = heroicon(assigns.name)
@@ -502,6 +612,31 @@ defmodule SmartKioskWeb.CoreComponents do
         {"transition-all ease-in duration-200", "opacity-100 translate-y-0 sm:scale-100",
          "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
     )
+  end
+
+  def show_modal(js \\ %JS{}, id) when is_binary(id) do
+    js
+    |> JS.show(to: "##{id}")
+    |> JS.show(
+      to: "##{id}-bg",
+      time: 300,
+      transition: {"transition-all ease-out duration-300", "opacity-0", "opacity-100"}
+    )
+    |> show("##{id}-container")
+    |> JS.add_class("overflow-hidden", to: "body")
+    |> JS.focus_first(to: "##{id}-content")
+  end
+
+  def hide_modal(js \\ %JS{}, id) do
+    js
+    |> JS.hide(
+      to: "##{id}-bg",
+      transition: {"transition-all ease-in duration-200", "opacity-100", "opacity-0"}
+    )
+    |> hide("##{id}-container")
+    |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})
+    |> JS.remove_class("overflow-hidden", to: "body")
+    |> JS.pop_focus()
   end
 
   @doc """

@@ -274,6 +274,25 @@ defmodule SmartKioskWeb.UserRegistrationLive do
                       <p class="mt-1 text-sm text-rose-300"><%= translate_error(error) %></p>
                     <% end %>
                   </div>
+
+                  <div class="space-y-2 animate-fade-in">
+                    <label class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold ml-1">
+                      Plan
+                    </label>
+                    <select
+                      name="registration[plan]"
+                      class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-violet-500/50 transition-all text-sm"
+                    >
+                      <%= for {label, slug} <- @plan_options do %>
+                        <option value={slug} selected={@form[:plan].value == slug} class="bg-slate-900">
+                          <%= label %>
+                        </option>
+                      <% end %>
+                    </select>
+                    <%= for error <- @form[:plan].errors do %>
+                      <p class="mt-1 text-sm text-rose-300"><%= translate_error(error) %></p>
+                    <% end %>
+                  </div>
                 <% end %>
 
                 <%!-- Password --%>
@@ -284,6 +303,8 @@ defmodule SmartKioskWeb.UserRegistrationLive do
                   <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-violet-400 transition-colors">
                       <.icon name="hero-lock-closed" class="w-5 h-5" />
+
+                      
                     </div>
                     <input
                       type="password"
@@ -331,13 +352,18 @@ defmodule SmartKioskWeb.UserRegistrationLive do
   end
 
   def mount(_params, _session, socket) do
-    changeset = Shops.change_registration(%{})
+    plan_options = SmartKioskCore.Plans.select_options()
+
+    default_plan = case plan_options do
+      [{_, slug} | _] -> slug
+      _ -> "basic"
+    end
+
+    changeset = Shops.change_registration(%{"plan" => default_plan})
 
     category_options =
       SmartKioskCore.Schemas.Shop.category_labels()
       |> Enum.map(fn {k, v} -> {to_string(k), v} end)
-
-    plan_options = ["kiosk", "duka", "biashara", "enterprise"]
 
     {:ok,
      socket
@@ -360,6 +386,11 @@ defmodule SmartKioskWeb.UserRegistrationLive do
     user_attrs = Map.take(registration_params, ["full_name", "email", "password", "phone"])
 
     if socket.assigns.reg_type == "shop" do
+      default_plan = case socket.assigns.plan_options do
+        [{_, slug} | _] -> slug
+        _ -> "basic"
+      end
+
       shop_attrs = %{
         "name" => registration_params["full_name"] <> "'s Shop",
         "phone" => registration_params["phone"],
@@ -367,7 +398,7 @@ defmodule SmartKioskWeb.UserRegistrationLive do
         "address" => registration_params["address"] || "Nairobi",
         "city" => registration_params["city"] || "Nairobi",
         "country" => "KE",
-        "plan" => "kiosk"
+        "plan" => registration_params["plan"] || default_plan
       }
 
       case Shops.register_shop_owner(shop_attrs, user_attrs) do

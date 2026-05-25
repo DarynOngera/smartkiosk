@@ -99,3 +99,13 @@
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /* This file is for your main application CSS */
+
+/* Receipt print styles */
+#receipt-container { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Helvetica Neue", monospace; }
+
+@media print {
+  body * { visibility: hidden !important; }
+  #receipt-container, #receipt-container * { visibility: visible !important; }
+  #receipt-container { position: absolute; top: 0; left: 0; width: 100%; padding: 1rem; font-family: ui-monospace, monospace; font-size: 12px; }
+  .no-print { display: none !important; }
+}

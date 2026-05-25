@@ -99,7 +99,11 @@
                   </h3>
                 </.link>
                 <p class="text-slate-400 text-sm mb-3 line-clamp-2 h-10">
-                  <%= product.description || "No description" %>
+                  <%= if String.trim(to_string(product.description || "")) != "" and not String.contains?(to_string(product.description || ""), "Phoenix.HTML.Form.normalize_value") do %>
+                    <%= product.description %>
+                  <% else %>
+                    No description
+                  <% end %>
                 </p>
 
                 <div class="flex items-center justify-between mb-4">

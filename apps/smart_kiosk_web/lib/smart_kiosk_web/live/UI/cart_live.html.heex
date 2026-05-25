@@ -2,6 +2,49 @@
   <.navbar current_user={@current_user} cart_count={@cart_count} />
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <%= if @show_receipt && @order do %>
+      <div id="receipt-container" phx-hook="PrintReceipt" class="digital-receipt bg-white text-black rounded-lg p-4 max-w-sm mx-auto font-mono mb-6">
+        <div class="text-sm mb-2">
+          <div class="font-semibold"><%= @order.shop.name %></div>
+          <div><%= DateTime.utc_now() |> DateTime.to_string() %></div>
+          <div>Order: <%= String.slice(@order.id, 0, 8) %></div>
+        </div>
+
+        <div class="divide-y">
+          <%= for item <- @order.items do %>
+            <div class="flex justify-between text-sm py-1">
+              <span><%= item.product_name %> x<%= item.quantity %></span>
+              <span>KES <%= item.line_total %></span>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="flex justify-between font-bold mt-4">
+          <span>Total</span>
+          <span>KES <%= @order.total %></span>
+        </div>
+
+        <%= if @order.transactions != [] && Enum.any?(@order.transactions, &(&1.payment_method == :cash)) do %>
+          <% cash_txn = Enum.find(@order.transactions, &(&1.payment_method == :cash)) %>
+          <div class="flex justify-between text-sm mt-1 text-slate-600">
+            <span>Received</span>
+            <span>KES <%= cash_txn.metadata["received"] || @order.total %></span>
+          </div>
+          <div class="flex justify-between text-sm font-semibold mt-1">
+            <span>Change</span>
+            <span>KES <%= cash_txn.metadata["change"] || 0.0 %></span>
+          </div>
+        <% end %>
+
+        <div class="text-sm mt-3">Thank you for your purchase!</div>
+
+        <div class="flex gap-2 mt-4">
+          <button phx-click="print_receipt" phx-value-order-id={@order.id} class="btn no-print">Print Receipt</button>
+          <button phx-click="share_receipt" class="btn no-print">Share Receipt</button>
+          <button phx-click="new_order" class="btn no-print">New Order</button>
+        </div>
+      </div>
+    <% end %>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
       <%!-- ── Cart items ─────────────────────────────────────────────────── --%>

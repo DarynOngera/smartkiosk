@@ -1,11 +1,11 @@
 defmodule SmartKioskWeb.UI.CreateShopLive do
   use SmartKioskWeb, :live_view
 
-  alias SmartKioskCore.Shops
+  alias SmartKioskCore.{Shops, Plans}
 
   def mount(_params, _session, socket) do
     # Shop plans and categories
-    plans = [Kiosk: :kiosk, Duka: :duka, Biashara: :biashara, Enterprise: :enterprise]
+    plans = Plans.select_options()
 
     categories = [
       General: :general_shop,
@@ -23,7 +23,7 @@ defmodule SmartKioskWeb.UI.CreateShopLive do
           "address" => "",
           "city" => "",
           "country" => "KE",
-          "plan" => :kiosk,
+          "plan" => :basic,
           "category" => :general_shop,
           "description" => ""
         },

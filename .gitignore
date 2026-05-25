@@ -23,4 +23,4 @@ erl_crash.dump
 /tmp/
 
 /config
-/.vscode
+.vscode/.phoenix-pulse-cache.json
