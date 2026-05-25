@@ -101,13 +101,26 @@ defmodule SmartKioskCore.Search.Persistence do
   """
   @spec load(String.t()) :: {:ok, Engine.trie()} | {:error, atom()}
   def load(dets_path) do
-    with {:ok, table} <- open(dets_path),
-         [{@data_key, serialized}] <- :dets.lookup(table, @data_key),
+    case open(dets_path) do
+      {:ok, table} ->
+        try do
+          do_load(table, dets_path)
+        after
+          close(table)
+        end
+
+      {:error, reason} ->
+        Logger.error("Search.Persistence: Failed to open DETS: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  defp do_load(table, dets_path) do
+    with [{@data_key, serialized}] <- :dets.lookup(table, @data_key),
          [{@checksum_key, stored_checksum}] <- :dets.lookup(table, @checksum_key),
          computed_checksum = :erlang.md5(serialized),
-         true <- computed_checksum == stored_checksum,
-         trie = :erlang.binary_to_term(serialized),
-         :ok <- close(table) do
+         true <- computed_checksum == stored_checksum do
+      trie = :erlang.binary_to_term(serialized)
       Logger.info("Search.Persistence: Loaded index from DETS")
       {:ok, trie}
     else
@@ -117,16 +130,12 @@ defmodule SmartKioskCore.Search.Persistence do
 
       false ->
         Logger.error("Search.Persistence: Checksum mismatch - index corrupted")
-        close_dets()
+        # Delete corrupted file
+        delete(dets_path)
         {:error, :corrupted}
-
-      {:error, reason} ->
-        Logger.error("Search.Persistence: Failed to load index: #{inspect(reason)}")
-        {:error, reason}
 
       error ->
         Logger.error("Search.Persistence: Unexpected error: #{inspect(error)}")
-        close_dets()
         {:error, :unknown}
     end
   end

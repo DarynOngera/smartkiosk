@@ -117,19 +117,33 @@ defmodule SmartKioskCore.Search.Metrics do
   @doc """
   Returns current search statistics.
 
+  ## Important Note
+
+  This function currently returns a placeholder structure with nil values.
+  For actual metrics, external systems should consume the `:telemetry` events
+  directly. Telemetry events are emitted for:
+
+    * `[:smart_kiosk, :search, :query]` - Search queries
+    * `[:smart_kiosk, :search, :index, :update]` - Index updates
+    * `[:smart_kiosk, :search, :index, :rebuild]` - Index rebuilds
+    * `[:smart_kiosk, :search, :persistence, :save]` - Persistence operations
+    * `[:smart_kiosk, :search, :persistence, :load]` - Load operations
+
   ## Examples
 
       iex> SmartKioskCore.Search.Metrics.stats()
       %{
-        query_count: 1234,
-        avg_latency_ms: 2.5,
-        index_size_bytes: 1024000
+        query_count: nil,
+        avg_latency_ms: nil,
+        index_size_bytes: nil,
+        last_rebuild: nil
       }
   """
   @spec stats() :: map()
   def stats do
-    # In a real implementation, this would aggregate from a metrics store
-    # For now, return a placeholder structure
+    # Note: This is a placeholder. Actual metrics should be obtained by
+    # consuming telemetry events from an external metrics system
+    # (e.g., Prometheus, StatsD, DataDog, etc.)
     %{
       query_count: nil,
       avg_latency_ms: nil,
