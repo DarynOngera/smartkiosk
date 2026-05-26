@@ -163,14 +163,12 @@ defmodule SmartKioskCore.Shops do
     Repo.get_by(Shop, id: id)
   end
 
-  defp enqueue_search_indexing({:ok, %{id: id}}, type) do
-    %{type: type, id: id}
-    |> SmartKioskCore.Workers.SearchIndexWorker.new()
-    |> Oban.insert()
+  defp enqueue_search_indexing({:ok, %{id: _id} = shop}, "shop") do
+    SmartKioskCore.Search.index_shop(shop)
   end
 
-  defp enqueue_search_indexing({:ok, shop, _user}, type) do
-    enqueue_search_indexing({:ok, shop}, type)
+  defp enqueue_search_indexing({:ok, shop, _user}, "shop") do
+    SmartKioskCore.Search.index_shop(shop)
   end
 
   defp enqueue_search_indexing(_, _), do: :ok

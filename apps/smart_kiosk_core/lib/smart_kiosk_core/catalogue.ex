@@ -101,6 +101,15 @@ defmodule SmartKioskCore.Catalogue do
     Repo.get(Product, id)
   end
 
+  @doc "Gets multiple products by their IDs."
+  def list_products_by_ids(ids) when is_list(ids) do
+    from(p in Product,
+      where: p.id in ^ids,
+      preload: [:shop, :images]
+    )
+    |> Repo.all()
+  end
+
   @doc "Creates a product for a shop."
   def create_product(%Shop{} = shop, attrs) do
     attrs =
@@ -156,25 +165,13 @@ defmodule SmartKioskCore.Catalogue do
     |> tap(&enqueue_search_indexing(&1, "product"))
   end
 
-  defp enqueue_search_indexing({:ok, %{id: id}}, type) do
-    %{type: type, id: id}
-    |> SmartKioskCore.Workers.SearchIndexWorker.new()
-    |> Oban.insert()
+  defp enqueue_search_indexing({:ok, product}, "product") do
+    # Preload shop for indexing
+    product = Repo.preload(product, :shop)
+    SmartKioskCore.Search.index_product(product)
   end
 
   defp enqueue_search_indexing(_, _), do: :ok
-
-  @doc "Lists products across all shops (centralized search)."
-  def list_products_centralized(search) do
-    term = "%#{search}%"
-
-    Product
-    |> join(:inner, [p], s in Shop, on: s.id == p.shop_id)
-    |> where([p, s], ilike(p.name, ^term))
-    |> where([p, s], p.status == :active and s.status == :active)
-    |> preload([:images, :shop])
-    |> Repo.all()
-  end
 
   # ── Inventory ─────────────────────────────────────────────────────────────────
 

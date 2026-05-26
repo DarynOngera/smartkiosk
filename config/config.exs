@@ -13,11 +13,26 @@ import Config
 config :smart_kiosk_core,
   ecto_repos: [SmartKioskCore.Repo]
 
+# Search engine configuration
+# Note: dets_path is set at runtime in application.ex
+config :smart_kiosk_core, SmartKioskCore.Search.IndexServer, snapshot_interval_ms: 300_000
+
 # Oban background job processing
 config :smart_kiosk_core, Oban,
   repo: SmartKioskCore.Repo,
-  plugins: [Oban.Plugins.Pruner],
-  queues: [default: 10, mailer: 5]
+  plugins: [
+    Oban.Plugins.Pruner,
+    {Oban.Plugins.Cron,
+     crontab: [
+       # Recommendation engine refresh every 6 hours
+       {"0 */6 * * *", SmartKioskCore.Workers.RecommendationWorker},
+       # Search index batch processing every 30 seconds
+       {"*/1 * * * *", SmartKioskCore.Workers.SearchIndexBatchWorker},
+       # Periodic index rebuild for consistency
+       {"0 2 * * *", SmartKioskCore.Workers.SearchRebuildWorker}
+     ]}
+  ],
+  queues: [default: 10, mailer: 5, search_index: 5]
 
 # Configure the mailer
 #
