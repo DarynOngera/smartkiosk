@@ -43,7 +43,13 @@ defmodule SmartKioskCore.Search.Engine do
       doc.text
       |> tokenize()
       |> Enum.reduce(tree, fn token, acc_tree ->
-        insert_token(acc_tree, token, doc.id, doc[:field] || :name, doc[:weight] || 1.0)
+        insert_token_with_prefixes(
+          acc_tree,
+          token,
+          doc.id,
+          doc[:field] || :name,
+          doc[:weight] || 1.0
+        )
       end)
     end)
   end
@@ -62,7 +68,7 @@ defmodule SmartKioskCore.Search.Engine do
     text
     |> tokenize()
     |> Enum.reduce(tree, fn token, acc_tree ->
-      insert_token(acc_tree, token, doc_id, field, weight)
+      insert_token_with_prefixes(acc_tree, token, doc_id, field, weight)
     end)
   end
 
@@ -159,7 +165,7 @@ defmodule SmartKioskCore.Search.Engine do
   def tokenize(text) when is_binary(text) do
     text
     |> String.downcase()
-    |> String.replace(~r/[^\w\s]/u, " ")
+    |> String.replace(~r/[^\p{L}\p{N}\s]/u, " ")
     |> String.split(~r/\s+/, trim: true)
     |> Enum.reject(&(&1 == ""))
   end
@@ -167,6 +173,23 @@ defmodule SmartKioskCore.Search.Engine do
   def tokenize(_), do: []
 
   # ── Private Functions ───────────────────────────────────────────────────────
+
+  # Insert a token with all its prefixes into the Trie
+  # This enables prefix matching (e.g., "iph" matches "iphone")
+  defp insert_token_with_prefixes(tree, token, doc_id, field, weight) do
+    token_length = String.length(token)
+
+    # Generate all prefixes from length 1 to full token length
+    # e.g., "iphone" -> ["i", "ip", "iph", "ipho", "iphon", "iphone"]
+    prefixes =
+      1..token_length
+      |> Enum.map(&String.slice(token, 0, &1))
+
+    # Insert each prefix into the tree
+    Enum.reduce(prefixes, tree, fn prefix, acc_tree ->
+      insert_token(acc_tree, prefix, doc_id, field, weight)
+    end)
+  end
 
   # Recursively insert a token into the Trie
   defp insert_token(tree, "", doc_id, field, weight) do
