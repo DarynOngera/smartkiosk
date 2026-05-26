@@ -152,6 +152,14 @@ defmodule SmartKioskCore.Shops do
     Repo.all(Shop)
   end
 
+  @doc "Gets multiple shops by their IDs."
+  def list_shops_by_ids(ids) when is_list(ids) do
+    from(s in Shop,
+      where: s.id in ^ids
+    )
+    |> Repo.all()
+  end
+
   @doc "Gets a shop by id."
   def get_shop(id) do
     Repo.get(Shop, id)
