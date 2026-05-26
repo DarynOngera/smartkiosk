@@ -60,12 +60,12 @@ defmodule SmartKioskWeb.UI.OrdersLive.Index do
       cart_count={@cart_count}
     >
       <div class="container mx-auto px-4 py-8">
-          <.back
-            href={~p"/dashboard"}
-            class="inline-flex items-center gap-1 text-sm text-black hover:text-blue-500 transition-colors mb-4 cursor-pointer"
-          >
-            Back to Dashboard
-          </.back>
+        <.back
+          href={~p"/dashboard"}
+          class="inline-flex items-center gap-1 text-sm text-black hover:text-blue-500 transition-colors mb-4 cursor-pointer"
+        >
+          Back to Dashboard
+        </.back>
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-3xl font-bold text-gray-900">Orders</h1>
           <div class="flex gap-2">
@@ -215,17 +215,21 @@ defmodule SmartKioskWeb.UI.OrdersLive.Show do
 
     if connected?(socket) do
       Phoenix.PubSub.subscribe(SmartKiosk.PubSub, "shop:#{shop.id}:orders")
+      subscribe_to_rider_location(order)
     end
 
     {:ok,
      socket
      |> assign(:order, order)
      |> assign(:page_title, "Order #{String.slice(order.id, 0..7)}")
-     |> assign(:allowed_transitions, Map.get(@valid_transitions, order.status, []))}
+     |> assign(:allowed_transitions, Map.get(@valid_transitions, order.status, []))
+     |> assign(:rider_location, nil)}
   end
 
   def handle_info({:order_updated, updated_order}, socket) do
     if updated_order.id == socket.assigns.order.id do
+      subscribe_to_rider_location(updated_order)
+
       {:noreply,
        socket
        |> assign(:order, updated_order)
@@ -235,10 +239,18 @@ defmodule SmartKioskWeb.UI.OrdersLive.Show do
     end
   end
 
+  def handle_info({:location_update, rider_location}, socket) do
+    {:noreply, assign(socket, :rider_location, rider_location)}
+  end
+
+  def handle_info({:delivery_assigned, _payload}, socket) do
+    {:noreply, socket}
+  end
+
   def handle_info(_other, socket), do: {:noreply, socket}
 
   def handle_event("transition_status", %{"status" => status}, socket) do
-    shop = socket.assigns.current_shop
+    _shop = socket.assigns.current_shop
     order = socket.assigns.order
     new_status = String.to_atom(status)
 
@@ -303,6 +315,44 @@ defmodule SmartKioskWeb.UI.OrdersLive.Show do
                 </div>
               </div>
             </div>
+
+            <%= if @order.delivery do %>
+              <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Delivery Tracking</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p class="text-gray-500">Rider</p>
+                    <p class="font-medium text-gray-900">
+                      <%= if @order.delivery.rider_id,
+                        do: String.slice(@order.delivery.rider_id, 0, 8),
+                        else: "Unassigned" %>
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">Delivery Status</p>
+                    <p class="font-medium text-gray-900">
+                      <%= String.capitalize(to_string(@order.delivery.status)) %>
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">Live Location</p>
+                    <p class="font-medium text-gray-900">
+                      <%= if @rider_location do %>
+                        <%= @rider_location.lat %>, <%= @rider_location.lng %>
+                      <% else %>
+                        Waiting for rider updates
+                      <% end %>
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">Delivery Point</p>
+                    <p class="font-medium text-gray-900">
+                      <%= @order.delivery_address || "Not set" %>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            <% end %>
             <!-- Order Items -->
             <div class="bg-white rounded-lg shadow p-6">
               <h2 class="text-lg font-semibold text-gray-900 mb-4">Order Items</h2>
@@ -430,4 +480,11 @@ defmodule SmartKioskWeb.UI.OrdersLive.Show do
   defp format_date(datetime) do
     Calendar.strftime(datetime, "%Y-%m-%d %H:%M")
   end
+
+  defp subscribe_to_rider_location(%{delivery: %{rider_id: rider_id}})
+       when not is_nil(rider_id) do
+    Phoenix.PubSub.subscribe(SmartKiosk.PubSub, "rider:#{rider_id}:location")
+  end
+
+  defp subscribe_to_rider_location(_), do: :ok
 end

@@ -99,6 +99,7 @@ defmodule SmartKioskWeb.SearchBar do
 
   defp search_result_item(%{result: %{type: :product, shop: shop}} = assigns) do
     assigns = assign(assigns, :shop_slug, shop.slug)
+
     ~H"""
     <.link
       navigate={~p"/shop/#{@shop_slug}/product/#{@result.id}"}

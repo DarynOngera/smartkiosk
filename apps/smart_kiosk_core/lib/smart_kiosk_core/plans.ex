@@ -5,7 +5,16 @@ defmodule SmartKioskCore.Plans do
   """
 
   defmodule Plan do
-    defstruct [:name, :slug, :price_cents, :max_products, :max_staff, :max_riders, :max_orders_per_month, :features]
+    defstruct [
+      :name,
+      :slug,
+      :price_cents,
+      :max_products,
+      :max_staff,
+      :max_riders,
+      :max_orders_per_month,
+      :features
+    ]
   end
 
   @plans [

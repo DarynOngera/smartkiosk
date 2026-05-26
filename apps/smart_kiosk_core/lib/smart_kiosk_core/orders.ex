@@ -12,7 +12,7 @@ defmodule SmartKioskCore.Orders do
 
   alias SmartKioskCore.Repo
   alias SmartKioskCore.Schemas.{Customer, Order, OrderItem, Product, Shop, Transaction}
-  alias SmartKioskCore.{Catalogue, Cart}
+  alias SmartKioskCore.{Catalogue, Cart, Deliveries}
 
   # ── Order queries ─────────────────────────────────────────────────────────────
 
@@ -33,7 +33,7 @@ defmodule SmartKioskCore.Orders do
   def get_order!(%Shop{} = shop, id) do
     Order
     |> scope(shop)
-    |> preload([:customer, :delivery, items: :product, transactions: []])
+    |> preload([:customer, delivery: [:rider], items: :product, transactions: []])
     |> Repo.get!(id)
   end
 
@@ -76,70 +76,181 @@ defmodule SmartKioskCore.Orders do
     channel = opts[:channel] || :online
     notes = opts[:notes]
     delivery_attrs = opts[:delivery] || %{}
+    delivery_type = delivery_attr(delivery_attrs, :delivery_type) || :delivery
 
-    Repo.transaction(fn ->
-      scoped_items = load_scoped_items!(shop, items)
+    delivery_type =
+      case delivery_type do
+        "pickup" -> :pickup
+        "delivery" -> :delivery
+        atom when is_atom(atom) -> atom
+        _ -> :delivery
+      end
 
-      # 1. Build line items with snapshotted prices
-      line_items =
-        Enum.map(scoped_items, fn {product, qty} ->
+    delivery_attrs = Map.put(delivery_attrs, :delivery_type, delivery_type)
+
+    with {:ok, delivery_attrs, selected_zone} <-
+           prepare_order_delivery(shop, channel, delivery_type, delivery_attrs) do
+      Repo.transaction(fn ->
+        scoped_items = load_scoped_items!(shop, items)
+
+        # 1. Build line items with snapshotted prices
+        line_items =
+          Enum.map(scoped_items, fn {product, qty} ->
+            %{
+              product_id: product.id,
+              product_name: product.name,
+              quantity: qty,
+              unit_price: product.price
+            }
+          end)
+
+        subtotal =
+          Enum.reduce(line_items, Decimal.new("0"), fn item, acc ->
+            Decimal.add(acc, Decimal.mult(Decimal.new(item.quantity), item.unit_price))
+          end)
+
+        delivery_fee =
+          if delivery_type == :pickup,
+            do: Decimal.new("0"),
+            else: (selected_zone && selected_zone.base_fee) || Decimal.new("0")
+
+        delivery_address = delivery_attr(delivery_attrs, :delivery_address)
+        delivery_lat = delivery_attr(delivery_attrs, :delivery_lat)
+        delivery_lng = delivery_attr(delivery_attrs, :delivery_lng)
+        delivery_zone_id = delivery_attr(delivery_attrs, :delivery_zone_id)
+
+        # 2. Create order
+        order_attrs =
           %{
-            product_id: product.id,
-            product_name: product.name,
-            quantity: qty,
-            unit_price: product.price
+            shop_id: shop.id,
+            customer_id: customer_id,
+            channel: channel,
+            delivery_type: delivery_type,
+            notes: notes,
+            subtotal: subtotal,
+            delivery_fee: delivery_fee,
+            status: :pending
           }
+          |> maybe_put_delivery(:delivery_address, delivery_address)
+          |> maybe_put_delivery(:delivery_lat, delivery_lat)
+          |> maybe_put_delivery(:delivery_lng, delivery_lng)
+          |> maybe_put_delivery(:delivery_zone_id, delivery_zone_id)
+
+        {:ok, order} =
+          %Order{}
+          |> Order.changeset(order_attrs)
+          |> Repo.insert()
+          |> ok_or_rollback()
+
+        # 3. Insert order items
+        Enum.each(line_items, fn item ->
+          %OrderItem{}
+          |> OrderItem.changeset(Map.put(item, :order_id, order.id))
+          |> Repo.insert()
+          |> ok_or_rollback()
         end)
 
-      subtotal =
-        Enum.reduce(line_items, Decimal.new("0"), fn item, acc ->
-          Decimal.add(acc, Decimal.mult(Decimal.new(item.quantity), item.unit_price))
-        end)
+        # 4. Deduct stock
+        stock_items = Enum.map(scoped_items, fn {product, qty} -> {product, -qty} end)
+        Catalogue.adjust_stock_bulk(stock_items) |> ok_or_rollback()
 
-      delivery_fee = delivery_attrs[:fee] || Decimal.new("0")
+        case maybe_create_delivery(order, shop, channel, delivery_attrs) do
+          {:ok, _delivery} ->
+            :ok
 
-      # 2. Create order
-      order_attrs =
-        %{
-          shop_id: shop.id,
-          customer_id: customer_id,
-          channel: channel,
-          notes: notes,
-          subtotal: subtotal,
-          delivery_fee: delivery_fee,
-          status: :pending
-        }
-        |> Map.merge(
-          delivery_attrs
-          |> Map.take([:delivery_address, :delivery_lat, :delivery_lng])
-        )
+          {:error, reason} ->
+            Repo.rollback(reason)
+        end
 
-      {:ok, order} =
-        %Order{}
-        |> Order.changeset(order_attrs)
-        |> Repo.insert()
-        |> ok_or_rollback()
+        order =
+          order
+          |> Repo.preload([
+            :customer,
+            :shop,
+            delivery: [:rider, :delivery_zone],
+            items: :product,
+            transactions: []
+          ])
 
-      # 3. Insert order items
-      Enum.each(line_items, fn item ->
-        %OrderItem{}
-        |> OrderItem.changeset(Map.put(item, :order_id, order.id))
-        |> Repo.insert()
-        |> ok_or_rollback()
+        # 5. Broadcast
+        broadcast_order_event(shop, {:new_order, order})
+
+        order
       end)
-
-      # 4. Deduct stock
-      stock_items = Enum.map(scoped_items, fn {product, qty} -> {product, -qty} end)
-      Catalogue.adjust_stock_bulk(stock_items) |> ok_or_rollback()
-
-      order = order |> Repo.preload([:customer, items: :product])
-
-      # 5. Broadcast
-      broadcast_order_event(shop, {:new_order, order})
-
-      order
-    end)
+    end
   end
+
+  defp maybe_create_delivery(_order, _shop, channel, _delivery_attrs) when channel != :online do
+    {:ok, nil}
+  end
+
+  defp maybe_create_delivery(order, shop, _channel, delivery_attrs) do
+    delivery_type = delivery_attr(delivery_attrs, :delivery_type) || :delivery
+
+    require Logger
+
+    Logger.debug(
+      "maybe_create_delivery: delivery_type=#{inspect(delivery_type)}, delivery_attrs=#{inspect(delivery_attrs)}"
+    )
+
+    if delivery_type == :pickup do
+      {:ok, nil}
+    else
+      case Deliveries.create_delivery_for_order(order, shop, delivery_attrs) do
+        {:ok, delivery} ->
+          Logger.debug("maybe_create_delivery: delivery created successfully")
+          {:ok, delivery}
+
+        {:error, reason} ->
+          Logger.error(
+            "maybe_create_delivery: failed to create delivery, reason=#{inspect(reason)}"
+          )
+
+          {:error, reason}
+      end
+    end
+  end
+
+  defp prepare_order_delivery(_shop, channel, _delivery_type, delivery_attrs)
+       when channel != :online do
+    {:ok, delivery_attrs, nil}
+  end
+
+  defp prepare_order_delivery(%Shop{} = _shop, _channel, :pickup, delivery_attrs) do
+    # For pickup orders, skip delivery preparation
+    {:ok, delivery_attrs, nil}
+  end
+
+  defp prepare_order_delivery(%Shop{} = shop, _channel, :delivery, delivery_attrs) do
+    case Deliveries.prepare_delivery_point(shop, delivery_attrs) do
+      {:ok, zone, lat, lng} ->
+        prepared_attrs =
+          delivery_attrs
+          |> put_delivery_point(:delivery_zone_id, zone.id)
+          |> put_delivery_point(:delivery_lat, lat)
+          |> put_delivery_point(:delivery_lng, lng)
+
+        {:ok, prepared_attrs, zone}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp put_delivery_point(attrs, key, value) do
+    if Map.has_key?(attrs, key) do
+      Map.put(attrs, key, value)
+    else
+      Map.put(attrs, Atom.to_string(key), value)
+    end
+  end
+
+  defp delivery_attr(attrs, key) do
+    Map.get(attrs, key) || Map.get(attrs, Atom.to_string(key))
+  end
+
+  defp maybe_put_delivery(attrs, _key, nil), do: attrs
+  defp maybe_put_delivery(attrs, key, value), do: Map.put(attrs, key, value)
 
   @doc """
   Processes a POS payment: creates an order, records a transaction, and optionally clears the cart.

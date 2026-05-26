@@ -39,6 +39,8 @@ defmodule SmartKioskCore.Schemas.Shop do
     field(:description, :string)
     field(:owner_id, :binary_id)
     field(:settings, :map, default: %{})
+    # GeoJSON polygon (JSONB). When PostGIS is enabled, can be upgraded to geometry.
+    field(:delivery_zone, :map)
     field(:type, :any, virtual: true, default: :shop)
 
     has_many(:users, SmartKioskCore.Schemas.User)
@@ -46,6 +48,7 @@ defmodule SmartKioskCore.Schemas.Shop do
     has_many(:orders, SmartKioskCore.Schemas.Order)
     has_many(:customers, SmartKioskCore.Schemas.Customer)
     has_many(:transactions, SmartKioskCore.Schemas.Transaction)
+    has_many(:delivery_zones, SmartKioskCore.Schemas.DeliveryZone)
     has_many(:campaigns, SmartKioskCore.Schemas.Campaign)
     has_many(:invoices, SmartKioskCore.Schemas.Invoice)
     has_one(:subscription, SmartKioskCore.Schemas.Subscription)
@@ -54,7 +57,7 @@ defmodule SmartKioskCore.Schemas.Shop do
   end
 
   @required ~w(name phone)a
-  @optional ~w(slug email address city country lat lng plan status category  logo_url description settings)a
+  @optional ~w(slug email address city country lat lng plan status category logo_url description settings delivery_zone)a
 
   def changeset(shop, attrs) do
     attrs = normalize_attrs(attrs)
@@ -94,12 +97,24 @@ defmodule SmartKioskCore.Schemas.Shop do
 
   def canonical_plan(plan) when is_binary(plan) do
     case String.downcase(plan) do
-      "kiosk" -> :basic
-      "duka" -> :pro
-      "biashara" -> :enterprise
-      "basic" -> :basic
-      "pro" -> :pro
-      "enterprise" -> :enterprise
+      "kiosk" ->
+        :basic
+
+      "duka" ->
+        :pro
+
+      "biashara" ->
+        :enterprise
+
+      "basic" ->
+        :basic
+
+      "pro" ->
+        :pro
+
+      "enterprise" ->
+        :enterprise
+
       other ->
         try do
           String.to_existing_atom(other)

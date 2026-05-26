@@ -10,7 +10,7 @@ defmodule SmartKioskCore.Accounts do
 
   import Ecto.Query
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Schemas.{Role, Shop, Subscription, User, UserRole, UserToken}
+  alias SmartKioskCore.Schemas.{Shop, User, UserToken}
 
   # ── User queries ─────────────────────────────────────────────────────────────
 
@@ -291,26 +291,4 @@ defmodule SmartKioskCore.Accounts do
     from(u in User, where: u.shop_id == ^shop_id, order_by: [asc: u.role, asc: u.full_name])
     |> Repo.all()
   end
-
-  defp assign_system_role(repo, %User{id: user_id}, role_slug, shop) when is_binary(role_slug) do
-    case repo.get_by(Role, slug: role_slug) do
-      %Role{id: role_id} ->
-        %UserRole{}
-        |> UserRole.changeset(%{
-          user_id: user_id,
-          role_id: role_id,
-          shop_id: shop && shop.id
-        })
-        |> repo.insert(on_conflict: :nothing)
-
-      nil ->
-        %UserRole{}
-        |> UserRole.changeset(%{})
-        |> Ecto.Changeset.add_error(:role_id, "missing system role #{role_slug}")
-        |> then(&{:error, &1})
-    end
-  end
-
-  defp unwrap_or_rollback({:ok, value}), do: value
-  defp unwrap_or_rollback({:error, reason}), do: Repo.rollback(reason)
 end

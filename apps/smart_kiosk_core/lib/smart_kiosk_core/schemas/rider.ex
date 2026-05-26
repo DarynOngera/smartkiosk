@@ -22,7 +22,11 @@ defmodule SmartKioskCore.Schemas.Rider do
     field(:rating, :decimal, default: Decimal.new("5.0"))
     field(:license_url, :string)
     field(:national_id_url, :string)
-    field(:verification_status, Ecto.Enum, values: [:pending, :verified, :rejected], default: :pending)
+
+    field(:verification_status, Ecto.Enum,
+      values: [:pending, :verified, :rejected],
+      default: :pending
+    )
 
     belongs_to(:user, SmartKioskCore.Schemas.User)
     has_many(:deliveries, SmartKioskCore.Schemas.Delivery)
@@ -32,7 +36,17 @@ defmodule SmartKioskCore.Schemas.Rider do
 
   def changeset(rider, attrs) do
     rider
-    |> cast(attrs, [:status, :current_lat, :current_lng, :vehicle, :rating, :user_id, :license_url, :national_id_url, :verification_status])
+    |> cast(attrs, [
+      :status,
+      :current_lat,
+      :current_lng,
+      :vehicle,
+      :rating,
+      :user_id,
+      :license_url,
+      :national_id_url,
+      :verification_status
+    ])
     |> validate_required([:user_id])
     |> foreign_key_constraint(:user_id)
     |> unique_constraint(:user_id, message: "user already has a rider profile")

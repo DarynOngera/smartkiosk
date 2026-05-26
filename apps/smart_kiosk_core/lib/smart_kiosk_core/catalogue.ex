@@ -48,7 +48,8 @@ defmodule SmartKioskCore.Catalogue do
     |> Category.changeset(attrs)
     |> Repo.update()
   end
-####=============test push===========
+
+  #### =============test push===========
   # ── Products ─────────────────────────────────────────────────────────────────
 
   @doc """
@@ -106,6 +107,7 @@ defmodule SmartKioskCore.Catalogue do
       attrs
       |> Map.delete(:shop_id)
       |> Map.delete("shop_id")
+
     # enforce plan product limits
     plan_slug = shop.plan |> SmartKioskCore.Schemas.Shop.canonical_plan() |> Atom.to_string()
     plan = SmartKioskCore.Plans.list_plans() |> Enum.find(fn p -> p.slug == plan_slug end)
@@ -118,7 +120,10 @@ defmodule SmartKioskCore.Catalogue do
         changeset =
           %Product{shop_id: shop.id}
           |> Product.changeset(attrs)
-          |> Ecto.Changeset.add_error(:base, "product limit reached for your plan (#{max_allowed})")
+          |> Ecto.Changeset.add_error(
+            :base,
+            "product limit reached for your plan (#{max_allowed})"
+          )
 
         {:error, changeset}
       else

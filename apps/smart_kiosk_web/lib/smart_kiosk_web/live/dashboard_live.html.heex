@@ -1,0 +1,37 @@
+<Layouts.app flash={@flash} current_path="/dashboard" current_user={@current_user}>
+  <div class="p-6 max-w-5xl mx-auto">
+    <h1 class="text-2xl font-bold text-white">Merchant Dashboard</h1>
+    <p class="text-sm text-slate-400 mb-4">Manage your shop, orders, and delivery zone.</p>
+
+    <div id="delivery-zone-map-wrapper" class="mb-6">
+      <div
+        id="delivery-zone-map"
+        phx-hook="DeliveryZoneMap"
+        data-shop-id={@current_shop && @current_shop.id}
+        data-initial-geojson={@current_shop && @current_shop.delivery_zone && ""}
+        class="w-full h-96 rounded-lg border border-white/10 overflow-hidden"
+      >
+      </div>
+    </div>
+
+    <div class="flex gap-3">
+      <button phx-click="save_zone" class="px-4 py-2 bg-violet-600 text-white rounded">
+        Save Zone
+      </button>
+      <button phx-click="clear_zone" class="px-4 py-2 bg-white/5 text-slate-200 rounded">
+        Clear Zone
+      </button>
+    </div>
+
+    <%!-- Include Leaflet and Leaflet.draw via CDN for now --%>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js">
+    </script>
+  </div>
+</Layouts.app>

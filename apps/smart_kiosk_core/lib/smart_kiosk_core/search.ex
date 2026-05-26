@@ -28,11 +28,13 @@ defmodule SmartKioskCore.Search do
 
   defp perform_db_search(query, _opts) do
     # Centralized search logic (previously in HomeLive)
-    products = SmartKioskCore.Catalogue.list_products_centralized(query)
-               |> Enum.map(&%{&1 | type: :product})
+    products =
+      SmartKioskCore.Catalogue.list_products_centralized(query)
+      |> Enum.map(&%{&1 | type: :product})
 
-    shops = SmartKioskCore.Shops.search_shops(query)
-            |> Enum.map(&%{&1 | type: :shop})
+    shops =
+      SmartKioskCore.Shops.search_shops(query)
+      |> Enum.map(&%{&1 | type: :shop})
 
     (products ++ shops)
     |> Enum.sort_by(& &1.inserted_at, :desc)

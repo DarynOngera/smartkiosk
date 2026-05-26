@@ -259,7 +259,10 @@
               <% end %>
 
               <%!-- Pagination Controls --%>
-              <div :if={@has_more || @page > 1} class="flex justify-center items-center gap-4 py-8">
+              <div
+                :if={@has_more || @page > 1}
+                class="flex justify-center items-center gap-4 py-8"
+              >
                 <button
                   :if={@page > 1}
                   phx-click="load-more"

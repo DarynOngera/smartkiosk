@@ -29,4 +29,3 @@ defmodule SmartKioskWeb.Plugs.EnsureSessionId do
     |> Base.url_encode64(padding: false)
   end
 end
-

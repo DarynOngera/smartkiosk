@@ -14,18 +14,23 @@ defmodule SmartKioskWeb.UI.CreateShopLive do
       Pharmacy: :pharmacy
     ]
 
+    # Pre-fill user details if available
+    current_user = socket.assigns.current_user
+
     form =
       to_form(
         %{
           "name" => "",
-          "phone" => "",
-          "email" => "",
+          "phone" => (current_user && current_user.phone) || "",
+          "email" => (current_user && current_user.email) || "",
           "address" => "",
           "city" => "",
           "country" => "KE",
           "plan" => :basic,
           "category" => :general_shop,
-          "description" => ""
+          "description" => "",
+          "lat" => "",
+          "lng" => ""
         },
         as: :shop
       )

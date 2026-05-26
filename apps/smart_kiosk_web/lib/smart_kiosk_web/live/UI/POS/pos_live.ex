@@ -347,7 +347,11 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
     # Quick Add logic: if query matches exactly one product's SKU, add it to cart
     case Enum.find(products, fn p -> p.sku == String.trim(query) end) do
       %{} = product when query != "" ->
-        handle_event("add_to_cart", %{"product_id" => product.id}, assign(socket, search_query: ""))
+        handle_event(
+          "add_to_cart",
+          %{"product_id" => product.id},
+          assign(socket, search_query: "")
+        )
 
       _ ->
         {:noreply, assign(socket, products: products, search_query: query)}
@@ -388,7 +392,8 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
         ""
       end
 
-    Enum.join(header ++ item_lines, "\n") <> total <> payment_details <> "\n\nThank you for your purchase!"
+    Enum.join(header ++ item_lines, "\n") <>
+      total <> payment_details <> "\n\nThank you for your purchase!"
   end
 
   # ── Info ────────────────────────────────────────────────────────────────────
@@ -693,7 +698,9 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                     <h3 class="font-semibold text-sm truncate text-slate-200"><%= product.name %></h3>
                     <div class="flex items-center justify-between mt-1">
                       <p class="text-violet-400 font-bold">KES <%= product.price %></p>
-                      <span class="text-[10px] text-slate-500 uppercase tracking-wider"><%= product.stock_qty %> left</span>
+                      <span class="text-[10px] text-slate-500 uppercase tracking-wider">
+                        <%= product.stock_qty %> left
+                      </span>
                     </div>
                   </button>
                 <% end %>
@@ -746,7 +753,12 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                 <%= for item <- @receipt.items do %>
                   <div class="flex justify-between text-sm py-1">
                     <span><%= item.product.name %> x<%= item.quantity %></span>
-                    <span>KES <%= :erlang.float_to_binary(Decimal.to_float(item.product.price) * item.quantity, decimals: 2) %></span>
+                    <span>
+                      KES <%= :erlang.float_to_binary(
+                        Decimal.to_float(item.product.price) * item.quantity,
+                        decimals: 2
+                      ) %>
+                    </span>
                   </div>
                 <% end %>
               </div>
@@ -814,12 +826,18 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                     </div>
 
                     <form phx-change="update_cash" class="space-y-3">
-                      <label class="text-xs text-slate-500 uppercase tracking-wider font-bold">Amount Received</label>
+                      <label class="text-xs text-slate-500 uppercase tracking-wider font-bold">
+                        Amount Received
+                      </label>
                       <input
                         name="cash_received"
                         type="text"
                         inputmode="numeric"
-                        value={if @cash_received > 0, do: :erlang.float_to_binary(@cash_received, decimals: 2), else: ""}
+                        value={
+                          if @cash_received > 0,
+                            do: :erlang.float_to_binary(@cash_received, decimals: 2),
+                            else: ""
+                        }
                         placeholder="0.00"
                         class="w-full bg-slate-900 border border-white/10 rounded-xl py-3 px-4 text-white text-xl font-mono focus:ring-2 focus:ring-violet-500/50 outline-none"
                       />
@@ -827,7 +845,9 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
 
                     <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/5">
                       <span class="text-slate-400">Change Due</span>
-                      <span class="text-xl font-bold text-white font-mono">KES <%= :erlang.float_to_binary(@cash_change, decimals: 2) %></span>
+                      <span class="text-xl font-bold text-white font-mono">
+                        KES <%= :erlang.float_to_binary(@cash_change, decimals: 2) %>
+                      </span>
                     </div>
 
                     <button
@@ -851,7 +871,10 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                       </div>
                       <span class="font-bold">M-PESA STK Push</span>
                     </div>
-                    <.icon name="hero-chevron-right" class="w-5 h-5 text-slate-600 group-hover:text-yellow-500" />
+                    <.icon
+                      name="hero-chevron-right"
+                      class="w-5 h-5 text-slate-600 group-hover:text-yellow-500"
+                    />
                   </button>
 
                   <%!-- Card Option --%>
@@ -865,7 +888,10 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                       </div>
                       <span class="font-bold">Credit/Debit Card</span>
                     </div>
-                    <.icon name="hero-chevron-right" class="w-5 h-5 text-slate-600 group-hover:text-blue-500" />
+                    <.icon
+                      name="hero-chevron-right"
+                      class="w-5 h-5 text-slate-600 group-hover:text-blue-500"
+                    />
                   </button>
                 </div>
               </div>
@@ -911,7 +937,9 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
               <div class="p-6 border-t border-white/10 space-y-4">
                 <div class="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span class="tabular-nums">KES <%= :erlang.float_to_binary(@cart_total, decimals: 2) %></span>
+                  <span class="tabular-nums">
+                    KES <%= :erlang.float_to_binary(@cart_total, decimals: 2) %>
+                  </span>
                 </div>
                 <button
                   phx-click="show_payment"
@@ -963,7 +991,9 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
 
                 <form phx-submit="submit_mpesa" class="space-y-6">
                   <div>
-                    <label class="text-sm text-slate-400 block mb-2 font-medium">Customer Phone Number</label>
+                    <label class="text-sm text-slate-400 block mb-2 font-medium">
+                      Customer Phone Number
+                    </label>
                     <input
                       name="mpesa[phone]"
                       type="tel"
@@ -1045,7 +1075,9 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                   </div>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="text-sm text-slate-400 block mb-2 font-medium">Expiry (MM/YY)</label>
+                      <label class="text-sm text-slate-400 block mb-2 font-medium">
+                        Expiry (MM/YY)
+                      </label>
                       <input
                         name="card[expiry]"
                         type="text"
@@ -1066,7 +1098,9 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                     </div>
                   </div>
                   <div>
-                    <label class="text-sm text-slate-400 block mb-2 font-medium">Cardholder Name</label>
+                    <label class="text-sm text-slate-400 block mb-2 font-medium">
+                      Cardholder Name
+                    </label>
                     <input
                       name="card[name]"
                       type="text"
