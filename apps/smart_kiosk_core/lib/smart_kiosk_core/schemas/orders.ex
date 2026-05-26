@@ -18,10 +18,12 @@ defmodule SmartKioskCore.Schemas.Order do
 
   @statuses ~w(pending confirmed preparing ready dispatched delivered cancelled)a
   @channels ~w(pos online)a
+  @delivery_types ~w(delivery pickup)a
 
   schema "orders" do
     field(:status, Ecto.Enum, values: @statuses, default: :pending)
     field(:channel, Ecto.Enum, values: @channels, default: :online)
+    field(:delivery_type, Ecto.Enum, values: @delivery_types, default: :delivery)
     field(:subtotal, :decimal)
     field(:delivery_fee, :decimal, default: Decimal.new("0"))
     field(:total, :decimal)
@@ -41,7 +43,7 @@ defmodule SmartKioskCore.Schemas.Order do
   end
 
   @required ~w(shop_id channel)a
-  @optional ~w(customer_id status subtotal delivery_fee total notes delivery_address delivery_lat delivery_lng)a
+  @optional ~w(customer_id status delivery_type subtotal delivery_fee total notes delivery_address delivery_lat delivery_lng)a
 
   def changeset(order, attrs) do
     order

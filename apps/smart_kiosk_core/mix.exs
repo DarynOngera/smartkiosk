@@ -48,6 +48,7 @@ defmodule SmartKioskCore.MixProject do
       # Utilities
       {:jason, "~> 1.4"},
       {:geo_postgis, "~> 3.5"},
+      {:req, "~> 0.5"},
       {:slugify, "~> 1.3"},
 
       # Telemetry

@@ -182,6 +182,76 @@ defmodule SmartKioskCore.Shops do
   def get_shop_for_user(%User{shop_id: nil}), do: nil
   def get_shop_for_user(%User{shop_id: shop_id}), do: Repo.get(Shop, shop_id)
 
+  @doc """
+  Returns true if the given `%Geo.Point{}` (lon, lat) lies inside the shop's
+  `delivery_zone` geometry. Uses PostGIS `ST_Contains`. Returns false if the
+  shop doesn't exist or has no zone.
+  """
+  def inside_delivery_zone?(shop_id, %Geo.Point{} = point) do
+    {lng, lat} =
+      case point.coordinates do
+        {x, y} -> {x, y}
+        [x, y] -> {x, y}
+        _ -> {nil, nil}
+      end
+
+    case {lng, lat} do
+      {nil, nil} ->
+        false
+
+      {lng, lat} ->
+        query =
+          from(s in Shop,
+            where:
+              s.id == ^shop_id and
+                fragment(
+                  "ST_Contains(?, ST_SetSRID(ST_Point(?, ?), 4326))",
+                  s.delivery_zone,
+                  ^lng,
+                  ^lat
+                ),
+            select: s.id,
+            limit: 1
+          )
+
+        case Repo.one(query) do
+          nil -> false
+          _ -> true
+        end
+    end
+  end
+
+  @doc """
+  Returns true when a delivery point lies inside the shop's saved delivery zone.
+
+  Supports the JSONB GeoJSON fallback used when PostGIS is unavailable and the
+  geometry-backed shape used when PostGIS is enabled.
+  """
+  def delivery_point_within_zone?(%Shop{} = shop, lat, lng)
+      when is_number(lat) and is_number(lng) do
+    case shop.delivery_zone do
+      nil ->
+        false
+
+      %Geo.Polygon{coordinates: [outer_ring | _]} ->
+        point_in_ring?(outer_ring, lng, lat)
+
+      %Geo.MultiPolygon{coordinates: [polygon | _]} ->
+        polygon |> List.first() |> point_in_ring?(lng, lat)
+
+      %{"type" => "Polygon", "coordinates" => [outer_ring | _]} when is_list(outer_ring) ->
+        point_in_ring?(outer_ring, lng, lat)
+
+      %{"type" => "MultiPolygon", "coordinates" => [polygon | _]} when is_list(polygon) ->
+        polygon |> List.first() |> point_in_ring?(lng, lat)
+
+      _ ->
+        false
+    end
+  end
+
+  def delivery_point_within_zone?(_shop, _lat, _lng), do: false
+
   @spec get_pending_status() :: any()
   @doc "Gets a shop by slug (used for public storefront URLs)."
   def get_shop_by_slug(slug), do: Repo.get_by(Shop, slug: slug, status: :active)
@@ -198,12 +268,34 @@ defmodule SmartKioskCore.Shops do
     |> Repo.all()
   end
 
-  @doc "Gets multiple shops by their IDs."
-  def list_shops_by_ids(ids) when is_list(ids) do
-    from(s in Shop,
-      where: s.id in ^ids
-    )
-    |> Repo.all()
+  defp point_in_ring?(ring, point_x, point_y) when is_list(ring) do
+    vertices =
+      Enum.map(ring, fn
+        [x, y] -> {x, y}
+        %{"x" => x, "y" => y} -> {x, y}
+        _ -> {nil, nil}
+      end)
+      |> Enum.reject(&match?({nil, nil}, &1))
+
+    point_in_polygon?(vertices, {point_x, point_y})
+  rescue
+    _ -> false
+  end
+
+  defp point_in_polygon?(vertices, {px, py}) when is_list(vertices) do
+    vertex_count = length(vertices)
+
+    vertices
+    |> Enum.with_index()
+    |> Enum.reduce(false, fn {{x_i, y_i}, index}, acc ->
+      {x_j, y_j} = Enum.at(vertices, rem(index + 1, vertex_count))
+
+      intersects =
+        y_i > py != y_j > py and
+          px < (x_j - x_i) * (py - y_i) / (y_j - y_i + 0.0) + x_i
+
+      if intersects, do: not acc, else: acc
+    end)
   end
 
   # =================for admin side =========================

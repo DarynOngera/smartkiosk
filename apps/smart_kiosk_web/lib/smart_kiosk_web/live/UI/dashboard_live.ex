@@ -6,6 +6,7 @@ defmodule SmartKioskWeb.UI.DashboardLive do
 
   alias SmartKioskCore.Catalogue
   alias SmartKioskCore.Orders
+  alias SmartKioskCore.Shops
   import SmartKioskWeb.Components.ProductCard
 
   def mount(_params, _session, socket) do
@@ -45,6 +46,111 @@ defmodule SmartKioskWeb.UI.DashboardLive do
     shop = socket.assigns.current_shop
 
     {:noreply, assign(socket, :low_stock_products, Catalogue.list_low_stock_products(shop))}
+  end
+
+  @doc "Handle client-drawn delivery zone GeoJSON payloads"
+  def handle_event("zone_drawn", payload, socket) do
+    # store pending geojson so admin can save later
+    {:noreply, assign(socket, :pending_zone_geojson, payload)}
+  end
+
+  def handle_event("map_ready", %{"shop_id" => _shop_id}, socket) do
+    # no-op for now; could be used to push existing zone to client
+    {:noreply, socket}
+  end
+
+  def handle_event("save_zone", _params, socket) do
+    shop = socket.assigns[:current_shop]
+    pending = socket.assigns[:pending_zone_geojson]
+
+    cond do
+      shop == nil ->
+        {:noreply, put_flash(socket, :error, "No shop selected")}
+
+      pending in [nil, %{}] or pending == %{} ->
+        # clear existing zone
+        case Shops.update_shop(shop, %{delivery_zone: nil}) do
+          {:ok, shop} ->
+            {:noreply,
+             socket
+             |> assign(:current_shop, shop)
+             |> assign(:pending_zone_geojson, %{})
+             |> put_flash(:info, "Delivery zone cleared")}
+
+          {:error, cs} ->
+            {:noreply, put_flash(socket, :error, "Failed to clear zone: #{inspect(cs.errors)}")}
+        end
+
+      true ->
+        # attempt to decode GeoJSON to a Geo.* struct
+        geom =
+          extract_geometry_from_geojson(pending)
+
+        case geom do
+          {:ok, g} ->
+            # ensure SRID 4326
+            g = if Map.get(g, :srid), do: g, else: Map.put(g, :srid, 4326)
+
+            case Shops.update_shop(shop, %{delivery_zone: g}) do
+              {:ok, shop} ->
+                {:noreply,
+                 socket
+                 |> assign(:current_shop, shop)
+                 |> assign(:pending_zone_geojson, %{})
+                 |> put_flash(:info, "Delivery zone saved")}
+
+              {:error, cs} ->
+                {:noreply,
+                 put_flash(socket, :error, "Failed to save zone: #{inspect(cs.errors)}")}
+            end
+
+          {:error, reason} ->
+            {:noreply, put_flash(socket, :error, "Invalid GeoJSON: #{reason}")}
+        end
+    end
+  end
+
+  def handle_event("clear_zone", _params, socket) do
+    shop = socket.assigns[:current_shop]
+
+    if shop do
+      case Shops.update_shop(shop, %{delivery_zone: nil}) do
+        {:ok, shop} ->
+          {:noreply, assign(socket, :current_shop, shop) |> assign(:pending_zone_geojson, %{})}
+
+        {:error, _} ->
+          {:noreply, put_flash(socket, :error, "Failed to clear zone")}
+      end
+    else
+      {:noreply, put_flash(socket, :error, "No shop selected")}
+    end
+  end
+
+  defp extract_geometry_from_geojson(nil), do: {:error, "no payload"}
+
+  defp extract_geometry_from_geojson(%{} = obj) do
+    # obj may be a Feature, FeatureCollection, or raw Geometry
+    try do
+      geom =
+        cond do
+          Map.get(obj, "type") == "Feature" and Map.has_key?(obj, "geometry") ->
+            Geo.JSON.decode!(obj["geometry"])
+
+          Map.get(obj, "type") == "FeatureCollection" and is_list(obj["features"]) ->
+            first = List.first(obj["features"]) || %{}
+            Geo.JSON.decode!(first["geometry"] || first)
+
+          Map.get(obj, "type") in ["Polygon", "MultiPolygon", "Point"] ->
+            Geo.JSON.decode!(obj)
+
+          true ->
+            Geo.JSON.decode!(obj)
+        end
+
+      {:ok, geom}
+    rescue
+      e -> {:error, Exception.message(e)}
+    end
   end
 
   def merchant_view(assigns) do

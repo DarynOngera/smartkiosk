@@ -6,17 +6,22 @@ defmodule SmartKioskWeb.UI.DeliveryZoneLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    zones = Deliveries.list_delivery_zones()
+    zones = list_zones(socket)
     {:ok, assign(socket, zones: zones, page_title: "Delivery Zones")}
   end
 
   @impl true
   def handle_params(params, _url, socket) do
-    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+    socket =
+      socket
+      |> assign(:zones, list_zones(socket))
+      |> apply_action(socket.assigns.live_action, params)
+
+    {:noreply, socket}
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    zone = Deliveries.get_delivery_zone!(id)
+    zone = get_zone(socket, id)
 
     socket
     |> assign(:page_title, "Edit Delivery Zone")
@@ -37,10 +42,31 @@ defmodule SmartKioskWeb.UI.DeliveryZoneLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    zone = Deliveries.get_delivery_zone!(id)
+    zone = get_zone(socket, id)
     {:ok, _} = Deliveries.delete_delivery_zone(zone)
 
     {:noreply, update(socket, :zones, fn zones -> Enum.reject(zones, &(&1.id == id)) end)}
+  end
+
+  @impl true
+  def handle_event("map_ready", _params, socket), do: {:noreply, socket}
+
+  defp boundary_json(nil), do: ""
+  defp boundary_json(boundary) when is_binary(boundary), do: boundary
+  defp boundary_json(boundary) when is_map(boundary), do: Jason.encode!(boundary)
+
+  defp list_zones(socket) do
+    case socket.assigns[:current_shop] do
+      %SmartKioskCore.Schemas.Shop{} = shop -> Deliveries.list_delivery_zones(shop)
+      _ -> Deliveries.list_delivery_zones()
+    end
+  end
+
+  defp get_zone(socket, id) do
+    case socket.assigns[:current_shop] do
+      %SmartKioskCore.Schemas.Shop{} = shop -> Deliveries.get_delivery_zone!(shop, id)
+      _ -> Deliveries.get_delivery_zone!(id)
+    end
   end
 
   @impl true
@@ -83,6 +109,18 @@ defmodule SmartKioskWeb.UI.DeliveryZoneLive.Index do
               <p class="text-2xl font-mono font-bold text-violet-400 mb-6">
                 KES <%= zone.base_fee %>
               </p>
+
+              <div :if={@live_action not in [:new, :edit]} class="mb-4">
+                <div
+                  id={"delivery-zone-preview-#{zone.id}"}
+                  phx-hook="DeliveryZoneMap"
+                  phx-update="ignore"
+                  data-readonly="true"
+                  data-initial-geojson={boundary_json(zone.boundary)}
+                  class="w-full h-48 rounded-xl border border-white/10 overflow-hidden bg-slate-900"
+                >
+                </div>
+              </div>
 
               <div class="flex items-center gap-3 pt-4 border-t border-white/5">
                 <.link
@@ -129,10 +167,23 @@ defmodule SmartKioskWeb.UI.DeliveryZoneLive.Index do
             title={@page_title}
             action={@live_action}
             zone={@zone}
+            current_shop={@current_shop}
+            shop_name={@current_shop && @current_shop.name}
             return_to={~p"/delivery-zones"}
           />
         </.modal>
       <% end %>
+
+      <%!-- Include Leaflet and Leaflet.draw via CDN for the zone editor --%>
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"
+      />
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+      </script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js">
+      </script>
     </Layouts.app>
     """
   end

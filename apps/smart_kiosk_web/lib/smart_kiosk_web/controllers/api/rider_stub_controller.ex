@@ -17,8 +17,8 @@ defmodule SmartKioskWeb.Api.RiderStubController do
   import Ecto.Query
 
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Schemas.{Rider, Delivery}
-  alias SmartKioskCore.Accounts
+  alias SmartKioskCore.Schemas.{Rider, Delivery, Shop}
+  alias SmartKioskCore.{Accounts, Orders}
 
   # ── POST /api/rider/location ───────────────────────────────────────────────
   @doc """
@@ -84,6 +84,13 @@ defmodule SmartKioskWeb.Api.RiderStubController do
            delivery
            |> Delivery.status_changeset(String.to_existing_atom(new_status))
            |> Repo.update() do
+      updated =
+        Repo.preload(updated,
+          order: [:shop, items: :product, transactions: [], delivery: [:rider]]
+        )
+
+      update_order_status_from_delivery(updated)
+
       Phoenix.PubSub.broadcast(
         SmartKiosk.PubSub,
         "delivery:#{delivery.id}",
@@ -155,4 +162,45 @@ defmodule SmartKioskWeb.Api.RiderStubController do
       end)
     end)
   end
+
+  defp update_order_status_from_delivery(%Delivery{
+         status: :delivered,
+         order: %SmartKioskCore.Schemas.Order{} = order
+       }) do
+    _ = Orders.update_order_status(%Shop{id: order.shop_id}, order.id, :delivered)
+
+    Phoenix.PubSub.broadcast(
+      SmartKiosk.PubSub,
+      "shop:#{order.shop_id}:orders",
+      {:order_updated, Orders.get_order!(%Shop{id: order.shop_id}, order.id)}
+    )
+  end
+
+  defp update_order_status_from_delivery(%Delivery{
+         status: :picked_up,
+         order: %SmartKioskCore.Schemas.Order{} = order
+       }) do
+    _ = Orders.update_order_status(%Shop{id: order.shop_id}, order.id, :dispatched)
+
+    Phoenix.PubSub.broadcast(
+      SmartKiosk.PubSub,
+      "shop:#{order.shop_id}:orders",
+      {:order_updated, Orders.get_order!(%Shop{id: order.shop_id}, order.id)}
+    )
+  end
+
+  defp update_order_status_from_delivery(%Delivery{
+         status: :in_transit,
+         order: %SmartKioskCore.Schemas.Order{} = order
+       }) do
+    _ = Orders.update_order_status(%Shop{id: order.shop_id}, order.id, :dispatched)
+
+    Phoenix.PubSub.broadcast(
+      SmartKiosk.PubSub,
+      "shop:#{order.shop_id}:orders",
+      {:order_updated, Orders.get_order!(%Shop{id: order.shop_id}, order.id)}
+    )
+  end
+
+  defp update_order_status_from_delivery(_), do: :ok
 end
