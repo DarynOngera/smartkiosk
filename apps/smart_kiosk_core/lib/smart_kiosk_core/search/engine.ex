@@ -329,39 +329,12 @@ defmodule SmartKioskCore.Search.Engine do
 
     # For prefix matching: when depth >= target_len, check if query matches prefix
     # by looking at the cell where the full query would align with the trie path
+    # The trie path is long enough - check exact alignment at target_len
     prefix_distance =
-      if depth >= target_len do
-        # The trie path is long enough - check exact alignment at target_len
-        elem(previous_row, target_len)
-      else
-        # Trie path is shorter than query - can't be a prefix match
-        # Use a high penalty
-        target_len
-      end
+      elem(previous_row, target_len)
 
     # Use the better distance, but with a penalty for non-prefix matches
     current_distance = min(standard_distance, prefix_distance)
-
-    matches =
-      if node[:terminal] == true and current_distance <= max_typos do
-        ids = node[:ids] || MapSet.new()
-        field_weights = node[:field_weights] || %{}
-
-        Enum.reduce(ids, matches, fn doc_id, acc ->
-          # Get the primary field for this doc_id from field_weights
-          field = get_primary_field_from_weights(field_weights, doc_id)
-
-          Map.update(acc, doc_id, {current_distance, field}, fn {existing_dist, existing_field} ->
-            if current_distance < existing_dist do
-              {current_distance, field}
-            else
-              {existing_dist, existing_field}
-            end
-          end)
-        end)
-      else
-        matches
-      end
 
     matches =
       if node[:terminal] == true and current_distance <= max_typos do
