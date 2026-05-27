@@ -368,7 +368,7 @@ defmodule SmartKioskCore.Recommendations do
         on: o.customer_id == c.id,
         where:
           c.user_id == ^user_id and o.inserted_at >= ^since and
-            o.status not in [:pending, :cancelled],
+            o.status != :cancelled,
         group_by: o.shop_id,
         select: {o.shop_id, count(o.id)}
       )
@@ -396,7 +396,7 @@ defmodule SmartKioskCore.Recommendations do
         on: oi.order_id == o.id,
         where:
           c.user_id == ^user_id and o.inserted_at >= ^since and
-            o.status not in [:pending, :cancelled],
+            o.status != :cancelled,
         group_by: oi.product_id,
         select: {oi.product_id, sum(oi.quantity)}
       )
@@ -427,7 +427,7 @@ defmodule SmartKioskCore.Recommendations do
       on: s.id == o.shop_id,
       where:
         c.user_id == ^user_id and o.inserted_at >= ^since and
-          o.status not in [:pending, :cancelled],
+          o.status != :cancelled,
       group_by: s.category,
       select: {s.category, count(o.id)}
     )
@@ -446,7 +446,7 @@ defmodule SmartKioskCore.Recommendations do
         on: p.id == oi.product_id,
         where:
           c.user_id == ^user_id and o.inserted_at >= ^since and
-            o.status not in [:pending, :cancelled],
+            o.status != :cancelled,
         group_by: p.category_id,
         select: {p.category_id, count(oi.id)}
       )

@@ -352,15 +352,27 @@ defmodule SmartKioskCore.Orders do
 
   # ── Customer helpers ──────────────────────────────────────────────────────────
 
-  @doc "Finds or creates a customer by phone for a shop."
+  @doc """
+  Finds or creates a customer by phone for a shop.
+
+  If an existing customer has no `user_id` and one is provided in `attrs`,
+  the record is updated so that order history can be tied back to the
+  platform user for personalization.
+  """
   def find_or_create_customer(%Shop{} = shop, attrs) do
     phone = attrs[:phone]
+    user_id = attrs[:user_id]
 
     case Repo.get_by(Customer, shop_id: shop.id, phone: phone) do
       nil ->
         %Customer{}
         |> Customer.changeset(Map.put(attrs, :shop_id, shop.id))
         |> Repo.insert()
+
+      %Customer{user_id: nil} = customer when not is_nil(user_id) ->
+        customer
+        |> Customer.changeset(%{user_id: user_id})
+        |> Repo.update()
 
       customer ->
         {:ok, customer}
