@@ -47,9 +47,9 @@ defmodule SmartKioskWeb.HomeLive do
     # Get products grouped by featured categories
     _products_by_category = fetch_products_by_categories()
 
-    # Get precomputed recommendations
-    recommended_shops = Recommendations.list_recommended_shops()
-    recommended_products = Recommendations.list_recommended_products()
+    # Get personalized recommendations (global fallback for guests / cold-start)
+    recommended_shops = Recommendations.list_recommended_shops_for_user(current_user)
+    recommended_products = Recommendations.list_recommended_products_for_user(current_user)
 
     # Get cart count
     cart_count =
