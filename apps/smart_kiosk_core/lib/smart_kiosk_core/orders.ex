@@ -29,6 +29,16 @@ defmodule SmartKioskCore.Orders do
     |> Repo.all()
   end
 
+  @doc "Counts orders grouped by status for a shop."
+  def count_orders_by_status(%Shop{} = shop) do
+    Order
+    |> scope(shop)
+    |> group_by([o], o.status)
+    |> select([o], {o.status, count(o.id)})
+    |> Repo.all()
+    |> Map.new()
+  end
+
   @doc "Gets a single order, scoped to a shop."
   def get_order!(%Shop{} = shop, id) do
     Order

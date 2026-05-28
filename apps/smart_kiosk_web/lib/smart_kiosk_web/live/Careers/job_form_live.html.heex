@@ -1,0 +1,82 @@
+<.header>
+  <%= if @job_post do %>
+    Edit Job Post
+  <% else %>
+    Add Job Post
+  <% end %>
+  <:subtitle>
+    <%= if @job_post do %>
+      Update job posting details
+    <% else %>
+      Create a new job posting for your shop
+    <% end %>
+  </:subtitle>
+  <:actions>
+    <.back navigate={~p"/careers"}>Back to Job Posts</.back>
+  </:actions>
+</.header>
+
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <.form for={@changeset} id="job-post-form" phx-submit="save" phx-change="validate">
+    <div class="space-y-6 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div class="space-y-1.5">
+        <label class="text-sm font-medium text-slate-700">Job Title</label>
+        <.input
+          field={@changeset[:title]}
+          type="text"
+          placeholder="e.g., Delivery Rider"
+          class="w-full"
+        />
+        <.error field={@changeset[:title]} />
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-sm font-medium text-slate-700">Description</label>
+        <.input
+          field={@changeset[:description]}
+          type="textarea"
+          placeholder="Describe the role and responsibilities..."
+          rows={4}
+          class="w-full"
+        />
+        <.error field={@changeset[:description]} />
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-sm font-medium text-slate-700">Requirements</label>
+        <.input
+          field={@changeset[:requirements]}
+          type="textarea"
+          placeholder="List the requirements for this position..."
+          rows={4}
+          class="w-full"
+        />
+        <.error field={@changeset[:requirements]} />
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-sm font-medium text-slate-700">Status</label>
+        <.input
+          field={@changeset[:status]}
+          type="select"
+          options={[{"Active", "active"}, {"Inactive", "inactive"}]}
+          class="w-full"
+        />
+        <.error field={@changeset[:status]} />
+      </div>
+
+      <div class="pt-4 border-t border-slate-200">
+        <button
+          type="submit"
+          class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 transition-colors"
+        >
+          <%= if @job_post do %>
+            Update Job Post
+          <% else %>
+            Create Job Post
+          <% end %>
+        </button>
+      </div>
+    </div>
+  </.form>
+</div>

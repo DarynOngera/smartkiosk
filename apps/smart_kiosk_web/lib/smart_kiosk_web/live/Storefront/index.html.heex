@@ -33,6 +33,10 @@
                   <%= @shop.city %>, <%= @shop.country %>
                 </span>
                 <span class="flex items-center gap-1">
+                  <.icon name="hero-map-pin" class="w-4 h-4" />
+                  <%= @shop.address %>
+                </span>
+                <span class="flex items-center gap-1">
                   <.icon name="hero-cube" class="w-4 h-4" />
                   <%= length(@products) %> products
                 </span>

@@ -6,7 +6,6 @@ defmodule SmartKioskWeb.UI.OrdersLive.Index do
 
   def mount(_params, _session, socket) do
     shop = socket.assigns.current_shop
-    orders = Orders.list_orders(shop)
 
     if connected?(socket) do
       Phoenix.PubSub.subscribe(SmartKiosk.PubSub, "shop:#{shop.id}:orders")
@@ -14,40 +13,27 @@ defmodule SmartKioskWeb.UI.OrdersLive.Index do
 
     {:ok,
      socket
-     |> assign(:orders, orders)
      |> assign(:page_title, "Orders")
      |> assign(:status_filter, nil)
-     |> assign(:statuses, @statuses)}
+     |> assign(:statuses, @statuses)
+     |> assign_orders(nil)}
   end
 
-  def handle_info({:new_order, order}, socket) do
-    {:noreply, update(socket, :orders, fn orders -> [order | orders] end)}
+  def handle_info({:new_order, _order}, socket) do
+    {:noreply, assign_orders(socket, status_from_string(socket.assigns.status_filter))}
   end
 
-  def handle_info({:order_updated, updated_order}, socket) do
-    {:noreply,
-     update(socket, :orders, fn orders ->
-       Enum.map(orders, fn o ->
-         if o.id == updated_order.id, do: updated_order, else: o
-       end)
-     end)}
+  def handle_info({:order_updated, _updated_order}, socket) do
+    {:noreply, assign_orders(socket, status_from_string(socket.assigns.status_filter))}
   end
 
   def handle_params(params, _url, socket) do
-    status = params["status"]
-    shop = socket.assigns.current_shop
-
-    orders =
-      if status && status in Enum.map(@statuses, &to_string/1) do
-        Orders.list_orders(shop, status: String.to_atom(status))
-      else
-        Orders.list_orders(shop)
-      end
+    status = status_from_params(params)
 
     {:noreply,
      socket
-     |> assign(:orders, orders)
-     |> assign(:status_filter, status)}
+     |> assign(:status_filter, status && Atom.to_string(status))
+     |> assign_orders(status)}
   end
 
   @spec render(any()) :: Phoenix.LiveView.Rendered.t()
@@ -80,10 +66,7 @@ defmodule SmartKioskWeb.UI.OrdersLive.Index do
                     "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 ]}
               >
-                <%= String.capitalize(to_string(status)) %> (<%= count_orders_by_status(
-                  @orders,
-                  status
-                ) %>)
+                <%= String.capitalize(to_string(status)) %> (<%= Map.get(@order_counts, status, 0) %>)
               </.link>
             <% end %>
             <.link
@@ -94,7 +77,7 @@ defmodule SmartKioskWeb.UI.OrdersLive.Index do
                 !is_nil(@status_filter) && "bg-gray-100 text-gray-700 hover:bg-gray-200"
               ]}
             >
-              All (<%= length(@orders) %>)
+              All (<%= @total_orders %>)
             </.link>
           </div>
         </div>
@@ -174,9 +157,28 @@ defmodule SmartKioskWeb.UI.OrdersLive.Index do
     """
   end
 
-  defp count_orders_by_status(orders, status) do
-    Enum.count(orders, &(&1.status == status))
+  defp assign_orders(socket, status) do
+    shop = socket.assigns.current_shop
+    opts = if is_nil(status), do: [], else: [status: status]
+    order_counts = Orders.count_orders_by_status(shop)
+
+    socket
+    |> assign(:orders, Orders.list_orders(shop, opts))
+    |> assign(:order_counts, order_counts)
+    |> assign(:total_orders, order_counts |> Map.values() |> Enum.sum())
   end
+
+  defp status_from_params(%{"status" => status}) do
+    status_from_string(status)
+  end
+
+  defp status_from_params(_params), do: nil
+
+  defp status_from_string(status) when is_binary(status) do
+    Enum.find(@statuses, &(Atom.to_string(&1) == status))
+  end
+
+  defp status_from_string(_status), do: nil
 
   defp status_bg_class(:pending), do: "bg-yellow-100 text-yellow-800"
   defp status_bg_class(:confirmed), do: "bg-blue-100 text-blue-800"

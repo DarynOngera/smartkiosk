@@ -1,7 +1,7 @@
 defmodule SmartKioskCore.Shops do
   import Ecto.Query
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Schemas.{Role, Shop, Subscription, User, UserRole}
+  alias SmartKioskCore.Schemas.{Rider, Role, Shop, Subscription, User, UserRole}
 
   def change_registration(attrs \\ %{}) do
     types = %{
@@ -344,8 +344,61 @@ defmodule SmartKioskCore.Shops do
   # =================HELPERS=================
   @doc "Lists all staff for a given shop."
   def list_shop_users(%Shop{id: shop_id}) do
-    from(u in User, where: u.shop_id == ^shop_id, order_by: [asc: u.role, asc: u.full_name])
+    from(u in User,
+      where: u.shop_id == ^shop_id and u.role in [:owner, :manager, :staff, :rider],
+      order_by: [asc: u.role, asc: u.full_name],
+      preload: [:rider_profile]
+    )
     |> Repo.all()
+  end
+
+  @doc "Lists rider applications for a shop, optionally filtered by status."
+  def list_rider_applications(%Shop{id: shop_id}, status \\ nil) do
+    Rider
+    |> join(:inner, [r], u in User, on: r.user_id == u.id)
+    |> where([r, u], u.shop_id == ^shop_id)
+    |> filter_rider_application_status(status)
+    |> order_by([r, u], desc: r.inserted_at)
+    |> preload([:user])
+    |> Repo.all()
+  end
+
+  @doc "Approves a rider application and grants the rider shop role."
+  def approve_rider_application(%Shop{} = shop, rider_id) do
+    with %Rider{} = rider <- get_rider_application(shop, rider_id) do
+      Repo.transaction(fn ->
+        rider =
+          rider
+          |> Rider.changeset(%{verification_status: :verified, status: :available})
+          |> Repo.update()
+          |> unwrap_or_rollback()
+
+        assign_system_role(Repo, rider.user, "rider", shop)
+        |> unwrap_or_rollback()
+
+        rider
+      end)
+    else
+      nil -> {:error, :not_found}
+    end
+  end
+
+  @doc "Rejects a rider application and removes the rider shop role if it exists."
+  def reject_rider_application(%Shop{} = shop, rider_id) do
+    with %Rider{} = rider <- get_rider_application(shop, rider_id) do
+      Repo.transaction(fn ->
+        rider =
+          rider
+          |> Rider.changeset(%{verification_status: :rejected, status: :offline})
+          |> Repo.update()
+          |> unwrap_or_rollback()
+
+        revoke_system_role(Repo, rider.user, "rider", shop)
+        rider
+      end)
+    else
+      nil -> {:error, :not_found}
+    end
   end
 
   defp assign_system_role(repo, %User{id: user_id}, role_slug, shop) when is_binary(role_slug) do
@@ -395,9 +448,6 @@ defmodule SmartKioskCore.Shops do
           %SmartKioskCore.Schemas.Rider{user_id: user.id}
           |> SmartKioskCore.Schemas.Rider.changeset(rider_attrs)
         end)
-        |> Ecto.Multi.run(:system_role, fn repo, %{user: user} ->
-          assign_system_role(repo, user, "rider", shop)
-        end)
 
       case Repo.transaction(multi) do
         {:ok, %{user: user, rider: rider}} -> {:ok, user, rider}
@@ -411,9 +461,35 @@ defmodule SmartKioskCore.Shops do
     from(r in SmartKioskCore.Schemas.Rider,
       join: u in User,
       on: r.user_id == u.id,
-      where: u.shop_id == ^shop_id
+      where: u.shop_id == ^shop_id and r.verification_status in [:pending, :verified]
     )
     |> Repo.aggregate(:count, :id)
+  end
+
+  defp get_rider_application(%Shop{id: shop_id}, rider_id) do
+    Rider
+    |> join(:inner, [r], u in User, on: r.user_id == u.id)
+    |> where([r, u], r.id == ^rider_id and u.shop_id == ^shop_id)
+    |> preload([:user])
+    |> Repo.one()
+  end
+
+  defp filter_rider_application_status(query, nil), do: query
+
+  defp filter_rider_application_status(query, status) when is_atom(status) do
+    where(query, [r], r.verification_status == ^status)
+  end
+
+  defp revoke_system_role(repo, %User{id: user_id}, role_slug, %Shop{id: shop_id})
+       when is_binary(role_slug) do
+    from(ur in UserRole,
+      join: role in Role,
+      on: ur.role_id == role.id,
+      where: ur.user_id == ^user_id and ur.shop_id == ^shop_id and role.slug == ^role_slug
+    )
+    |> repo.delete_all()
+
+    :ok
   end
 
   defp unwrap_or_rollback({:ok, value}), do: value

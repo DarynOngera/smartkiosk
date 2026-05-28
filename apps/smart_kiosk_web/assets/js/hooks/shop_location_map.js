@@ -1,5 +1,10 @@
 const ShopLocationMap = {
   mounted() {
+    // Delay map initialization to ensure DOM is fully rendered
+    setTimeout(() => this._initMap(), 100)
+  },
+
+  _initMap() {
     try {
       if (typeof L === "undefined") {
         console.error("[ShopLocationMap] Leaflet (L) is not loaded. Include Leaflet.js")

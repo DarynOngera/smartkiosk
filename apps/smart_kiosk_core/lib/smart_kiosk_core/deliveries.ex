@@ -272,4 +272,70 @@ defmodule SmartKioskCore.Deliveries do
       _ -> {:error, :unresolved_delivery_point}
     end
   end
+
+  # ── Rider-Specific Functions ────────────────────────────────────────────────
+
+  @doc "Lists active deliveries assigned to a rider."
+  def list_deliveries_for_rider(rider_id) do
+    Delivery
+    |> where([d], d.rider_id == ^rider_id)
+    |> where([d], d.status in [:pending_pickup, :picked_up, :in_transit])
+    |> order_by([d], desc: d.inserted_at)
+    |> preload([:delivery_zone, order: [:customer, :shop, items: :product]])
+    |> Repo.all()
+  end
+
+  @doc "Counts active deliveries assigned to a rider."
+  def count_active_deliveries_for_rider(rider_id) do
+    Delivery
+    |> where([d], d.rider_id == ^rider_id)
+    |> where([d], d.status in [:pending_pickup, :picked_up, :in_transit])
+    |> Repo.aggregate(:count, :id)
+  end
+
+  @doc "Lists dispatched, unassigned delivery orders for a shop."
+  def list_available_deliveries(%Shop{id: shop_id}) do
+    Delivery
+    |> join(:inner, [d], o in Order, on: d.order_id == o.id)
+    |> where([d, o], o.shop_id == ^shop_id and is_nil(d.rider_id))
+    |> where([d, o], d.status == :pending_pickup and o.status == :dispatched)
+    |> order_by([d, o], desc: d.inserted_at)
+    |> preload([:delivery_zone, order: [:customer, :shop, items: :product]])
+    |> Repo.all()
+  end
+
+  @doc "Assigns a rider to a delivery."
+  def accept_delivery(delivery_id, rider_id) do
+    case count_active_deliveries_for_rider(rider_id) do
+      active_count when active_count >= 5 ->
+        {:error, :capacity_reached}
+
+      _ ->
+        case Repo.get(Delivery, delivery_id) do
+          nil ->
+            {:error, :not_found}
+
+          %Delivery{rider_id: nil} = delivery ->
+            delivery
+            |> Delivery.changeset(%{rider_id: rider_id, status: :in_transit})
+            |> Repo.update()
+
+          _ ->
+            {:error, :already_assigned}
+        end
+    end
+  end
+
+  @doc "Updates delivery status."
+  def update_delivery_status(delivery_id, new_status) do
+    case Repo.get(Delivery, delivery_id) do
+      nil ->
+        {:error, :not_found}
+
+      delivery ->
+        delivery
+        |> Delivery.status_changeset(new_status)
+        |> Repo.update()
+    end
+  end
 end

@@ -121,7 +121,7 @@ defmodule SmartKioskWeb.Api.RiderStubController do
         {:error, :unauthorized}
 
       user ->
-        case Repo.get_by(Rider, user_id: user.id) do
+        case Repo.get_by(Rider, user_id: user.id, verification_status: :verified) do
           nil -> {:error, :unauthorized}
           rider -> {:ok, rider}
         end
