@@ -10,7 +10,8 @@ defmodule SmartKioskCore.Application do
       {Oban, Application.fetch_env!(:smart_kiosk_core, Oban)},
       # Search engine processes
       SmartKioskCore.Search.BatchQueue,
-      SmartKioskCore.Search.IndexServer
+      SmartKioskCore.Search.IndexServer,
+      SmartKioskCore.Search.MetricsAggregator
     ]
 
     # Attach search telemetry handlers

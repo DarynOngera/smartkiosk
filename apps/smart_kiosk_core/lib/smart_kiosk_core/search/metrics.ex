@@ -2,24 +2,19 @@ defmodule SmartKioskCore.Search.Metrics do
   @moduledoc """
   Telemetry and metrics collection for the search engine.
 
-  This module attaches telemetry handlers to track:
-  - Query latency and throughput
-  - Index size and memory usage
-  - Batch processing statistics
-  - Cache hit/miss rates (if applicable)
-
-  Metrics are reported via the `:telemetry` library and can be consumed by
-  external monitoring systems (Prometheus, StatsD, etc.).
+  Emits telemetry events consumed by MetricsAggregator for real-time
+  performance monitoring and the /api/search/metrics endpoint.
   """
 
   require Logger
+
+  alias SmartKioskCore.Search.MetricsAggregator
 
   # ── Public API ──────────────────────────────────────────────────────────────
 
   @doc """
   Attaches telemetry handlers for search metrics.
-
-  Call this during application startup.
+  Called during application startup.
   """
   @spec attach_handlers() :: :ok
   def attach_handlers do
@@ -42,25 +37,25 @@ defmodule SmartKioskCore.Search.Metrics do
   end
 
   @doc """
-  Handles telemetry events and logs metrics.
-
-  This function is called automatically by :telemetry.
+  Handles telemetry events. Routes to aggregator and logs.
   """
   @spec handle_event(list(atom()), map(), map(), term()) :: :ok
   def handle_event([:smart_kiosk, :search, :query], measurements, metadata, _config) do
     duration_ms = measurements.duration_ms
     result_count = measurements.results
-    token_count = metadata.tokens
+    token_count = metadata[:tokens] || 1
 
-    # Log slow queries
-    if duration_ms > 10 do
+    # Forward to aggregator for percentile tracking
+    MetricsAggregator.record_query(duration_ms, result_count, token_count)
+
+    # Log slow queries (> 50ms threshold)
+    if duration_ms > 50 do
       Logger.warning(
-        "Search.Metrics: Slow query - #{duration_ms}ms, " <>
+        "Search.Metrics: Slow query - #{:erlang.float_to_binary(duration_ms, decimals: 1)}ms, " <>
           "#{result_count} results, #{token_count} tokens"
       )
     end
 
-    # Could also report to external metrics system here
     :ok
   end
 
@@ -74,9 +69,14 @@ defmodule SmartKioskCore.Search.Metrics do
   end
 
   def handle_event([:smart_kiosk, :search, :index, :rebuild], measurements, _metadata, _config) do
+    doc_count = measurements.documents
+    duration_ms = measurements.duration_ms
+
+    MetricsAggregator.record_rebuild(doc_count, duration_ms)
+
     Logger.info(
       "Search.Metrics: Index rebuilt - " <>
-        "#{measurements.documents} documents in #{measurements.duration_ms}ms"
+        "#{doc_count} documents in #{duration_ms}ms"
     )
 
     :ok
@@ -103,7 +103,7 @@ defmodule SmartKioskCore.Search.Metrics do
   end
 
   @doc """
-  Records custom metric.
+  Records a custom metric event.
   """
   @spec record(atom(), map(), map()) :: :ok
   def record(event_name, measurements, metadata \\ %{}) do
@@ -115,40 +115,10 @@ defmodule SmartKioskCore.Search.Metrics do
   end
 
   @doc """
-  Returns current search statistics.
-
-  ## Important Note
-
-  This function currently returns a placeholder structure with nil values.
-  For actual metrics, external systems should consume the `:telemetry` events
-  directly. Telemetry events are emitted for:
-
-    * `[:smart_kiosk, :search, :query]` - Search queries
-    * `[:smart_kiosk, :search, :index, :update]` - Index updates
-    * `[:smart_kiosk, :search, :index, :rebuild]` - Index rebuilds
-    * `[:smart_kiosk, :search, :persistence, :save]` - Persistence operations
-    * `[:smart_kiosk, :search, :persistence, :load]` - Load operations
-
-  ## Examples
-
-      iex> SmartKioskCore.Search.Metrics.stats()
-      %{
-        query_count: nil,
-        avg_latency_ms: nil,
-        index_size_bytes: nil,
-        last_rebuild: nil
-      }
+  Returns current search statistics from the aggregator.
   """
   @spec stats() :: map()
   def stats do
-    # Note: This is a placeholder. Actual metrics should be obtained by
-    # consuming telemetry events from an external metrics system
-    # (e.g., Prometheus, StatsD, DataDog, etc.)
-    %{
-      query_count: nil,
-      avg_latency_ms: nil,
-      index_size_bytes: nil,
-      last_rebuild: nil
-    }
+    MetricsAggregator.stats()
   end
 end

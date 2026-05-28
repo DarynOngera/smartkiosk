@@ -27,11 +27,11 @@ defmodule SmartKioskCore.Search do
 
   The search system consists of:
 
-  1. **Engine** (`Search.Engine`) - Core Trie + Levenshtein algorithm
-  2. **IndexServer** (`Search.IndexServer`) - GenServer managing ETS/DETS
+  1. **Engine** (`Search.Engine`) - Inverted index + Levenshtein fuzzy matching
+  2. **IndexServer** (`Search.IndexServer`) - GenServer managing ETS/file
   3. **BatchQueue** (`Search.BatchQueue`) - Accumulates changes for batch processing
-  4. **Query** (`Search.Query`) - Search execution and ranking
-  5. **Persistence** (`Search.Persistence`) - DETS snapshot management
+  4. **Query** (`Search.Query`) - TF-IDF ranking and search execution
+  5. **Persistence** (`Search.Persistence`) - File snapshot management
   6. **Workers** - Oban jobs for batch processing and rebuilding
 
   """
@@ -182,7 +182,8 @@ defmodule SmartKioskCore.Search do
       ready: ready?(),
       document_count: document_count(),
       stats: stats(),
-      queue_size: SmartKioskCore.Search.BatchQueue.size()
+      queue_size: SmartKioskCore.Search.BatchQueue.size(),
+      memory_estimate_bytes: IndexServer.memory_estimate()
     }
   end
 
@@ -196,7 +197,7 @@ defmodule SmartKioskCore.Search do
   """
   @spec rebuild() :: :ok
   def rebuild do
-    %{}
+    %{force: true}
     |> SmartKioskCore.Workers.SearchRebuildWorker.new()
     |> Oban.insert()
 

@@ -39,27 +39,30 @@ defmodule SmartKioskCore.Workers.SearchIndexBatchWorker do
   defp process_changes(changes) do
     start_time = System.monotonic_time(:millisecond)
 
-    # Get current trie
-    current_trie = get_current_trie()
+    # Get current index
+    current_index = get_current_index()
 
     # Apply all changes
-    new_trie =
-      Enum.reduce(changes, current_trie, fn
-        {:insert, doc}, trie ->
-          Engine.insert(trie, doc.text, doc.id, doc[:field] || :name, doc[:weight] || 1.0)
+    new_index =
+      Enum.reduce(changes, current_index, fn
+        {:insert, doc}, index ->
+          Engine.insert(index, doc.text, doc.id, doc[:field] || :name, doc[:weight] || 1.0)
 
-        {:update, doc}, trie ->
+        {:update, doc}, index ->
           # Delete then re-insert
-          trie
+          index
           |> Engine.remove(doc.id)
           |> Engine.insert(doc.text, doc.id, doc[:field] || :name, doc[:weight] || 1.0)
 
-        {:delete, doc_id}, trie ->
-          Engine.remove(trie, doc_id)
+        {:delete, doc_id}, index ->
+          Engine.remove(index, doc_id)
       end)
 
+    # Recompute vocabulary and IDF after mutations
+    new_index = Engine.finalize_index(new_index)
+
     # Update the index
-    update_index(new_trie)
+    update_index(new_index)
 
     duration = System.monotonic_time(:millisecond) - start_time
 
@@ -74,15 +77,14 @@ defmodule SmartKioskCore.Workers.SearchIndexBatchWorker do
     :ok
   end
 
-  defp get_current_trie do
-    # Access the ETS table directly to get current state
-    case :ets.lookup(:search_index, :trie) do
-      [{:trie, trie}] -> trie
-      [] -> %{}
+  defp get_current_index do
+    case :ets.lookup(:search_index, :index) do
+      [{:index, index}] -> index
+      [] -> Engine.empty_index()
     end
   end
 
-  defp update_index(trie) do
-    :ets.insert(:search_index, {:trie, trie})
+  defp update_index(index) do
+    :ets.insert(:search_index, {:index, index})
   end
 end
