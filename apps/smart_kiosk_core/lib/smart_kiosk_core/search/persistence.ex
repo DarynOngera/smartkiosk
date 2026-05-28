@@ -1,86 +1,46 @@
 defmodule SmartKioskCore.Search.Persistence do
   @moduledoc """
-  Manages disk persistence of the search index using DETS (Disk ETS).
+  Manages disk persistence of the search index using plain files.
 
-  This module provides functions for:
-  - Saving the in-memory Trie to disk
-  - Loading the Trie from disk on startup
-  - Detecting index corruption via checksums
-  - Periodic snapshot maintenance
+  The inverted index serialises to ~8 MB for 150k products, well within
+  safe limits for `:erlang.term_to_binary/2`.
 
-  DETS is used for persistence because:
-  - It's built into Erlang/OTP (no dependencies)
-  - Supports large datasets (up to 2GB per table)
-  - Provides ACID properties
+  Approach:
+  - Serialise with `:erlang.term_to_binary/2` (compressed)
+  - Write to a temp file, then rename atomically
+  - Verify with an MD5 checksum stored alongside the data
   """
 
   require Logger
 
   alias SmartKioskCore.Search.Engine
 
-  @typedoc "DETS table handle"
-  @type table_handle :: :dets.table_name()
-
   @typedoc "Persistence result"
   @type result :: :ok | {:error, term()}
 
-  @dets_table :search_index
   @checksum_key :__checksum__
   @data_key :__trie_data__
 
   # ── Public API ──────────────────────────────────────────────────────────────
 
   @doc """
-  Opens the DETS table for reading/writing.
-
-  Creates the file if it doesn't exist.
+  Saves the index to disk with a checksum for corruption detection.
   """
-  @spec open(String.t()) :: {:ok, table_handle()} | {:error, term()}
-  def open(dets_path) do
-    opts = [
-      type: :set,
-      file: to_charlist(dets_path),
-      access: :read_write
-    ]
+  @spec save(Engine.index(), String.t()) :: result()
+  def save(index, path) do
+    serialized = :erlang.term_to_binary(index, compressed: 9)
+    checksum = :erlang.md5(serialized)
+    payload = :erlang.term_to_binary({@checksum_key, checksum, @data_key, serialized})
 
-    case :dets.open_file(@dets_table, opts) do
-      {:ok, table} ->
-        Logger.info("Search.Persistence: Opened DETS table at #{dets_path}")
-        {:ok, table}
+    tmp = path <> ".tmp"
 
-      {:error, reason} ->
-        Logger.error("Search.Persistence: Failed to open DETS: #{inspect(reason)}")
-        {:error, reason}
-    end
-  end
+    with :ok <- File.write(tmp, payload),
+         :ok <- File.rename(tmp, path) do
+      Logger.info(
+        "Search.Persistence: Saved index (#{byte_size(serialized)} bytes serialized, " <>
+          "#{byte_size(payload)} bytes on disk)"
+      )
 
-  @doc """
-  Closes the DETS table.
-  """
-  @spec close(table_handle()) :: :ok | {:error, term()}
-  def close(table) do
-    :dets.close(table)
-  end
-
-  @doc """
-  Saves the Trie to disk with a checksum for corruption detection.
-
-  ## Examples
-
-      iex> trie = %{...}
-      iex> SmartKioskCore.Search.Persistence.save(trie, "/path/to/index.dets")
-      :ok
-  """
-  @spec save(Engine.trie(), String.t()) :: result()
-  def save(trie, dets_path) do
-    with {:ok, table} <- open(dets_path),
-         serialized = :erlang.term_to_binary(trie),
-         checksum = :erlang.md5(serialized),
-         :ok <- :dets.insert(table, {@data_key, serialized}),
-         :ok <- :dets.insert(table, {@checksum_key, checksum}),
-         :ok <- :dets.sync(table),
-         :ok <- close(table) do
-      Logger.info("Search.Persistence: Saved index to DETS (#{byte_size(serialized)} bytes)")
       :ok
     else
       {:error, reason} ->
@@ -90,106 +50,73 @@ defmodule SmartKioskCore.Search.Persistence do
   end
 
   @doc """
-  Loads the Trie from disk and verifies checksum.
-
-  Returns `{:ok, trie}` on success, `{:error, reason}` on failure.
-
-  ## Examples
-
-      iex> SmartKioskCore.Search.Persistence.load("/path/to/index.dets")
-      {:ok, %{...}}
+  Loads the index from disk and verifies checksum.
   """
-  @spec load(String.t()) :: {:ok, Engine.trie()} | {:error, atom()}
-  def load(dets_path) do
-    case open(dets_path) do
-      {:ok, table} ->
-        try do
-          do_load(table, dets_path)
-        after
-          close(table)
-        end
+  @spec load(String.t()) :: {:ok, Engine.index()} | {:error, atom()}
+  def load(path) do
+    case File.read(path) do
+      {:ok, payload} ->
+        do_load(payload, path)
 
-      {:error, reason} ->
-        Logger.error("Search.Persistence: Failed to open DETS: #{inspect(reason)}")
-        {:error, reason}
-    end
-  end
-
-  defp do_load(table, dets_path) do
-    with [{@data_key, serialized}] <- :dets.lookup(table, @data_key),
-         [{@checksum_key, stored_checksum}] <- :dets.lookup(table, @checksum_key),
-         computed_checksum = :erlang.md5(serialized),
-         true <- computed_checksum == stored_checksum do
-      trie = :erlang.binary_to_term(serialized)
-      Logger.info("Search.Persistence: Loaded index from DETS")
-      {:ok, trie}
-    else
-      [] ->
-        Logger.warning("Search.Persistence: DETS file empty or missing data")
+      {:error, :enoent} ->
         {:error, :empty}
 
-      false ->
-        Logger.error("Search.Persistence: Checksum mismatch - index corrupted")
-        # Delete corrupted file
-        delete(dets_path)
-        {:error, :corrupted}
-
-      error ->
-        Logger.error("Search.Persistence: Unexpected error: #{inspect(error)}")
-        {:error, :unknown}
+      {:error, reason} ->
+        Logger.error("Search.Persistence: Failed to read file: #{inspect(reason)}")
+        {:error, :read_error}
     end
   end
 
-  @doc """
-  Checks if a valid DETS file exists at the given path.
-
-  Performs a lightweight check without loading the full index.
-  """
   @spec exists?(String.t()) :: boolean()
-  def exists?(dets_path) do
-    File.exists?(dets_path)
-  end
+  def exists?(path), do: File.exists?(path)
 
-  @doc """
-  Deletes the DETS file (useful for forcing a rebuild).
-  """
   @spec delete(String.t()) :: :ok | {:error, term()}
-  def delete(dets_path) do
-    close_dets()
-
-    case File.rm(dets_path) do
+  def delete(path) do
+    case File.rm(path) do
       :ok ->
-        Logger.info("Search.Persistence: Deleted DETS file at #{dets_path}")
+        Logger.info("Search.Persistence: Deleted index file at #{path}")
         :ok
 
       {:error, :enoent} ->
         :ok
 
       {:error, reason} ->
-        Logger.error("Search.Persistence: Failed to delete DETS: #{inspect(reason)}")
+        Logger.error("Search.Persistence: Failed to delete file: #{inspect(reason)}")
         {:error, reason}
     end
   end
 
-  @doc """
-  Returns statistics about the DETS file.
-  """
   @spec stats(String.t()) :: {:ok, map()} | {:error, term()}
-  def stats(dets_path) do
-    with {:ok, table} <- open(dets_path),
-         info = :dets.info(table),
-         :ok <- close(table) do
-      {:ok, Map.new(info)}
+  def stats(path) do
+    case File.stat(path) do
+      {:ok, info} -> {:ok, %{size: info.size, mtime: info.mtime}}
+      {:error, reason} -> {:error, reason}
     end
   end
 
   # ── Private Functions ───────────────────────────────────────────────────────
 
-  defp close_dets do
-    try do
-      :dets.close(@dets_table)
-    catch
-      _, _ -> :ok
+  defp do_load(payload, path) do
+    with {@checksum_key, stored_checksum, @data_key, serialized} <-
+           :erlang.binary_to_term(payload),
+         computed_checksum = :erlang.md5(serialized),
+         true <- computed_checksum == stored_checksum do
+      index = :erlang.binary_to_term(serialized)
+      Logger.info("Search.Persistence: Loaded index from file")
+      {:ok, index}
+    else
+      false ->
+        Logger.error("Search.Persistence: Checksum mismatch - index corrupted")
+        delete(path)
+        {:error, :corrupted}
+
+      _ ->
+        Logger.error("Search.Persistence: Unexpected file format")
+        {:error, :unknown}
     end
+  rescue
+    e ->
+      Logger.error("Search.Persistence: Failed to deserialize: #{inspect(e)}")
+      {:error, :deserialization_failed}
   end
 end

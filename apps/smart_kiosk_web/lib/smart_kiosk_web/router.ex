@@ -146,6 +146,12 @@ defmodule SmartKioskWeb.Router do
     post "/tasks/:id/status", RiderStubController, :update_task_status
   end
 
+  # ── Search metrics (public monitoring endpoint) ────────────────────────────────
+  scope "/api/search", SmartKioskWeb.Api do
+    pipe_through :api
+    get "/metrics", SearchMetricsController, :index
+  end
+
   # ── Dev tooling ───────────────────────────────────────────────────────────────
   if Application.compile_env(:smart_kiosk_web, :dev_routes) do
     import Phoenix.LiveDashboard.Router

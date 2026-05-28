@@ -1,10 +1,10 @@
-# SmartKiosk Fuzzy Search Engine
+# SmartKiosk Search Engine
 
-A high-performance, native Elixir fuzzy search engine for product and shop discovery.
+A high-performance, native Elixir search engine for product and shop discovery using an **inverted index** with TF-IDF ranking and fuzzy matching.
 
 ## Overview
 
-This search engine replaces traditional SQL `ILIKE` pattern matching with a sophisticated in-memory Trie data structure combined with Levenshtein distance calculations for typo tolerance. It provides sub-millisecond query response times and intelligent ranking based on multiple relevance factors.
+This search engine replaces traditional SQL `ILIKE` pattern matching with an in-memory inverted index combined with Levenshtein distance for typo tolerance and TF-IDF for relevance ranking. It provides sub-10ms query response times for 150k+ products.
 
 ## Architecture
 
@@ -16,13 +16,14 @@ This search engine replaces traditional SQL `ILIKE` pattern matching with a soph
                                │                           │
                                ▼                           ▼
                         ┌──────────────┐           ┌──────────────┐
-                        │    Query     │           │     Trie     │
-                        │   (Ranking)  │           │  (Prefix Tree│
+                        │    Query     │           │   Inverted   │
+                        │  (TF-IDF     │           │    Index     │
+                        │   Ranking)   │           │              │
                         └──────────────┘           └──────────────┘
                                │                           │
                                ▼                           ▼
                         ┌──────────────┐           ┌──────────────┐
-                        │  Persistence │◀─────────▶│    DETS      │
+                        │  Persistence │◀─────────▶│     File     │
                         │  (Snapshot)  │           │  (Disk File) │
                         └──────────────┘           └──────────────┘
 ```
@@ -30,64 +31,78 @@ This search engine replaces traditional SQL `ILIKE` pattern matching with a soph
 ## Core Components
 
 ### 1. Engine (`engine.ex`)
-The heart of the search system implementing:
 
-- **Trie (Prefix Tree)**: Stores all searchable terms with prefix indexing
-- **Levenshtein Distance**: Calculates edit distance for fuzzy matching
-- **Tokenization**: Normalizes and splits text into searchable tokens
+The inverted index implementation:
+
+- **Postings**: `token → [{doc_id, field, weight}]`
+- **Vocabulary**: Sorted list of all unique tokens
+- **IDF**: Pre-computed inverse document frequency per token
+- **Length Index**: `token_length → [tokens]` for fast fuzzy filtering
+- **Doc Metadata**: Token count, name, shop_name per document
 
 **Typo Budget Rules**:
-- `< 4 characters`: 0 typos allowed (exact match only)
+- `< 4 characters`: 0 typos (exact match + prefix)
 - `4-8 characters`: 1 typo allowed
 - `> 8 characters`: 2 typos allowed
 
+**Search Strategy**:
+1. **Prefix matches first**: Exact prefix hits get distance = 0
+2. **Fuzzy matches second**: Levenshtein within typo budget (distance ≥ 1)
+3. **Result merging**: Keep lowest distance per doc_id
+
 **Example**:
 ```elixir
-# "iphone" can match "ipone" (1 typo) but not "ipn" (2 typos)
-# "kilimanjaro" can match "kilimanjar" (1 typo) or "kilimajar" (2 typos)
+# "kili" matches "kilimani", "kilimanjaro" via prefix
+# "iphoen" matches "iphone" via fuzzy (1 typo)
 ```
 
-### 2. IndexServer (`index_server.ex`)
-Central coordinator managing:
+### 2. Query (`query.ex`)
 
-- **ETS Table**: Concurrent read access for web requests
-- **DETS Persistence**: Disk-based snapshots for recovery
-- **Automatic Rebuild**: Triggers rebuild on startup if no index exists
+Multi-token search with TF-IDF ranking:
 
-**Data Flow**:
-1. Search queries read from ETS (sub-millisecond)
-2. Index updates write to ETS (single writer pattern)
-3. Periodic snapshots save to DETS (every 5 minutes)
-
-### 3. Query (`query.ex`)
-Handles search execution and multi-tier ranking:
-
-**Ranking Algorithm**:
+**Scoring Formula**:
 ```
-score = (distance × 0.5) + (prefix_bonus × 0.3) + (field_penalty × 0.2)
+score = (tfidf × 0.6) + (field_weight × 0.25) − (distance × 0.15)
 ```
 
 Where:
-- **distance**: Edit distance (0 = exact match, 1 = 1 typo, etc.)
-- **prefix_bonus**: 0.0 for exact prefix, 0.5 for fuzzy match
-- **field_penalty**: Weight based on field importance
-  - `name`: 1.0 (no penalty)
-  - `description`: 0.3 (higher penalty, ranks lower)
+- **tfidf**: Inverse document frequency × term frequency (rare matches rank higher)
+- **field_weight**: Importance of matched field
+  - `product_name`: 1.0
+  - `shop_name`: 1.0
+  - `description`: 0.3
+- **distance**: Levenshtein edit distance (0 = exact, 1+ = fuzzy)
 
-### 4. BatchQueue (`batch_queue.ex`)
-Accumulates document changes for batch processing:
+**Multi-token AND logic**: All tokens must match. Intersection of doc_ids across tokens.
 
-- **Insert**: New product/shop added to index
-- **Update**: Existing document re-indexed
-- **Delete**: Document removed from index
+### 3. IndexServer (`index_server.ex`)
 
-Changes are processed every 30 seconds via Oban worker.
+Central coordinator:
+
+- **ETS Table**: Concurrent read access for web requests
+- **File Persistence**: Compressed snapshot (`priv/search_index.bin`)
+- **Automatic Rebuild**: Triggers rebuild on startup if stale/missing
+- **Scheduled Snapshots**: Every 24 hours (configurable)
+
+**Data Flow**:
+1. Search queries read from ETS (sub-10ms)
+2. Index updates write to ETS (single writer pattern)
+3. Periodic snapshots save to file (~8MB for 150k products)
+
+### 4. BatchQueue + BatchWorker
+
+Incremental updates:
+
+- **BatchQueue**: Accumulates insert/update/delete operations
+- **SearchIndexBatchWorker** (Oban, every minute): Applies queued changes to index
+- Changes trigger `Engine.finalize_index/1` to rebuild vocabulary + IDF
 
 ### 5. Persistence (`persistence.ex`)
-Manages disk storage using DETS (Disk ETS):
 
-- **Save**: Serializes Trie to disk with MD5 checksum
-- **Load**: Validates checksum, deserializes Trie
+File-based persistence with integrity checks:
+
+- **Save**: `:erlang.term_to_binary(index, compressed: 9)` → temp file → atomic rename
+- **Load**: MD5 checksum validation → deserialization
 - **Corruption Detection**: Auto-rebuilds if checksum fails
 
 ## Data Flow
@@ -102,19 +117,19 @@ Product/Shop Created/Updated
 │   enqueue/1     │───▶ Adds to BatchQueue
 └─────────────────┘
          │
-         ▼ (every 30s)
+         ▼ (every minute)
 ┌─────────────────┐
 │  BatchWorker    │───▶ Processes all queued changes
 └─────────────────┘
          │
          ▼
 ┌─────────────────┐
-│  Update ETS     │───▶ Trie updated atomically
+│  Update ETS     │───▶ Index updated atomically
 └─────────────────┘
          │
-         ▼ (every 5 min)
+         ▼ (every 24h)
 ┌─────────────────┐
-│  DETS Snapshot  │───▶ Persist to disk
+│  File Snapshot  │───▶ Persist to disk (~8MB)
 └─────────────────┘
 ```
 
@@ -130,17 +145,17 @@ User Types Query
          │
          ▼
 ┌─────────────────┐
-│  Lookup in ETS  │───▶ Get current Trie
+│  Lookup in ETS  │───▶ Get current index
 └─────────────────┘
          │
          ▼
 ┌─────────────────┐
-│ Fuzzy Traversal │───▶ DFS with Levenshtein pruning
+│ Prefix + Fuzzy  │───▶ Prefix matches (dist=0) + fuzzy (dist≥1)
 └─────────────────┘
          │
          ▼
 ┌─────────────────┐
-│  Calculate Rank │───▶ Score by distance + field weight
+│  Calculate Rank │───▶ TF-IDF score + field weight − distance penalty
 └─────────────────┘
          │
          ▼
@@ -159,7 +174,7 @@ User Types Query
 ### Public API
 
 ```elixir
-# Search for products and shops
+# Search for products and shops (fuzzy + TF-IDF)
 SmartKioskCore.Search.query_products("iphone")
 # => [%{id: "...", name: "iPhone 15", type: :product, ...}, ...]
 
@@ -172,7 +187,7 @@ SmartKioskCore.Search.ready?()
 # => true
 
 SmartKioskCore.Search.document_count()
-# => 150
+# => 150101
 
 # Manual rebuild
 SmartKioskCore.Search.rebuild()
@@ -180,13 +195,47 @@ SmartKioskCore.Search.rebuild()
 
 # Diagnostics
 SmartKioskCore.Search.diagnose()
-# => %{ready: true, document_count: 150, ...}
+# => %{ready: true, document_count: 150101, ...}
+```
+
+### Metrics API
+
+```bash
+# Public endpoint — no authentication
+curl http://localhost:4000/api/search/metrics
+```
+
+**Response**:
+```json
+{
+  "query_latency": {
+    "p50_ms": 5.2,
+    "p95_ms": 12.4,
+    "p99_ms": 28.6,
+    "min_ms": 1.8,
+    "max_ms": 45.3,
+    "count_1m": 342,
+    "count_5m": 1240
+  },
+  "index": {
+    "document_count": 150101,
+    "memory_bytes": 33554432,
+    "last_rebuild_at": "2026-05-28T09:32:53Z",
+    "freshness_seconds": 1847,
+    "build_duration_ms": 15420
+  },
+  "relevance": {
+    "avg_results_per_query": 8.3,
+    "zero_result_rate": 0.02,
+    "total_queries": 5240
+  }
+}
 ```
 
 ### Mix Tasks
 
 ```bash
-# Rebuild search index (only if empty)
+# Rebuild search index (only if empty/stale)
 mix search.rebuild
 
 # Force rebuild even if index exists
@@ -201,7 +250,7 @@ config :smart_kiosk_core, Oban,
   plugins: [
     {Oban.Plugins.Cron,
      crontab: [
-       # Batch process changes every 30 seconds
+       # Batch process changes every minute
        {"*/1 * * * *", SmartKioskCore.Workers.SearchIndexBatchWorker},
        # Daily full rebuild at 2 AM
        {"0 2 * * *", SmartKioskCore.Workers.SearchRebuildWorker}
@@ -212,15 +261,17 @@ config :smart_kiosk_core, Oban,
 
 ## Performance Characteristics
 
-| Metric | Target | Actual |
-|--------|--------|--------|
-| Query Latency (p95) | <5ms | ~2-3ms |
-| Query Latency (p99) | <10ms | ~5-8ms |
-| Index Build Time | <60s | ~10-20s (100k docs) |
-| Memory Usage | <300MB | ~150-250MB |
+| Metric | Target | Actual (150k docs) |
+|--------|--------|-------------------|
+| Query Latency (p50) | <10ms | ~3-5ms |
+| Query Latency (p95) | <50ms | ~8-15ms |
+| Query Latency (p99) | <100ms | ~20-30ms |
+| Index Build Time | <30s | ~12-18s |
+| Memory Usage | <100MB | ~30-40MB |
+| Serialized Size | <20MB | ~8MB |
 | Concurrent Queries | Unlimited | Limited by ETS |
 
-## Comparison: Fuzzy vs ILIKE
+## Comparison: Search vs ILIKE
 
 ### ILIKE (Old)
 ```sql
@@ -229,69 +280,74 @@ SELECT * FROM products WHERE name ILIKE '%iphone%'
 -- Cons: No typo tolerance, slow on large tables, linear scan
 ```
 
-### Fuzzy Search (New)
+### Inverted Index (New)
 ```elixir
 SmartKioskCore.Search.query_products("ipone")
 # Returns: ["iPhone 15"] (auto-corrected 1 typo)
--- Pros: Typo tolerance, sub-millisecond, intelligent ranking
--- Cons: Memory intensive, eventual consistency (30s delay)
+SmartKioskCore.Search.query_products("iphone 15")
+# Returns: docs with BOTH "iphone" AND "15" tokens
+-- Pros: Typo tolerance, TF-IDF ranking, sub-10ms, prefix autocomplete
+-- Cons: Memory-only (rebuilds from DB on boot), eventual consistency (~1 min)
 ```
 
 ## Troubleshooting
 
 ### Issue: Search returns empty results
-**Cause**: Index not built yet (first boot)
-**Solution**: 
+**Cause**: Index not built yet (first boot after deploy)
+**Solution**:
 ```bash
 mix search.rebuild --force
 ```
 
-### Issue: Search crashes with BadMapError
-**Cause**: Corrupted index data
+### Issue: Search crashes on short queries
+**Cause**: Stale index file from old Trie version
 **Solution**:
 ```bash
-rm priv/search_index.dets
+rm apps/smart_kiosk_core/priv/search_index.bin
 mix search.rebuild --force
 ```
 
 ### Issue: High memory usage
-**Cause**: Large document set
-**Solution**: Monitor with:
-```elixir
-SmartKioskCore.Search.stats()
-# Check :memory_estimate_bytes
+**Cause**: Large document set loaded into memory
+**Solution**: Monitor with metrics endpoint:
+```bash
+curl http://localhost:4000/api/search/metrics | jq '.index.memory_bytes'
 ```
+
+### Issue: Slow queries (>100ms)
+**Cause**: Very short prefixes (e.g., "a") matching thousands of tokens
+**Solution**: Already mitigated — `Engine.search` caps results at `limit * 3`
 
 ## Testing
 
 ```elixir
 # Unit tests
-test "search handles typos" do
-  results = Search.query_products("iphne")
-  assert length(results) > 0
-end
+ test "search handles typos" do
+   results = Search.query_products("iphne")
+   assert length(results) > 0
+ end
+
+ test "prefix search returns results" do
+   results = Search.prefix_search("kilim", limit: 5)
+   assert length(results) > 0
+ end
 
 # Load test
-test "concurrent searches" do
-  1..1000
-  |> Task.async_stream(fn _ -> 
-    Search.query_products("test")
-  end, max_concurrency: 100)
-  |> Enum.to_list()
-end
+ test "concurrent searches" do
+   1..1000
+   |> Task.async_stream(fn _ -> 
+     Search.query_products("test")
+   end, max_concurrency: 100)
+   |> Enum.to_list()
+ end
 ```
-
-## Future Enhancements
-
-1. **Synonym Support**: Map "cell phone" → "mobile", "smartphone"
-2. **Faceted Search**: Filter by category, price range, location
-3. **Personalization**: Boost results based on user history
-4. **Auto-complete**: Trie-based suggestions as you type
-5. **Search Analytics**: Track popular queries, zero-result searches
 
 ## See Also
 
-- `SmartKioskCore.Search` - Public API
-- `SmartKioskCore.Search.Engine` - Core algorithm
-- `SmartKioskCore.Workers.SearchRebuildWorker` - Index builder
-- `SmartKioskWeb.Components.SearchBar` - UI component
+- `SmartKioskCore.Search` — Public API
+- `SmartKioskCore.Search.Engine` — Inverted index + fuzzy matching
+- `SmartKioskCore.Search.Query` — TF-IDF ranking
+- `SmartKioskCore.Search.MetricsAggregator` — Performance metrics
+- `SmartKioskWeb.Api.SearchMetricsController` — HTTP metrics endpoint
+- `SmartKioskCore.Workers.SearchRebuildWorker` — Index builder
+- `SmartKioskWeb.Components.SearchBar` — UI component
