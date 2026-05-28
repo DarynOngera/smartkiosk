@@ -179,10 +179,10 @@ defmodule SmartKioskCore.Schemas.User do
     shop_id = get_field(changeset, :shop_id)
 
     cond do
-      role in [:platform_admin, :customer, :rider] && shop_id != nil ->
+      role in [:platform_admin, :customer] && shop_id != nil ->
         add_error(changeset, :shop_id, "this user role must not belong to a shop")
 
-      role in [:owner, :manager, :staff] && shop_id == nil ->
+      role in [:owner, :manager, :staff, :rider] && shop_id == nil ->
         add_error(changeset, :shop_id, "this user role must belong to a shop")
 
       true ->

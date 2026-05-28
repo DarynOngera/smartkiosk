@@ -51,6 +51,7 @@ defmodule SmartKioskCore.Schemas.Shop do
     has_many(:delivery_zones, SmartKioskCore.Schemas.DeliveryZone)
     has_many(:campaigns, SmartKioskCore.Schemas.Campaign)
     has_many(:invoices, SmartKioskCore.Schemas.Invoice)
+    has_many(:job_posts, SmartKioskCore.Schemas.JobPost)
     has_one(:subscription, SmartKioskCore.Schemas.Subscription)
 
     timestamps(type: :utc_datetime)

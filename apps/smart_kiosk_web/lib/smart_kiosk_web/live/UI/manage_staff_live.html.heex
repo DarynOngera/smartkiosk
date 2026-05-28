@@ -1,0 +1,253 @@
+<Layouts.app
+  flash={@flash}
+  current_path="/manage-staff"
+  current_user={@current_user}
+  current_shop={@current_shop}
+  cart_count={@cart_count}
+>
+  <div class="min-h-screen bg-[#0B0F1A] text-white">
+    <div class="p-6 lg:p-10">
+      <div class="max-w-7xl mx-auto space-y-8">
+        <header class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <.link
+              navigate={~p"/dashboard"}
+              class="inline-flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-white transition-colors"
+            >
+              <.icon name="hero-arrow-left" class="w-4 h-4" /> Dashboard
+            </.link>
+            <h1 class="mt-4 text-3xl font-bold tracking-tight">Manage Staff</h1>
+            <p class="mt-2 text-slate-400">
+              Review rider applications and manage team access for <span class="font-semibold text-violet-300"><%= @current_shop.name %></span>.
+            </p>
+          </div>
+        </header>
+
+        <nav class="inline-flex rounded-2xl border border-white/10 bg-white/5 p-1">
+          <.link
+            patch={~p"/manage-staff?tab=riders"}
+            class={[
+              "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition",
+              @active_tab == :riders && "bg-violet-500 text-white shadow-lg shadow-violet-500/20",
+              @active_tab != :riders && "text-slate-400 hover:text-white"
+            ]}
+          >
+            <.icon name="hero-rider" class="w-4 h-4" /> Rider Applications
+          </.link>
+          <.link
+            patch={~p"/manage-staff?tab=staff"}
+            class={[
+              "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition",
+              @active_tab == :staff && "bg-violet-500 text-white shadow-lg shadow-violet-500/20",
+              @active_tab != :staff && "text-slate-400 hover:text-white"
+            ]}
+          >
+            <.icon name="hero-users" class="w-4 h-4" /> Staff Members
+          </.link>
+        </nav>
+
+        <%= if @active_tab == :riders do %>
+          <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div class="xl:col-span-2 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+              <div class="flex items-center justify-between gap-4 mb-5">
+                <h2 class="text-xl font-bold">Rider Applications</h2>
+                <span class="text-sm text-slate-400">
+                  <%= length(@rider_applications) %> total
+                </span>
+              </div>
+
+              <%= if @rider_applications == [] do %>
+                <div class="rounded-2xl border border-dashed border-white/10 p-10 text-center text-slate-500">
+                  No rider applications yet.
+                </div>
+              <% else %>
+                <div class="space-y-4">
+                  <article
+                    :for={rider <- @rider_applications}
+                    id={"rider-application-#{rider.id}"}
+                    class="rounded-2xl border border-white/10 bg-slate-950/50 p-5"
+                  >
+                    <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
+                      <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <h3 class="text-lg font-semibold"><%= rider.user.full_name %></h3>
+                          <span class={[
+                            "rounded-full px-2.5 py-1 text-xs font-semibold",
+                            rider.verification_status == :pending &&
+                              "bg-amber-500/15 text-amber-300",
+                            rider.verification_status == :verified &&
+                              "bg-emerald-500/15 text-emerald-300",
+                            rider.verification_status == :rejected &&
+                              "bg-rose-500/15 text-rose-300"
+                          ]}>
+                            <%= rider.verification_status |> to_string() |> String.capitalize() %>
+                          </span>
+                        </div>
+                        <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-400">
+                          <p>
+                            <span class="text-slate-500">Email:</span> <%= rider.user.email %>
+                          </p>
+                          <p>
+                            <span class="text-slate-500">Phone:</span> <%= rider.user.phone ||
+                              "Not provided" %>
+                          </p>
+                          <p>
+                            <span class="text-slate-500">Vehicle:</span> <%= rider.vehicle ||
+                              "Not provided" %>
+                          </p>
+                          <p>
+                            <span class="text-slate-500">Applied:</span> <%= Calendar.strftime(
+                              rider.inserted_at,
+                              "%Y-%m-%d %H:%M"
+                            ) %>
+                          </p>
+                        </div>
+                        <div class="mt-4 flex flex-wrap gap-3 text-sm">
+                          <a
+                            href={rider.license_url}
+                            target="_blank"
+                            class="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 font-semibold text-slate-200 hover:bg-white/10"
+                          >
+                            <.icon name="hero-document-text" class="w-4 h-4" /> License
+                          </a>
+                          <a
+                            href={rider.national_id_url}
+                            target="_blank"
+                            class="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 font-semibold text-slate-200 hover:bg-white/10"
+                          >
+                            <.icon name="hero-identification" class="w-4 h-4" /> National ID
+                          </a>
+                        </div>
+                      </div>
+
+                      <div :if={rider.verification_status == :pending} class="flex shrink-0 gap-2">
+                        <button
+                          id={"approve-rider-#{rider.id}"}
+                          phx-click="approve_rider"
+                          phx-value-id={rider.id}
+                          class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
+                        >
+                          <.icon name="hero-check" class="w-4 h-4" /> Approve
+                        </button>
+                        <button
+                          id={"reject-rider-#{rider.id}"}
+                          phx-click="reject_rider"
+                          phx-value-id={rider.id}
+                          class="inline-flex items-center gap-2 rounded-xl bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-400"
+                        >
+                          <.icon name="hero-x-mark" class="w-4 h-4" /> Reject
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              <% end %>
+            </div>
+
+            <aside class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+              <h2 class="text-xl font-bold">Approval Rules</h2>
+              <div class="mt-5 space-y-4 text-sm text-slate-400">
+                <p class="flex gap-3">
+                  <.icon name="hero-shield-check" class="mt-0.5 w-5 h-5 text-emerald-300" />
+                  Riders stay pending until you approve their documents.
+                </p>
+                <p class="flex gap-3">
+                  <.icon name="hero-key" class="mt-0.5 w-5 h-5 text-violet-300" />
+                  Approval grants the rider shop role and unlocks delivery tasks.
+                </p>
+                <p class="flex gap-3">
+                  <.icon name="hero-no-symbol" class="mt-0.5 w-5 h-5 text-rose-300" />
+                  Rejection removes rider access for this shop.
+                </p>
+              </div>
+            </aside>
+          </section>
+        <% else %>
+          <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div class="xl:col-span-2 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+              <div class="flex items-center justify-between gap-4 mb-5">
+                <h2 class="text-xl font-bold">Team Members</h2>
+                <span class="text-sm text-slate-400"><%= length(@staff_members) %> total</span>
+              </div>
+
+              <div class="overflow-hidden rounded-2xl border border-white/10">
+                <table class="min-w-full divide-y divide-white/10">
+                  <thead class="bg-white/5">
+                    <tr>
+                      <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Name
+                      </th>
+                      <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Role
+                      </th>
+                      <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Phone
+                      </th>
+                      <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-white/10 bg-slate-950/40">
+                    <tr :for={member <- @staff_members} id={"staff-member-#{member.id}"}>
+                      <td class="px-4 py-4">
+                        <div class="font-semibold text-white"><%= member.full_name %></div>
+                        <div class="text-xs text-slate-500"><%= member.email %></div>
+                      </td>
+                      <td class="px-4 py-4 text-sm text-slate-300">
+                        <%= member.role |> to_string() |> String.capitalize() %>
+                      </td>
+                      <td class="px-4 py-4 text-sm text-slate-400">
+                        <%= member.phone || "Not provided" %>
+                      </td>
+                      <td class="px-4 py-4 text-sm">
+                        <%= if member.rider_profile do %>
+                          <span class="rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold text-slate-300">
+                            <%= member.rider_profile.verification_status
+                            |> to_string()
+                            |> String.capitalize() %>
+                          </span>
+                        <% else %>
+                          <span class="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-300">
+                            Active
+                          </span>
+                        <% end %>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <aside class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+              <h2 class="text-xl font-bold">Add Staff Member</h2>
+              <.form
+                for={@staff_form}
+                id="add-staff-form"
+                phx-change="validate_staff"
+                phx-submit="save_staff"
+                class="mt-5 space-y-4"
+              >
+                <.input field={@staff_form[:full_name]} type="text" label="Full name" required />
+                <.input field={@staff_form[:email]} type="email" label="Email" required />
+                <.input field={@staff_form[:phone]} type="tel" label="Phone" />
+                <.input
+                  field={@staff_form[:password]}
+                  type="password"
+                  label="Temporary password"
+                  required
+                />
+                <button
+                  type="submit"
+                  class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-violet-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-violet-400"
+                >
+                  <.icon name="hero-user-plus" class="w-4 h-4" /> Add Staff
+                </button>
+              </.form>
+            </aside>
+          </section>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</Layouts.app>

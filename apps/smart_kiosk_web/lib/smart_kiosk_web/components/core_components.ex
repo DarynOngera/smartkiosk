@@ -337,7 +337,7 @@ defmodule SmartKioskWeb.CoreComponents do
             class={@class || "checkbox checkbox-sm"}
             {@rest}
           />
-          <span :if={@label} class="ml-2">{@label}</span>
+          <span :if={@label} class="ml-2"><%= @label %></span>
         </span>
       </label>
       <.error :for={msg <- @errors}><%= msg %></.error>
@@ -349,7 +349,7 @@ defmodule SmartKioskWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="label mb-1"><%= @label %></span>
         <select
           id={@id}
           name={@name}
@@ -370,7 +370,7 @@ defmodule SmartKioskWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1"><%= @label %></span>
+        <span :if={@label} class="label mb-1 "><%= @label %></span>
         <textarea
           id={@id}
           name={@name}
@@ -391,7 +391,7 @@ defmodule SmartKioskWeb.CoreComponents do
     ~H"""
     <div class="fieldset mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="label mb-1"><%= @label %></span>
         <input
           type={@type}
           name={@name}
@@ -448,8 +448,8 @@ defmodule SmartKioskWeb.CoreComponents do
   ## Examples
 
       <.table id="users" rows={@users}>
-        <:col :let={user} label="id">{user.id}</:col>
-        <:col :let={user} label="username">{user.username}</:col>
+        <:col :let={user} label="id"><%= user.id %></:col>
+        <:col :let={user} label="username"><%= user.username %></:col>
       </.table>
   """
   attr(:id, :string, required: true)
@@ -480,7 +480,7 @@ defmodule SmartKioskWeb.CoreComponents do
         <tr>
           <th :for={col <- @col}><%= col[:label] %></th>
           <th :if={@action != []}>
-            <span class="sr-only">{gettext("Actions")}</span>
+            <span class="sr-only"><%= gettext("Actions") %></span>
           </th>
         </tr>
       </thead>
@@ -512,8 +512,8 @@ defmodule SmartKioskWeb.CoreComponents do
   ## Examples
 
       <.list>
-        <:item title="Title">{@post.title}</:item>
-        <:item title="Views">{@post.views}</:item>
+        <:item title="Title"><%= @post.title %></:item>
+        <:item title="Views"><%= @post.views %></:item>
       </.list>
   """
   slot :item, required: true do
@@ -525,7 +525,7 @@ defmodule SmartKioskWeb.CoreComponents do
     <ul class="list">
       <li :for={item <- @item} class="list-row">
         <div class="list-col-grow">
-          <div class="font-bold">{item.title}</div>
+          <div class="font-bold"><%= item.title %></div>
           <div><%= render_slot(item) %></div>
         </div>
       </li>
@@ -593,6 +593,7 @@ defmodule SmartKioskWeb.CoreComponents do
   defp heroicon_alias("storefront"), do: "building-storefront"
   defp heroicon_alias("receipt"), do: "document-text"
   defp heroicon_alias("cup"), do: "beaker"
+  defp heroicon_alias("rider"), do: "truck"
   defp heroicon_alias(name), do: name
 
   ## JS Commands
