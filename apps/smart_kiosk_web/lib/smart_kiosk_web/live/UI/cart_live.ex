@@ -258,8 +258,14 @@ defmodule SmartKioskWeb.CartLive do
     results =
       Enum.map(items_by_shop, fn {shop, items} ->
         # Resolve or create a customer record for this shop
+        customer_attrs = %{
+          name: name,
+          phone: phone,
+          user_id: current_user && current_user.id
+        }
+
         customer_id =
-          case Orders.find_or_create_customer(shop, %{name: name, phone: phone}) do
+          case Orders.find_or_create_customer(shop, customer_attrs) do
             {:ok, customer} -> customer.id
             _ -> nil
           end

@@ -1,17 +1,10 @@
 defmodule SmartKioskCore.Search.Query do
   @moduledoc """
-  Handles search query execution and result ranking.
+  Handles search query execution and result ranking with TF-IDF.
 
-  This module provides the high-level search interface that:
-  1. Tokenizes and normalizes queries
-  2. Determines typo budgets based on query length
-  3. Executes fuzzy search across the Trie
-  4. Ranks results by relevance using multiple factors
-  5. Returns sorted document IDs
-
-  Ranking Algorithm:
-  1. Edit distance (lower is better)
-  2. Prefix match bonus (exact prefix matches rank higher)
+  Ranking factors:
+  1. TF-IDF score (higher is better — rare, matching terms boost rank)
+  2. Edit distance penalty (lower distance = better)
   3. Field weight (title matches rank above description)
   """
 
@@ -44,176 +37,153 @@ defmodule SmartKioskCore.Search.Query do
   # ── Public API ──────────────────────────────────────────────────────────────
 
   @doc """
-  Executes a search query against the Trie and returns ranked results.
+  Executes a search query against the index and returns ranked results.
 
-  ## Options
-
-    * `:max_typos` - Override default typo budget calculation
-    * `:limit` - Maximum number of results (default: 50)
-    * `:field_weights` - Custom field weight mapping
-
-  ## Examples
-
-      iex> tree = SmartKioskCore.Search.Engine.build_index([%{id: 1, text: "iPhone"}])
-      iex> SmartKioskCore.Search.Query.execute(tree, "iphoen")
-      [{1, 0.5, %{distance: 1, field: :name}}]
+  For multi-token queries (e.g. "iphone 15") all tokens must match
+  (AND logic) and TF-IDF is computed across the combined tokens.
   """
-  @spec execute(Engine.trie(), String.t(), options()) :: [ranked_result()]
-  def execute(tree, query, opts \\ []) do
+  @spec execute(Engine.index(), String.t(), options()) :: [ranked_result()]
+  def execute(index, query, opts \\ []) do
     start_time = System.monotonic_time(:microsecond)
 
     if query == nil or String.trim(query) == "" do
       log_metrics(0, 0, start_time)
       []
     else
-      results = do_execute(tree, query, opts)
+      results = do_execute(index, query, opts)
       log_metrics(length(results), 1, start_time)
       results
     end
   end
 
   @doc """
-  Executes a multi-token search with AND logic.
-
-  All tokens must match (within typo budget) for a document to be included.
-
-  ## Examples
-
-      iex> tree = SmartKioskCore.Search.Engine.build_index([%{id: 1, text: "iPhone 15"}])
-      iex> SmartKioskCore.Search.Query.execute_and(tree, "iphone 15")
-      [{1, ...}]
+  Prefix search — exact prefix matches only (no typos).
   """
-  @spec execute_and(Engine.trie(), String.t(), options()) :: [ranked_result()]
-  def execute_and(tree, query, opts \\ []) do
-    start_time = System.monotonic_time(:microsecond)
+  @spec prefix_search(Engine.index(), String.t(), options()) :: [ranked_result()]
+  def prefix_search(index, query, opts \\ []) do
+    limit = opts[:limit] || @default_limit
 
-    tokens = Engine.tokenize(query)
-
-    if tokens == [] do
-      log_metrics(0, 0, start_time)
-      []
-    else
-      results = do_execute_and(tree, tokens, opts)
-      log_metrics(length(results), length(tokens), start_time)
-      results
-    end
+    index
+    |> Engine.prefix_search(query, limit: limit)
+    |> Enum.map(fn {doc_id, distance, field} -> {doc_id, distance, %{field: field}} end)
+    |> rank_results(index, [], opts[:field_weights] || @default_field_weights)
+    |> Enum.take(limit)
   end
 
   @doc """
-  Filters results to only include exact prefix matches (no typos).
+  Calculates the composite relevance score.
 
-  Useful for "search-as-you-type" instant suggestions.
-  """
-  @spec prefix_search(Engine.trie(), String.t(), options()) :: [ranked_result()]
-  def prefix_search(tree, query, opts \\ []) do
-    opts = Keyword.put(opts, :max_typos, 0)
-    execute(tree, query, opts)
-  end
+  Higher scores rank higher (best match gets highest score).
 
-  @doc """
-  Calculates the composite relevance score for a match.
-
-  Lower scores rank higher (0.0 is perfect match).
-
-  ## Scoring Formula
-
-      score = (distance * 0.5) + (prefix_bonus * 0.3) + (field_penalty * 0.2)
+  Formula:
+      score = (tfidf * 0.6) + (field_weight * 0.25) - (distance_penalty * 0.15)
 
   Where:
-    * distance: Levenshtein edit distance
-    * prefix_bonus: 0.0 for exact prefix, 0.5 for fuzzy
-    * field_penalty: (1.0 - field_weight)
+    * tfidf:        TF-IDF relevance (0..N, higher = more relevant)
+    * field_weight: 1.0 for title, 0.3 for description
+    * distance:     edit distance (0 for exact, 1+ for fuzzy)
   """
-  @spec calculate_score(non_neg_integer(), atom(), float()) :: float()
-  def calculate_score(distance, _field, field_weight) do
-    distance_component = distance * 0.5
+  @spec calculate_score(float(), non_neg_integer(), atom(), float()) :: float()
+  def calculate_score(tfidf, distance, _field, field_weight) do
+    tfidf_component = tfidf * 0.6
+    field_component = field_weight * 0.25
+    distance_penalty = distance * 0.15
 
-    prefix_bonus =
-      if distance == 0 do
-        0.0
-      else
-        0.5
-      end
-
-    field_penalty = (1.0 - field_weight) * 0.2
-
-    distance_component + prefix_bonus + field_penalty
+    tfidf_component + field_component - distance_penalty
   end
 
   # ── Private Functions ───────────────────────────────────────────────────────
 
-  defp do_execute(tree, query, opts) do
+  defp do_execute(index, query, opts) do
     max_typos = opts[:max_typos] || Engine.calculate_typo_budget(query)
     limit = opts[:limit] || @default_limit
     field_weights = opts[:field_weights] || @default_field_weights
+    tokens = Engine.tokenize(query)
 
-    # Engine.search now returns {doc_id, distance, field} tuples
-    results = Engine.search(tree, query, max_typos: max_typos)
-
-    results
-    |> Enum.map(fn {doc_id, distance, field} -> {doc_id, distance, %{field: field}} end)
-    |> rank_results(field_weights)
-    |> Enum.take(limit)
-  end
-
-  defp do_execute_and(tree, tokens, opts) do
-    max_typos = opts[:max_typos]
-    limit = opts[:limit] || @default_limit
-    field_weights = opts[:field_weights] || @default_field_weights
-
-    # Get results for each token
-    # Engine.search returns {doc_id, distance, field} tuples
+    # Get per-token results
     token_results =
       Enum.map(tokens, fn token ->
-        typos = max_typos || Engine.calculate_typo_budget(token)
-        Engine.search(tree, token, max_typos: typos)
+        if max_typos == 0 do
+          Engine.prefix_search(index, token, limit: limit * 2)
+        else
+          Engine.search(index, token, max_typos: max_typos, limit: limit * 2)
+        end
       end)
 
-    # Find intersection of all token results
+    # AND logic: intersect doc_ids across all tokens
     case token_results do
       [] ->
         []
 
-      [first | rest] ->
-        # Convert to map for intersection logic: doc_id => {distance, field}
-        first_map = Map.new(first, fn {id, dist, field} -> {id, {dist, field}} end)
+      [single] ->
+        single
+        |> Enum.map(fn {doc_id, distance, field} -> {doc_id, distance, %{field: field}} end)
+        |> rank_results(index, tokens, field_weights)
+        |> Enum.take(limit)
 
-        intersection =
-          Enum.reduce(rest, first_map, fn results, acc ->
-            result_map = Map.new(results, fn {id, dist, field} -> {id, {dist, field}} end)
+      multiple ->
+        # Build doc_id => {distances, field} map for intersection
+        doc_matches = intersect_token_results(multiple)
 
-            Map.filter(acc, fn {id, _} ->
-              Map.has_key?(result_map, id)
-            end)
-          end)
-
-        intersection
-        |> Enum.map(fn {doc_id, {distance, field}} ->
-          {doc_id, distance, %{field: field}}
+        doc_matches
+        |> Enum.map(fn {doc_id, {avg_distance, field}} ->
+          {doc_id, avg_distance, %{field: field}}
         end)
-        |> rank_results(field_weights)
+        |> rank_results(index, tokens, field_weights)
         |> Enum.take(limit)
     end
   end
 
-  defp rank_results(results, field_weights) do
+  # Intersect results from multiple tokens, averaging distances.
+  defp intersect_token_results(token_results) do
+    [first | rest] = token_results
+
+    first_map =
+      Map.new(first, fn {id, dist, field} ->
+        {id, %{distances: [dist], field: field}}
+      end)
+
+    Enum.reduce(rest, first_map, fn results, acc ->
+      result_map = Map.new(results, fn {id, dist, _field} -> {id, dist} end)
+
+      acc
+      |> Map.filter(fn {id, _} -> Map.has_key?(result_map, id) end)
+      |> Map.new(fn {id, data} ->
+        {id, %{data | distances: [Map.get(result_map, id) | data.distances]}}
+      end)
+    end)
+    |> Map.new(fn {id, data} ->
+      avg_dist = Enum.sum(data.distances) / length(data.distances)
+      {id, {avg_dist, data.field}}
+    end)
+  end
+
+  defp rank_results(results, index, tokens, field_weights) do
     Enum.map(results, fn {doc_id, distance, metadata} ->
-      # Field now comes from the search result tuple (extracted from terminal node)
       field = metadata[:field] || :name
       field_weight = Map.get(field_weights, field, 1.0)
 
-      score = calculate_score(distance, field, field_weight)
+      # TF-IDF score for this document across all query tokens
+      tfidf =
+        if tokens == [] do
+          1.0
+        else
+          Engine.tfidf_score(index, doc_id, tokens)
+        end
+
+      score = calculate_score(tfidf, distance, field, field_weight)
 
       metadata =
         Map.merge(metadata, %{
           distance: distance,
           field: field,
-          field_weight: field_weight
+          field_weight: field_weight,
+          tfidf: tfidf
         })
 
       {doc_id, score, metadata}
     end)
-    |> Enum.sort_by(fn {_id, score, _meta} -> score end)
+    |> Enum.sort_by(fn {_id, score, _meta} -> score end, :desc)
   end
 
   defp log_metrics(result_count, token_count, start_time) do
@@ -225,7 +195,7 @@ defmodule SmartKioskCore.Search.Query do
       %{tokens: token_count}
     )
 
-    if duration_ms > 10 do
+    if duration_ms > 50 do
       Logger.warning("Search.Query: Slow query detected (#{duration_ms}ms)")
     end
   end

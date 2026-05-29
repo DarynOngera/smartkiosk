@@ -1,10 +1,10 @@
 defmodule SmartKioskCore.Search.IndexServer do
   @moduledoc """
-  GenServer managing the in-memory search index with ETS and DETS backing.
+  GenServer managing the in-memory search index with ETS and file backing.
 
   This is the central coordinator for:
-  - In-memory Trie storage (ETS table for concurrent reads)
-  - Disk persistence (DETS for recovery)
+  - In-memory inverted-index storage (ETS table for concurrent reads)
+  - Disk persistence (compressed file for recovery)
   - Change batching and processing
   - Snapshot management
 
@@ -15,15 +15,14 @@ defmodule SmartKioskCore.Search.IndexServer do
                       ↓
               [GenServer] → (single-writer for updates)
                       ↓
-              [DETS File] → (disk persistence)
+              [File] → (disk persistence)
   ```
 
   ## Configuration
 
       config :smart_kiosk_core, SmartKioskCore.Search.IndexServer,
-        dets_path: "priv/search_index.dets",
-        snapshot_interval_ms: 300_000,  # 5 minutes
-        max_memory_mb: 512
+        persist_path: "priv/search_index.bin",
+        snapshot_interval_ms: 86_400_000  # 24 hours
   """
 
   use GenServer
@@ -35,10 +34,11 @@ defmodule SmartKioskCore.Search.IndexServer do
   @typedoc "Index server state"
   @type state :: %{
           ets_table: :ets.table(),
-          dets_path: String.t(),
+          persist_path: String.t(),
           snapshot_timer: reference() | nil,
           last_snapshot: DateTime.t() | nil,
-          stats: map()
+          stats: map(),
+          doc_count: non_neg_integer()
         }
 
   @ets_table :search_index
@@ -50,8 +50,8 @@ defmodule SmartKioskCore.Search.IndexServer do
 
   ## Options
 
-    * `:dets_path` - Path to DETS file (default: priv/search_index.dets)
-    * `:snapshot_interval_ms` - Auto-save interval (default: 5 minutes)
+    * `:persist_path` - Path to persisted index file (default: priv/search_index.bin)
+    * `:snapshot_interval_ms` - Auto-save interval (default: 24 hours)
   """
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts \\ []) do
@@ -61,34 +61,27 @@ defmodule SmartKioskCore.Search.IndexServer do
 
   @doc """
   Searches the index with the given query.
-
-  ## Examples
-
-      iex> SmartKioskCore.Search.IndexServer.search("iphone")
-      [{1, 0.0, %{distance: 0, field: :name}}, ...]
   """
   @spec search(String.t(), keyword()) :: [Query.ranked_result()]
   def search(query, opts \\ []) do
-    case lookup_trie() do
+    case lookup_index() do
       nil ->
         Logger.warning("IndexServer: Search attempted but index not loaded")
         []
 
-      trie ->
-        SmartKioskCore.Search.Query.execute(trie, query, opts)
+      index ->
+        SmartKioskCore.Search.Query.execute(index, query, opts)
     end
   end
 
   @doc """
   Performs a prefix search (exact match only, no typos).
-
-  Ideal for autocomplete/suggestions.
   """
   @spec prefix_search(String.t(), keyword()) :: [Query.ranked_result()]
   def prefix_search(query, opts \\ []) do
-    case lookup_trie() do
+    case lookup_index() do
       nil -> []
-      trie -> SmartKioskCore.Search.Query.prefix_search(trie, query, opts)
+      index -> SmartKioskCore.Search.Query.prefix_search(index, query, opts)
     end
   end
 
@@ -104,8 +97,6 @@ defmodule SmartKioskCore.Search.IndexServer do
 
   @doc """
   Updates a document in the index.
-
-  Equivalent to delete + insert.
   """
   @spec update(Engine.document()) :: :ok
   def update(doc) do
@@ -114,8 +105,6 @@ defmodule SmartKioskCore.Search.IndexServer do
 
   @doc """
   Removes a document from the index.
-
-  This is an async operation.
   """
   @spec delete(term()) :: :ok
   def delete(doc_id) do
@@ -125,11 +114,22 @@ defmodule SmartKioskCore.Search.IndexServer do
   @doc """
   Rebuilds the entire index from the given documents.
 
-  This is a synchronous operation that replaces the current index.
+  The index is built in the caller process (not the GenServer) to avoid
+  blocking concurrent reads. Only the atomic swap into ETS happens
+  inside the GenServer.
   """
   @spec rebuild([Engine.document()]) :: :ok | {:error, term()}
   def rebuild(documents) do
-    GenServer.call(__MODULE__, {:rebuild, documents}, :infinity)
+    index = Engine.build_index(documents)
+    swap_index(index, map_size(index.docs))
+  end
+
+  @doc """
+  Atomically swaps the current in-memory index for a pre-built one.
+  """
+  @spec swap_index(Engine.index(), non_neg_integer()) :: :ok
+  def swap_index(index, doc_count) do
+    GenServer.call(__MODULE__, {:swap_index, index, doc_count})
   end
 
   @doc """
@@ -149,21 +149,28 @@ defmodule SmartKioskCore.Search.IndexServer do
   end
 
   @doc """
+  Returns the estimated memory size of the search index.
+  """
+  @spec memory_estimate() :: non_neg_integer()
+  def memory_estimate do
+    GenServer.call(__MODULE__, :memory_estimate, :infinity)
+  end
+
+  @doc """
   Checks if the index is ready for queries.
   """
   @spec ready?() :: boolean()
   def ready? do
-    lookup_trie() != nil
+    lookup_index() != nil
   end
 
   # ── GenServer Callbacks ─────────────────────────────────────────────────────
 
   @impl true
   def init(opts) do
-    dets_path = opts[:dets_path] || default_dets_path()
-    snapshot_interval = opts[:snapshot_interval_ms] || 300_000
+    persist_path = opts[:persist_path] || default_persist_path()
+    snapshot_interval = opts[:snapshot_interval_ms] || 86_400_000
 
-    # Create ETS table for concurrent reads
     ets_table =
       :ets.new(@ets_table, [
         :set,
@@ -174,75 +181,64 @@ defmodule SmartKioskCore.Search.IndexServer do
 
     state = %{
       ets_table: ets_table,
-      dets_path: dets_path,
+      persist_path: persist_path,
       snapshot_timer: nil,
       last_snapshot: nil,
-      stats: %{documents: 0, last_rebuild: nil}
+      stats: %{documents: 0, last_rebuild: nil},
+      doc_count: 0
     }
 
-    # Try to load from disk, otherwise trigger async rebuild
+    # Try to load from disk; schedule rebuild either way to verify freshness
     state =
-      case Persistence.load(dets_path) do
-        {:ok, trie} ->
-          :ets.insert(ets_table, {:trie, trie})
-          update_stats(state, trie)
+      case Persistence.load(persist_path) do
+        {:ok, index} ->
+          :ets.insert(ets_table, {:index, index})
+
+          count = map_size(index.docs)
+
+          %{
+            state
+            | stats: %{documents: count, last_rebuild: DateTime.utc_now()},
+              doc_count: count
+          }
 
         {:error, reason} ->
-          Logger.warning("IndexServer: Could not load index (#{reason}), scheduling rebuild")
-          # Schedule a rebuild in 5 seconds to allow system to fully boot
-          Process.send_after(self(), :trigger_rebuild, 5_000)
+          Logger.warning("IndexServer: Could not load index (#{reason}), will rebuild")
           state
       end
 
-    # Schedule periodic snapshots
+    Process.send_after(self(), :trigger_rebuild, 5_000)
+
     timer = Process.send_after(self(), :scheduled_snapshot, snapshot_interval)
     state = %{state | snapshot_timer: timer}
 
-    Logger.info("IndexServer: Initialized with DETS at #{dets_path}")
+    Logger.info("IndexServer: Initialized with persist_path=#{persist_path}")
     {:ok, state}
   end
 
   @impl true
-  def handle_call({:rebuild, documents}, _from, state) do
-    start_time = System.monotonic_time(:millisecond)
-
-    # Build new trie
-    trie = Engine.build_index(documents)
-
-    # Update ETS
-    :ets.insert(state.ets_table, {:trie, trie})
-
-    # Save to disk
-    Persistence.save(trie, state.dets_path)
-
-    duration = System.monotonic_time(:millisecond) - start_time
+  def handle_call({:swap_index, index, doc_count}, _from, state) do
+    :ets.insert(state.ets_table, {:index, index})
 
     new_stats = %{
-      documents: length(documents),
-      last_rebuild: DateTime.utc_now(),
-      rebuild_duration_ms: duration
+      documents: doc_count,
+      last_rebuild: DateTime.utc_now()
     }
 
-    Logger.info("IndexServer: Rebuilt index with #{length(documents)} documents in #{duration}ms")
+    Logger.info("IndexServer: Swapped index with #{doc_count} documents")
 
-    :telemetry.execute(
-      [:smart_kiosk, :search, :index, :rebuild],
-      %{duration_ms: duration, documents: length(documents)},
-      %{}
-    )
-
-    {:reply, :ok, %{state | stats: new_stats, last_snapshot: DateTime.utc_now()}}
+    {:reply, :ok, %{state | stats: new_stats, doc_count: doc_count}}
   end
 
   @impl true
   def handle_call(:snapshot, _from, state) do
     result =
-      case lookup_trie() do
+      case lookup_index() do
         nil ->
           {:error, :no_index}
 
-        trie ->
-          Persistence.save(trie, state.dets_path)
+        index ->
+          Persistence.save(index, state.persist_path)
       end
 
     new_state =
@@ -257,19 +253,13 @@ defmodule SmartKioskCore.Search.IndexServer do
   @impl true
   def handle_call(:stats, _from, state) do
     stats =
-      case lookup_trie() do
+      case lookup_index() do
         nil ->
           state.stats
 
-        trie ->
-          doc_count =
-            trie
-            |> Engine.all_doc_ids()
-            |> MapSet.size()
-
+        _index ->
           Map.merge(state.stats, %{
-            documents_in_index: doc_count,
-            memory_estimate_bytes: estimate_memory(trie),
+            documents_in_index: state.doc_count,
             ready: true
           })
       end
@@ -278,25 +268,38 @@ defmodule SmartKioskCore.Search.IndexServer do
   end
 
   @impl true
+  def handle_call(:memory_estimate, _from, state) do
+    result =
+      case lookup_index() do
+        nil -> 0
+        index -> :erlang.external_size(index)
+      end
+
+    {:reply, result, state}
+  end
+
+  @impl true
   def handle_info(:scheduled_snapshot, state) do
-    # Cancel existing timer
     if state.snapshot_timer do
       Process.cancel_timer(state.snapshot_timer)
     end
 
-    # Perform snapshot
-    case lookup_trie() do
+    case lookup_index() do
       nil ->
         :ok
 
-      trie ->
+      index ->
         Task.start(fn ->
-          Persistence.save(trie, state.dets_path)
+          try do
+            Persistence.save(index, state.persist_path)
+          catch
+            _type, reason ->
+              Logger.warning("IndexServer: Snapshot failed: #{inspect(reason)}")
+          end
         end)
     end
 
-    # Schedule next snapshot
-    interval = 300_000
+    interval = 86_400_000
     timer = Process.send_after(self(), :scheduled_snapshot, interval)
 
     {:noreply, %{state | snapshot_timer: timer, last_snapshot: DateTime.utc_now()}}
@@ -306,7 +309,6 @@ defmodule SmartKioskCore.Search.IndexServer do
   def handle_info(:trigger_rebuild, state) do
     Logger.info("IndexServer: Triggering async index rebuild")
 
-    # Enqueue the rebuild worker
     %{}
     |> SmartKioskCore.Workers.SearchRebuildWorker.new()
     |> Oban.insert()
@@ -316,10 +318,16 @@ defmodule SmartKioskCore.Search.IndexServer do
 
   @impl true
   def terminate(_reason, state) do
-    # Final snapshot on shutdown
-    case lookup_trie() do
-      nil -> :ok
-      trie -> Persistence.save(trie, state.dets_path)
+    case lookup_index() do
+      nil ->
+        :ok
+
+      index ->
+        try do
+          Persistence.save(index, state.persist_path)
+        rescue
+          e -> Logger.warning("IndexServer: Shutdown save failed: #{inspect(e)}")
+        end
     end
 
     :ok
@@ -327,30 +335,14 @@ defmodule SmartKioskCore.Search.IndexServer do
 
   # ── Private Functions ───────────────────────────────────────────────────────
 
-  defp lookup_trie do
-    case :ets.lookup(@ets_table, :trie) do
-      [{:trie, trie}] -> trie
+  defp lookup_index do
+    case :ets.lookup(@ets_table, :index) do
+      [{:index, index}] -> index
       [] -> nil
     end
   end
 
-  defp update_stats(state, trie) do
-    doc_count =
-      trie
-      |> Engine.all_doc_ids()
-      |> MapSet.size()
-
-    %{state | stats: %{documents: doc_count, last_rebuild: DateTime.utc_now()}}
-  end
-
-  defp estimate_memory(trie) do
-    # Rough estimate based on term size
-    :erlang.external_size(trie)
-  end
-
-  defp default_dets_path do
-    :code.priv_dir(:smart_kiosk_core)
-    |> to_string()
-    |> Path.join("search_index.dets")
+  defp default_persist_path do
+    Path.join(["apps", "smart_kiosk_core", "priv", "search_index.bin"])
   end
 end
