@@ -5,6 +5,7 @@ defmodule SmartKioskCore.JobPosts do
 
   import Ecto.Query
   alias SmartKioskCore.Repo
+  alias SmartKioskCore.Schemas.Shop
   alias SmartKioskCore.Schemas.JobPost
 
   @doc """
@@ -13,6 +14,17 @@ defmodule SmartKioskCore.JobPosts do
   def list_active_job_posts do
     JobPost
     |> where([jp], jp.status == "active")
+    |> order_by([jp], desc: jp.inserted_at)
+    |> preload([:shop])
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns job posts for a specific shop, newest first.
+  """
+  def list_job_posts_for_shop(%Shop{} = shop) do
+    JobPost
+    |> where([jp], jp.shop_id == ^shop.id)
     |> order_by([jp], desc: jp.inserted_at)
     |> preload([:shop])
     |> Repo.all()
@@ -44,6 +56,19 @@ defmodule SmartKioskCore.JobPosts do
     job_post
     |> JobPost.changeset(attrs)
     |> Repo.update()
+  end
+
+  @doc """
+  Toggles a job post between active and overdue.
+  """
+  def toggle_job_post_status(%JobPost{} = job_post) do
+    next_status =
+      case job_post.status do
+        "active" -> "overdue"
+        _ -> "active"
+      end
+
+    update_job_post(job_post, %{status: next_status})
   end
 
   @doc """

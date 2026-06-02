@@ -21,8 +21,9 @@ defmodule SmartKioskWeb.Sidebar do
   def sidebar(assigns) do
     ~H"""
     <%!-- Mobile Horizontal Category Bar --%>
-    <div class="lg:hidden px-4 py-3 border-b border-white/5 bg-[#0B0F1A]">
-      <div class="flex items-center gap-2 overflow-x-auto pb-1 snap-x snap-mandatory scrollbar-thin">
+    <div class="lg:hidden border-b border-white/5 bg-[#0B0F1A]">
+      <div class="px-4 py-3">
+        <div class="flex items-center gap-2 overflow-x-auto overscroll-x-contain touch-pan-x scroll-smooth pb-2 pr-4 snap-x snap-mandatory scrollbar-thin">
         <.mobile_category_chip cat_key={nil} label="All" is_selected={is_nil(@selected_category)} />
 
         <%= for {cat_key, label} <- @shop_categories do %>
@@ -32,6 +33,7 @@ defmodule SmartKioskWeb.Sidebar do
             is_selected={@selected_category == cat_key}
           />
         <% end %>
+        </div>
       </div>
     </div>
 

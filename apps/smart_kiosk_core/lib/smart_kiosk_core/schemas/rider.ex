@@ -22,6 +22,7 @@ defmodule SmartKioskCore.Schemas.Rider do
     field(:rating, :decimal, default: Decimal.new("5.0"))
     field(:license_url, :string)
     field(:national_id_url, :string)
+    belongs_to(:job_post, SmartKioskCore.Schemas.JobPost, type: :binary_id)
 
     field(:verification_status, Ecto.Enum,
       values: [:pending, :verified, :rejected],
@@ -45,10 +46,12 @@ defmodule SmartKioskCore.Schemas.Rider do
       :user_id,
       :license_url,
       :national_id_url,
+      :job_post_id,
       :verification_status
     ])
     |> validate_required([:user_id])
     |> foreign_key_constraint(:user_id)
+    |> foreign_key_constraint(:job_post_id)
     |> unique_constraint(:user_id, message: "user already has a rider profile")
   end
 

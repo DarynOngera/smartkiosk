@@ -42,8 +42,8 @@ defmodule SmartKioskWeb.Router do
       # Shop public storefront (accessed by consumers)
       live "/shop/:slug", StorefrontLive.Index, :index
       live "/shop/:slug/product/:id", StorefrontLive.Show, :show
-      live "/shop/:slug/rider/register", RiderRegistrationLive, :new
-      live "/careers", Careers.CareersLive, :show
+      live "/shop/:slug/job/apply", RiderRegistrationLive, :new
+      live "/shop/:slug/rider/thanks", RiderApplicationThanksLive, :show
 
       # Job board (public access for job seekers)
       live "/jobs", Careers.JobBoardLive, :index
@@ -85,9 +85,8 @@ defmodule SmartKioskWeb.Router do
       live "/users/settings/confirm-email/:token", UserSettingsLive, :confirm_email
       live "/dashboard", UI.DashboardLive, :index
       live "/create-shop", UI.CreateShopLive, :new
-
-      # Job post management (for shop owners)
-      # Routes moved to public section to avoid conflicts
+      live "/careers", Careers.CareersLive, :index
+      live "/careers/new", Careers.CareersLive, :new
     end
 
     delete "/logout", UserSessionController, :delete

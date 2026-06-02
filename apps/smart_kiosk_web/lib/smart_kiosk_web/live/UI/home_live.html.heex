@@ -21,7 +21,7 @@
     </div>
 
     <%!-- Main Content --%>
-    <div class="flex overflow-x-hidden">
+    <div class="flex flex-col lg:flex-row overflow-x-hidden">
       <%!-- Sidebar Component --%>
       <.sidebar shop_categories={@shop_categories} selected_category={@selected_category} />
 
@@ -86,7 +86,7 @@
                       <h2 class="text-xl font-bold">Recommended Shops</h2>
                     </div>
                   </div>
-                  <div class="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory ">
+                  <div class="flex gap-3 overflow-x-auto overscroll-x-contain touch-pan-x scroll-smooth pb-2 pr-4 snap-x snap-mandatory">
                     <%= for rec <- @recommended_shops do %>
                       <% shop = rec.shop %>
                       <a
@@ -136,8 +136,13 @@
                   <div class="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory ">
                     <%= for rec <- @recommended_products do %>
                       <% product = rec.product %>
-                      <div class="group flex-shrink-0 w-56 bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-violet-500/30 hover:bg-white/[0.07] transition-all snap-start">
-                        <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center relative overflow-hidden">
+                      <div class="group flex-shrink-0 w-40 sm:w-44 bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-violet-500/30 hover:bg-white/[0.07] transition-all snap-start">
+                        <a
+                          href={~p"/shop/#{product.shop.slug}/product/#{product.id}"}
+                          class="block"
+                          aria-label={"View #{product.name}"}
+                        >
+                          <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
                           <%= if product.images != [] && List.first(product.images) do %>
                             <img
                               src={List.first(product.images).url}
@@ -159,27 +164,28 @@
                               Featured
                             </div>
                           <% end %>
-                        </div>
-                        <div class="p-3">
-                          <h4 class="text-sm font-medium text-white truncate">
+                          </div>
+                          <div class="p-2.5">
+                          <h4 class="text-xs font-medium text-white truncate">
                             <%= product.name %>
                           </h4>
-                          <p class="text-xs text-slate-500 truncate"><%= product.shop.name %></p>
+                          <p class="text-[10px] text-slate-500 truncate"><%= product.shop.name %></p>
                           <div class="flex items-center justify-between mt-2">
-                            <span class="text-violet-400 font-bold">
+                            <span class="text-violet-400 font-bold text-xs">
                               Ksh <%= product.price %>
                             </span>
                             <%= if product.stock_qty > 0 do %>
                               <button
                                 phx-click="add_to_cart"
                                 phx-value-product_id={product.id}
-                                class="p-1.5 bg-violet-500/20 hover:bg-violet-500 text-violet-400 hover:text-white rounded-lg transition-all"
+                                class="p-1 bg-violet-500/20 hover:bg-violet-500 text-violet-400 hover:text-white rounded-lg transition-all"
                               >
-                                <.icon name="hero-plus" class="w-4 h-4" />
+                                <.icon name="hero-plus" class="w-3.5 h-3.5" />
                               </button>
                             <% end %>
                           </div>
-                        </div>
+                          </div>
+                        </a>
                       </div>
                     <% end %>
                   </div>
@@ -211,10 +217,15 @@
                     </button>
                   </div>
 
-                  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                     <%= for product <- products do %>
                       <div class="group bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-violet-500/30 hover:bg-white/[0.07] transition-all">
-                        <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center relative overflow-hidden">
+                        <a
+                          href={~p"/shop/#{product.shop.slug}/product/#{product.id}"}
+                          class="block"
+                          aria-label={"View #{product.name}"}
+                        >
+                          <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
                           <%= if product.images != [] && List.first(product.images) do %>
                             <img
                               src={List.first(product.images).url}
@@ -231,27 +242,28 @@
                               </span>
                             </div>
                           <% end %>
-                        </div>
-                        <div class="p-3">
-                          <h4 class="text-sm font-medium text-white truncate">
+                          </div>
+                          <div class="p-2.5">
+                          <h4 class="text-xs font-medium text-white truncate">
                             <%= product.name %>
                           </h4>
-                          <p class="text-xs text-slate-500 truncate"><%= product.shop.name %></p>
+                          <p class="text-[10px] text-slate-500 truncate"><%= product.shop.name %></p>
                           <div class="flex items-center justify-between mt-2">
-                            <span class="text-violet-400 font-bold">
+                            <span class="text-violet-400 font-bold text-xs">
                               Ksh <%= product.price %>
                             </span>
                             <%= if product.stock_qty > 0 do %>
                               <button
                                 phx-click="add_to_cart"
                                 phx-value-product_id={product.id}
-                                class="p-1.5 bg-violet-500/20 hover:bg-violet-500 text-violet-400 hover:text-white rounded-lg transition-all"
+                                class="p-1 bg-violet-500/20 hover:bg-violet-500 text-violet-400 hover:text-white rounded-lg transition-all"
                               >
-                                <.icon name="hero-plus" class="w-4 h-4" />
+                                <.icon name="hero-plus" class="w-3.5 h-3.5" />
                               </button>
                             <% end %>
                           </div>
-                        </div>
+                          </div>
+                        </a>
                       </div>
                     <% end %>
                   </div>
