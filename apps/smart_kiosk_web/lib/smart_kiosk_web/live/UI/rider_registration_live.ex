@@ -1,11 +1,12 @@
 defmodule SmartKioskWeb.RiderRegistrationLive do
   use SmartKioskWeb, :live_view
 
+  alias SmartKioskCore.JobPosts
   alias SmartKioskCore.Shops
   alias SmartKioskCore.Schemas.User
 
   @impl true
-  def mount(%{"slug" => slug}, _session, socket) do
+  def mount(%{"slug" => slug} = params, _session, socket) do
     case Shops.get_shop_by_slug(slug) do
       nil ->
         {:ok,
@@ -14,14 +15,18 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
          |> push_navigate(to: ~p"/")}
 
       shop ->
+        job_post = load_job_post(shop, params["job_id"])
         changeset = User.registration_changeset(%User{}, %{})
+        requires_license = requires_driving_license?(job_post)
 
         {:ok,
          socket
          |> assign(page_title: "Join #{shop.name} as a Rider")
          |> assign(shop: shop)
+         |> assign(job_post: job_post)
+         |> assign(requires_license: requires_license)
          |> assign_form(changeset)
-         |> allow_upload(:license, accept: ~w(.pdf), max_entries: 1)
+         |> maybe_allow_upload(:license, requires_license)
          |> allow_upload(:national_id, accept: ~w(.pdf), max_entries: 1)}
     end
   end
@@ -38,29 +43,31 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
 
   def handle_event("save", %{"user" => user_params}, socket) do
     shop = socket.assigns.shop
+    job_post = socket.assigns[:job_post]
+    requires_license = socket.assigns[:requires_license]
+    user_params = Map.put_new(user_params, "password", generated_password())
 
-    # 1. Consume uploads
-    license_urls = consume_rider_uploads(socket, :license)
     id_urls = consume_rider_uploads(socket, :national_id)
+    license_urls = if requires_license, do: consume_rider_uploads(socket, :license), else: []
 
-    case {license_urls, id_urls} do
-      {[license_url], [id_url]} ->
+    case {requires_license, license_urls, id_urls} do
+      {true, [license_url], [id_url]} ->
         rider_attrs = %{
           license_url: license_url,
           national_id_url: id_url,
+          job_post_id: job_post && job_post.id,
           verification_status: :pending
         }
 
-        # 2. Register User + Rider under the specific shop
         case Shops.register_rider(shop, user_params, rider_attrs) do
           {:ok, _user, _rider} ->
             {:noreply,
              socket
              |> put_flash(
                :info,
-               "Registration successful! #{shop.name} will verify your documents."
-             )
-             |> push_navigate(to: ~p"/login")}
+               success_message(shop, job_post)
+              )
+             |> push_navigate(to: thanks_path(shop, job_post))}
 
           {:error, %Ecto.Changeset{} = changeset} ->
             {:noreply, assign_form(socket, changeset)}
@@ -69,9 +76,33 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
             {:noreply, put_flash(socket, :error, reason)}
         end
 
-      _ ->
+      {false, _, [id_url]} ->
+        rider_attrs = %{
+          national_id_url: id_url,
+          job_post_id: job_post && job_post.id,
+          verification_status: :pending
+        }
+
+        case Shops.register_rider(shop, user_params, rider_attrs) do
+          {:ok, _user, _rider} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, success_message(shop, job_post))
+             |> push_navigate(to: thanks_path(shop, job_post))}
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            {:noreply, assign_form(socket, changeset)}
+
+          {:error, reason} when is_binary(reason) ->
+            {:noreply, put_flash(socket, :error, reason)}
+        end
+
+      _ when requires_license ->
         {:noreply,
-         put_flash(socket, :error, "Please upload both your License and National ID (PDF)")}
+         put_flash(socket, :error, "Please upload your National ID and Driving License (PDF)")}
+
+      _ ->
+        {:noreply, put_flash(socket, :error, "Please upload your National ID (PDF)")}
     end
   end
 
@@ -96,6 +127,42 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
     assign(socket, :form, to_form(changeset))
   end
 
+  defp maybe_allow_upload(socket, _name, false), do: socket
+  defp maybe_allow_upload(socket, name, true), do: allow_upload(socket, name, accept: ~w(.pdf), max_entries: 1)
+
+  defp load_job_post(_shop, nil), do: nil
+
+  defp load_job_post(shop, job_post_id) do
+    case JobPosts.get_job_post!(job_post_id) do
+      %{} = job_post when job_post.shop_id == shop.id -> job_post
+      _ -> nil
+    end
+  rescue
+    _ -> nil
+  end
+
+  defp success_message(shop, nil) do
+    "Registration successful! #{shop.name} will verify your documents."
+  end
+
+  defp success_message(shop, job_post) do
+    "Your application for #{job_post.title} at #{shop.name} was received. They will review it and get back to you soon."
+  end
+
+  defp requires_driving_license?(nil), do: false
+
+  defp requires_driving_license?(job_post) do
+    title = String.downcase(job_post.title || "")
+    String.contains?(title, ["rider", "delivery", "driver", "courier"])
+  end
+
+  defp thanks_path(shop, nil), do: ~p"/shop/#{shop.slug}/rider/thanks"
+  defp thanks_path(shop, job_post), do: ~p"/shop/#{shop.slug}/rider/thanks?job_id=#{job_post.id}"
+
+  defp generated_password do
+    :crypto.strong_rand_bytes(24) |> Base.url_encode64(padding: false)
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -106,8 +173,20 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
             <div class="w-16 h-16 bg-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-500/20">
               <.icon name="hero-truck" class="w-10 h-10 text-white" />
             </div>
-            <h1 class="text-3xl font-bold text-white">Join <%= @shop.name %></h1>
-            <p class="text-slate-400 mt-2 text-sm">Become a delivery partner for our shop.</p>
+            <h1 class="text-3xl font-bold text-white">
+              <%= if @job_post do %>
+                Apply for <%= @job_post.title %>
+              <% else %>
+                Join <%= @shop.name %>
+              <% end %>
+            </h1>
+            <p class="text-slate-400 mt-2 text-sm">
+              <%= if @job_post do %>
+                Submit your application for this role. We only require your national ID.
+              <% else %>
+                Become a delivery partner for our shop.
+              <% end %>
+            </p>
           </div>
 
           <div class="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl shadow-2xl">
@@ -145,19 +224,33 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
                     required
                   />
                 </div>
-                <.input field={@form[:password]} type="password" label="Create Password" required />
               </div>
 
               <div class="space-y-4 pt-6 border-t border-white/5">
-                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">
-                  Document Upload (PDF only)
-                </h3>
+                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Documents</h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">
-                      Driving License
-                    </label>
+                <div>
+                  <label class="block text-sm font-medium text-slate-300 mb-2">National ID</label>
+                  <div class="relative border-2 border-dashed border-white/10 rounded-xl p-4 text-center hover:border-violet-500/50 transition-all">
+                    <.live_file_input
+                      upload={@uploads.national_id}
+                      class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div class="space-y-1">
+                      <.icon name="hero-identification" class="w-6 h-6 text-slate-500 mx-auto" />
+                      <p class="text-[10px] text-slate-400">Click to upload your National ID</p>
+                    </div>
+                  </div>
+                  <%= for entry <- @uploads.national_id.entries do %>
+                    <div class="mt-2 text-[10px] text-violet-400 font-medium">
+                      Selected: <%= entry.client_name %>
+                    </div>
+                  <% end %>
+                </div>
+
+                <%= if @requires_license do %>
+                  <div class="pt-4">
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Driving License</label>
                     <div class="relative border-2 border-dashed border-white/10 rounded-xl p-4 text-center hover:border-violet-500/50 transition-all">
                       <.live_file_input
                         upload={@uploads.license}
@@ -165,7 +258,7 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
                       />
                       <div class="space-y-1">
                         <.icon name="hero-document-text" class="w-6 h-6 text-slate-500 mx-auto" />
-                        <p class="text-[10px] text-slate-400">Click to upload License</p>
+                        <p class="text-[10px] text-slate-400">Click to upload your Driving License</p>
                       </div>
                     </div>
                     <%= for entry <- @uploads.license.entries do %>
@@ -174,26 +267,7 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
                       </div>
                     <% end %>
                   </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">National ID</label>
-                    <div class="relative border-2 border-dashed border-white/10 rounded-xl p-4 text-center hover:border-violet-500/50 transition-all">
-                      <.live_file_input
-                        upload={@uploads.national_id}
-                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      />
-                      <div class="space-y-1">
-                        <.icon name="hero-identification" class="w-6 h-6 text-slate-500 mx-auto" />
-                        <p class="text-[10px] text-slate-400">Click to upload ID</p>
-                      </div>
-                    </div>
-                    <%= for entry <- @uploads.national_id.entries do %>
-                      <div class="mt-2 text-[10px] text-violet-400 font-medium">
-                        Selected: <%= entry.client_name %>
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
+                <% end %>
               </div>
 
               <div class="pt-6">

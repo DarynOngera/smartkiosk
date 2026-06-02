@@ -115,14 +115,14 @@ defmodule SmartKioskWeb.CartLive do
 
   @impl true
   def handle_event("new_order", _params, socket) do
-    # reset cart view and navigate to POS
+    # reset cart view and return the shopper to the home page
     {:noreply,
      socket
      |> assign(:cart_items, [])
      |> assign(:cart_total, Decimal.new("0"))
      |> assign(:cart_count, 0)
      |> assign(:show_receipt, false)
-     |> push_navigate(to: ~p"/pos")}
+     |> push_navigate(to: ~p"/")}
   end
 
   @impl true
