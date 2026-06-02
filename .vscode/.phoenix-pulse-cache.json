@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "timestamp": 1779943335104,
+  "timestamp": 1780380942927,
   "workspaceRoot": "/home/dtech/Projects/smartkiosk",
   "registries": {
     "components": {
@@ -256,316 +256,37 @@
           ]
         ],
         [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/job_posts.ex",
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/orders.ex",
           []
         ],
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
           [
             {
-              "name": "icon",
+              "name": "modal",
               "moduleName": "SmartKioskWeb.CoreComponents",
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
-              "line": 551,
+              "line": 55,
               "attributes": [
-                {
-                  "name": "class",
-                  "type": "any",
-                  "required": false,
-                  "default": "\"size-4\"",
-                  "rawType": "any"
-                },
-                {
-                  "name": "name",
-                  "type": "string",
-                  "required": true,
-                  "rawType": "string"
-                }
-              ],
-              "slots": []
-            },
-            {
-              "name": "list",
-              "moduleName": "SmartKioskWeb.CoreComponents",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
-              "line": 523,
-              "attributes": [],
-              "slots": [
-                {
-                  "name": "item",
-                  "required": true,
-                  "attributes": [
-                    {
-                      "default": null,
-                      "line": 520,
-                      "name": "title",
-                      "type": "string",
-                      "values": null,
-                      "doc": null,
-                      "required": true
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "name": "table",
-              "moduleName": "SmartKioskWeb.CoreComponents",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
-              "line": 471,
-              "attributes": [
-                {
-                  "name": "row_item",
-                  "type": "any",
-                  "required": false,
-                  "default": "{:&, [line: 461, column: 14], [{:/, [line: 461, column: 32], [{{:., [line: 461, column: 23], [{:__aliases__, [last: [line: 461, column: 15], line: 461, column: 15], [:Function]}, :identity]}, [no_parens: true, line: 461, column: 24], []}, 1]}]}",
-                  "doc": "the function for mapping each row before calling the :col and :action slots",
-                  "rawType": "any"
-                },
-                {
-                  "name": "row_click",
-                  "type": "any",
-                  "required": false,
-                  "default": "nil",
-                  "doc": "the function for handling phx-click on each row",
-                  "rawType": "any"
-                },
-                {
-                  "name": "row_id",
-                  "type": "any",
-                  "required": false,
-                  "default": "nil",
-                  "doc": "the function for generating the row id",
-                  "rawType": "any"
-                },
-                {
-                  "name": "rows",
-                  "type": "list",
-                  "required": true,
-                  "rawType": "list"
-                },
                 {
                   "name": "id",
                   "type": "string",
-                  "required": true,
-                  "rawType": "string"
-                }
-              ],
-              "slots": [
-                {
-                  "name": "action",
-                  "required": false,
-                  "doc": "the slot for showing user actions in the last table column",
-                  "attributes": []
+                  "rawType": ":string",
+                  "required": true
                 },
                 {
-                  "name": "col",
-                  "required": true,
-                  "attributes": [
-                    {
-                      "default": null,
-                      "line": 466,
-                      "name": "label",
-                      "type": "string",
-                      "values": null,
-                      "doc": null,
-                      "required": false
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "name": "header",
-              "moduleName": "SmartKioskWeb.CoreComponents",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
-              "line": 429,
-              "attributes": [],
-              "slots": [
-                {
-                  "name": "actions",
-                  "required": false,
-                  "attributes": []
-                },
-                {
-                  "name": "subtitle",
-                  "required": false,
-                  "attributes": []
-                },
-                {
-                  "name": "inner_block",
-                  "required": true,
-                  "attributes": []
-                }
-              ]
-            },
-            {
-              "name": "error",
-              "moduleName": "SmartKioskWeb.CoreComponents",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
-              "line": 413,
-              "attributes": [],
-              "slots": []
-            },
-            {
-              "name": "input",
-              "moduleName": "SmartKioskWeb.CoreComponents",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
-              "line": 297,
-              "attributes": [
-                {
-                  "name": "rest",
-                  "type": "global",
-                  "required": false,
-                  "rawType": "global"
-                },
-                {
-                  "name": "error_class",
-                  "type": "any",
-                  "required": false,
-                  "default": "nil",
-                  "doc": "the input error class to use over defaults",
-                  "rawType": "any"
-                },
-                {
-                  "name": "class",
-                  "type": "any",
-                  "required": false,
-                  "default": "nil",
-                  "doc": "the input class to use over defaults",
-                  "rawType": "any"
-                },
-                {
-                  "name": "multiple",
+                  "name": "show",
                   "type": "boolean",
+                  "rawType": ":boolean",
                   "required": false,
-                  "default": "false",
-                  "doc": "the multiple flag for select inputs",
-                  "rawType": "boolean"
+                  "default": "false"
                 },
                 {
-                  "name": "options",
-                  "type": "list",
+                  "name": "on_cancel",
+                  "type": "JS",
+                  "rawType": "JS",
                   "required": false,
-                  "doc": "the options to pass to Phoenix.HTML.Form.options_for_select/2",
-                  "rawType": "list"
-                },
-                {
-                  "name": "prompt",
-                  "type": "string",
-                  "required": false,
-                  "default": "nil",
-                  "doc": "the prompt for select inputs",
-                  "rawType": "string"
-                },
-                {
-                  "name": "checked",
-                  "type": "boolean",
-                  "required": false,
-                  "doc": "the checked flag for checkbox inputs",
-                  "rawType": "boolean"
-                },
-                {
-                  "name": "errors",
-                  "type": "list",
-                  "required": false,
-                  "default": "[]",
-                  "rawType": "list"
-                },
-                {
-                  "name": "field",
-                  "type": "{:__aliases__, [last: [line: 280, column: 29], line: 280, column: 16], [:Phoenix, :HTML, :FormField]}",
-                  "required": false,
-                  "doc": "a form field struct retrieved from the form, for example: @form[:email]",
-                  "rawType": "{:__aliases__, [last: [line: 280, column: 29], line: 280, column: 16], [:Phoenix, :HTML, :FormField]}"
-                },
-                {
-                  "name": "type",
-                  "type": "string",
-                  "required": false,
-                  "default": "\"text\"",
-                  "rawType": "string"
-                },
-                {
-                  "name": "value",
-                  "type": "any",
-                  "required": false,
-                  "rawType": "any"
-                },
-                {
-                  "name": "label",
-                  "type": "string",
-                  "required": false,
-                  "default": "nil",
-                  "rawType": "string"
-                },
-                {
-                  "name": "name",
-                  "type": "any",
-                  "required": false,
-                  "rawType": "any"
-                },
-                {
-                  "name": "id",
-                  "type": "any",
-                  "required": false,
-                  "default": "nil",
-                  "rawType": "any"
-                }
-              ],
-              "slots": []
-            },
-            {
-              "name": "back",
-              "moduleName": "SmartKioskWeb.CoreComponents",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
-              "line": 204,
-              "attributes": [
-                {
-                  "name": "class",
-                  "type": "any",
-                  "required": false,
-                  "default": "nil",
-                  "rawType": "any"
-                },
-                {
-                  "name": "rest",
-                  "type": "global",
-                  "required": false,
-                  "rawType": "global"
-                }
-              ],
-              "slots": [
-                {
-                  "name": "inner_block",
-                  "required": true,
-                  "attributes": []
-                }
-              ]
-            },
-            {
-              "name": "button",
-              "moduleName": "SmartKioskWeb.CoreComponents",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
-              "line": 169,
-              "attributes": [
-                {
-                  "name": "variant",
-                  "type": "string",
-                  "required": false,
-                  "rawType": "string"
-                },
-                {
-                  "name": "class",
-                  "type": "any",
-                  "required": false,
-                  "rawType": "any"
-                },
-                {
-                  "name": "rest",
-                  "type": "global",
-                  "required": false,
-                  "rawType": "global"
+                  "default": "%JS{}"
                 }
               ],
               "slots": [
@@ -581,93 +302,82 @@
               "moduleName": "SmartKioskWeb.CoreComponents",
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
               "line": 123,
-              "attributes": [
-                {
-                  "name": "rest",
-                  "type": "global",
-                  "required": false,
-                  "doc": "the arbitrary HTML attributes to add to the flash container",
-                  "rawType": "global"
-                },
-                {
-                  "name": "kind",
-                  "type": "atom",
-                  "required": false,
-                  "values": [
-                    "info",
-                    "error"
-                  ],
-                  "doc": "used for styling and flash lookup",
-                  "rawType": "atom"
-                },
-                {
-                  "name": "title",
-                  "type": "string",
-                  "required": false,
-                  "default": "nil",
-                  "rawType": "string"
-                },
-                {
-                  "name": "flash",
-                  "type": "map",
-                  "required": false,
-                  "default": "{:%{}, [closing: [line: 116, column: 33], line: 116, column: 31], []}",
-                  "doc": "the map of flash messages to display",
-                  "rawType": "map"
-                },
-                {
-                  "name": "id",
-                  "type": "string",
-                  "required": false,
-                  "doc": "the optional id of flash container",
-                  "rawType": "string"
-                }
-              ],
+              "attributes": [],
+              "slots": []
+            },
+            {
+              "name": "button",
+              "moduleName": "SmartKioskWeb.CoreComponents",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
+              "line": 169,
+              "attributes": [],
+              "slots": []
+            },
+            {
+              "name": "back",
+              "moduleName": "SmartKioskWeb.CoreComponents",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
+              "line": 204,
+              "attributes": [],
+              "slots": []
+            },
+            {
+              "name": "input",
+              "moduleName": "SmartKioskWeb.CoreComponents",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
+              "line": 308,
+              "attributes": [],
+              "slots": []
+            },
+            {
+              "name": "error",
+              "moduleName": "SmartKioskWeb.CoreComponents",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
+              "line": 413,
+              "attributes": [],
+              "slots": []
+            },
+            {
+              "name": "header",
+              "moduleName": "SmartKioskWeb.CoreComponents",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
+              "line": 429,
+              "attributes": [],
+              "slots": []
+            },
+            {
+              "name": "table",
+              "moduleName": "SmartKioskWeb.CoreComponents",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
+              "line": 471,
+              "attributes": [],
               "slots": [
                 {
-                  "name": "inner_block",
-                  "required": false,
-                  "doc": "the optional inner block that renders the flash message",
+                  "name": "col",
+                  "required": true,
                   "attributes": []
                 }
               ]
             },
             {
-              "name": "modal",
+              "name": "list",
               "moduleName": "SmartKioskWeb.CoreComponents",
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex",
-              "line": 55,
-              "attributes": [
-                {
-                  "name": "on_cancel",
-                  "type": "{:__aliases__, [last: [line: 52, column: 20], line: 52, column: 20], [:JS]}",
-                  "required": false,
-                  "default": "{:%, [line: 52, column: 33], [{:__aliases__, [last: [line: 52, column: 34], line: 52, column: 34], [:JS]}, {:%{}, [closing: [line: 52, column: 37], line: 52, column: 36], []}]}",
-                  "rawType": "{:__aliases__, [last: [line: 52, column: 20], line: 52, column: 20], [:JS]}"
-                },
-                {
-                  "name": "show",
-                  "type": "boolean",
-                  "required": false,
-                  "default": "false",
-                  "rawType": "boolean"
-                },
-                {
-                  "name": "id",
-                  "type": "string",
-                  "required": true,
-                  "rawType": "string"
-                }
-              ],
+              "line": 523,
+              "attributes": [],
               "slots": [
                 {
-                  "name": "inner_block",
+                  "name": "item",
                   "required": true,
                   "attributes": []
                 }
               ]
             }
           ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_board_live.ex",
+          []
         ],
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex",
@@ -769,6 +479,10 @@
           ]
         ],
         [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/careers_live.ex",
+          []
+        ],
+        [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/navbar.ex",
           [
             {
@@ -832,6 +546,10 @@
               "slots": []
             }
           ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/job_posts.ex",
+          []
         ],
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/product_card.ex",
@@ -1038,10 +756,13 @@
         ]
       ],
       "fileHashes": {
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/job_posts.ex": "2b2d85ac84ac0c4d9381577bb48aac57e4f3d933",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex": "3d50ab1b80fb27e7f2ef8f44aa234bb5a05e1e1a",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/orders.ex": "5c6f9656ab2bd35b1e90fddbd144628041bfae25",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/core_components.ex": "aba0d289a4175f7ebd894e3b443acb311a23380a",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_board_live.ex": "de016b4b08458b8c4a775894b42755226edc3040",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/layouts.ex": "022dcfb7b0ceae3564b2f7c0a9cceb9fa17444d9",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/careers_live.ex": "6ca5e44091ee0cdae562971c2b29292b32c5edd3",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/navbar.ex": "4c1e9c7a75d1c9527b8453ec1d8f514e6b71765b",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/job_posts.ex": "2b2d85ac84ac0c4d9381577bb48aac57e4f3d933",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/product_card.ex": "059bc8e3a6a41fec67eadbccd400826049b94615",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/search_bar.ex": "da77e80391b5e422bca1fd466ed13439f81e0e57",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/components/sidebar.ex": "935528b14ef8037f245dcaa98768659168d4eb08",
@@ -1231,7 +952,7 @@
             "associationsDetailed": [],
             "aliases": {},
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/job_post.ex",
-            "line": 9
+            "line": 11
           }
         ],
         [
@@ -1910,7 +1631,7 @@
               "associationsDetailed": [],
               "aliases": {},
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/job_post.ex",
-              "line": 9
+              "line": 11
             }
           ]
         ],
@@ -2342,7 +2063,7 @@
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/customer.ex": "3ba655d71ccd9d882678a6b7d2c5d5ba0ac01b06",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/delivery.ex": "da0ef0d293811c01d2c94314b888b2cb56dd97df",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/delivery_zone.ex": "dd5f4084394979769d776e7a151fde65a2804363",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/job_post.ex": "267d8d193502e96dd108fcb95bf8f1e7879e9ddf",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/job_post.ex": "4d356c9313b4cb25babb2bc4b6c9b1e24e7d6f78",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/order_item.ex": "17f04ad62dc8b58929a15730e4f1de0a55f64042",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/orders.ex": "9ee209bcbb2de0a5eb859744990d2cf76d7cd733",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/permission.ex": "0724817b5cd63969858cd0d45afe1394a73c7b07",
@@ -2352,10 +2073,10 @@
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/rider.ex": "04739c9b699e0cabd25babf15201cbb3c8580e21",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/role.ex": "973ed37b5d8deb5dc3f5469e37fdb8f4d17f9b72",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/role_permission.ex": "97c9efb2fa4bf16505ad71035c94eced00db23dc",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/shop.ex": "c7c9ca5be82fbc44f4702108138c6b3fd1adf47f",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/shop.ex": "4c791fd3796f2a213e4ecc2f54316a98bcf5347f",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/stock_adjustment.ex": "ce382d30dce7f6863483c7e2b4bedff46f07a4d1",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/transaction.ex": "92252bf1e47b48331e6ba13a44df5dcd59c8a6f9",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex": "be837e2b408293dbb8ac9bb06ea94bf4299df438",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user.ex": "ea777eac8e2edf8b9fa7550a3d51cc0679f23a27",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user_role.ex": "6fada9543127f724d38c9ac1f4c3b3f4fa9d6084",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/schemas/user_token.ex": "3e1c719071fff0e8896b86e34d11c81e5c8ac1c4"
       },
@@ -2364,54 +2085,8 @@
     "events": {
       "events": [
         [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/job_posts.ex",
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/orders.ex",
           []
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_form_live.ex",
-          [
-            {
-              "name": "save",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_form_live.ex",
-              "moduleName": "SmartKioskWeb.Careers.JobFormLive",
-              "line": 45,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            }
-          ]
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/create_shop_live.ex",
-          [
-            {
-              "name": "save",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/create_shop_live.ex",
-              "moduleName": "SmartKioskWeb.UI.CreateShopLive",
-              "line": 47,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            }
-          ]
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_board_live.ex",
-          []
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/careers_live.ex",
-          [
-            {
-              "name": "delete",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/careers_live.ex",
-              "moduleName": "SmartKioskWeb.Careers.CareersLive",
-              "line": 25,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            }
-          ]
         ],
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex",
@@ -2626,52 +2301,107 @@
           ]
         ],
         [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/careers_live.ex",
           [
             {
-              "name": "clear_zone",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
-              "moduleName": "SmartKioskWeb.UI.DashboardLive",
-              "line": 113,
+              "name": "delete",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/careers_live.ex",
+              "moduleName": "SmartKioskWeb.Careers.CareersLive",
+              "line": 25,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_form_live.ex",
+          [
+            {
+              "name": "save",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_form_live.ex",
+              "moduleName": "SmartKioskWeb.Careers.JobFormLive",
+              "line": 45,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
+          [
+            {
+              "name": "product_updated",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
+              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
+              "line": 129,
+              "params": "{product_updated, _product_id}",
+              "kind": "handle_info",
+              "nameKind": "atom"
+            },
+            {
+              "name": "stock_adjusted",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
+              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
+              "line": 116,
+              "params": "{stock_adjusted, _product_id}",
+              "kind": "handle_info",
+              "nameKind": "atom"
+            },
+            {
+              "name": "close_adjust_stock",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
+              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
+              "line": 111,
+              "params": ":atom",
+              "kind": "handle_info",
+              "nameKind": "atom"
+            },
+            {
+              "name": "close_edit_modal",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
+              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
+              "line": 103,
               "params": "_params",
               "kind": "handle_event",
               "nameKind": "string"
             },
             {
-              "name": "save_zone",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
-              "moduleName": "SmartKioskWeb.UI.DashboardLive",
-              "line": 62,
-              "params": "_params",
-              "kind": "handle_event",
-              "nameKind": "string"
-            },
-            {
-              "name": "map_ready",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
-              "moduleName": "SmartKioskWeb.UI.DashboardLive",
-              "line": 57,
+              "name": "edit_product",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
+              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
+              "line": 91,
               "params": "%{}",
               "kind": "handle_event",
               "nameKind": "string"
             },
             {
-              "name": "zone_drawn",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
-              "moduleName": "SmartKioskWeb.UI.DashboardLive",
-              "line": 52,
-              "params": "payload",
+              "name": "archive_product",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
+              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
+              "line": 67,
+              "params": "%{}",
               "kind": "handle_event",
               "nameKind": "string"
             },
             {
-              "name": "low_stock",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
-              "moduleName": "SmartKioskWeb.UI.DashboardLive",
-              "line": 45,
-              "params": "{low_stock, _product}",
-              "kind": "handle_info",
-              "nameKind": "atom"
+              "name": "add_product",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
+              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
+              "line": 48,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "adjust_stock",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
+              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
+              "line": 39,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
             }
           ]
         ],
@@ -2735,7 +2465,111 @@
           ]
         ],
         [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
+          [
+            {
+              "name": "clear_zone",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
+              "moduleName": "SmartKioskWeb.UI.DashboardLive",
+              "line": 209,
+              "params": "_params",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "save_zone",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
+              "moduleName": "SmartKioskWeb.UI.DashboardLive",
+              "line": 158,
+              "params": "_params",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "map_ready",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
+              "moduleName": "SmartKioskWeb.UI.DashboardLive",
+              "line": 153,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "zone_drawn",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
+              "moduleName": "SmartKioskWeb.UI.DashboardLive",
+              "line": 148,
+              "params": "payload",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "update_delivery_status",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
+              "moduleName": "SmartKioskWeb.UI.DashboardLive",
+              "line": 126,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "accept_delivery",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
+              "moduleName": "SmartKioskWeb.UI.DashboardLive",
+              "line": 103,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "order_updated",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
+              "moduleName": "SmartKioskWeb.UI.DashboardLive",
+              "line": 92,
+              "params": "{order_updated, _order}",
+              "kind": "handle_info",
+              "nameKind": "atom"
+            },
+            {
+              "name": "new_order",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
+              "moduleName": "SmartKioskWeb.UI.DashboardLive",
+              "line": 83,
+              "params": "{new_order, _order}",
+              "kind": "handle_info",
+              "nameKind": "atom"
+            },
+            {
+              "name": "low_stock",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex",
+              "moduleName": "SmartKioskWeb.UI.DashboardLive",
+              "line": 78,
+              "params": "{low_stock, _product}",
+              "kind": "handle_info",
+              "nameKind": "atom"
+            }
+          ]
+        ],
+        [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_detail_live.ex",
+          []
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/create_shop_live.ex",
+          [
+            {
+              "name": "save",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/create_shop_live.ex",
+              "moduleName": "SmartKioskWeb.UI.CreateShopLive",
+              "line": 47,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_board_live.ex",
           []
         ],
         [
@@ -2745,7 +2579,7 @@
               "name": "location_update",
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex",
               "moduleName": "SmartKioskWeb.CartLive",
-              "line": 606,
+              "line": 612,
               "params": "{location_update, rider_location}",
               "kind": "handle_info",
               "nameKind": "atom"
@@ -2754,7 +2588,7 @@
               "name": "card_result",
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex",
               "moduleName": "SmartKioskWeb.CartLive",
-              "line": 537,
+              "line": 543,
               "params": "{}",
               "kind": "handle_info",
               "nameKind": "atom"
@@ -2763,7 +2597,7 @@
               "name": "mpesa_stk_result",
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex",
               "moduleName": "SmartKioskWeb.CartLive",
-              "line": 454,
+              "line": 460,
               "params": "{}",
               "kind": "handle_info",
               "nameKind": "atom"
@@ -2897,6 +2731,125 @@
           ]
         ],
         [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_forgot_password_live.ex",
+          [
+            {
+              "name": "send_reset_password",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_forgot_password_live.ex",
+              "moduleName": "SmartKioskWeb.UserForgotPasswordLive",
+              "line": 25,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex",
+          [
+            {
+              "name": "reject_shop",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex",
+              "moduleName": "SmartKioskWeb.AdminLive",
+              "line": 70,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "approve_shop",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex",
+              "moduleName": "SmartKioskWeb.AdminLive",
+              "line": 47,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
+          [
+            {
+              "name": "transition_status",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
+              "moduleName": "SmartKioskWeb.UI.OrdersLive.Show",
+              "line": 254,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "delivery_assigned",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
+              "moduleName": "SmartKioskWeb.UI.OrdersLive.Show",
+              "line": 248,
+              "params": "{delivery_assigned, _payload}",
+              "kind": "handle_info",
+              "nameKind": "atom"
+            },
+            {
+              "name": "location_update",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
+              "moduleName": "SmartKioskWeb.UI.OrdersLive.Show",
+              "line": 244,
+              "params": "{location_update, rider_location}",
+              "kind": "handle_info",
+              "nameKind": "atom"
+            },
+            {
+              "name": "order_updated",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
+              "moduleName": "SmartKioskWeb.UI.OrdersLive.Show",
+              "line": 231,
+              "params": "{order_updated, updated_order}",
+              "kind": "handle_info",
+              "nameKind": "atom"
+            },
+            {
+              "name": "order_updated",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
+              "moduleName": "SmartKioskWeb.UI.OrdersLive.Index",
+              "line": 26,
+              "params": "{order_updated, _updated_order}",
+              "kind": "handle_info",
+              "nameKind": "atom"
+            },
+            {
+              "name": "new_order",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
+              "moduleName": "SmartKioskWeb.UI.OrdersLive.Index",
+              "line": 22,
+              "params": "{new_order, _order}",
+              "kind": "handle_info",
+              "nameKind": "atom"
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_reset_password_live.ex",
+          [
+            {
+              "name": "save",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_reset_password_live.ex",
+              "moduleName": "SmartKioskWeb.UserResetPasswordLive",
+              "line": 54,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "validate",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_reset_password_live.ex",
+              "moduleName": "SmartKioskWeb.UserResetPasswordLive",
+              "line": 47,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            }
+          ]
+        ],
+        [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex",
           [
             {
@@ -2913,165 +2866,6 @@
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex",
               "moduleName": "SmartKioskWeb.RiderRegistrationLive",
               "line": 30,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            }
-          ]
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
-          [
-            {
-              "name": "product_updated",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
-              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
-              "line": 129,
-              "params": "{product_updated, _product_id}",
-              "kind": "handle_info",
-              "nameKind": "atom"
-            },
-            {
-              "name": "stock_adjusted",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
-              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
-              "line": 116,
-              "params": "{stock_adjusted, _product_id}",
-              "kind": "handle_info",
-              "nameKind": "atom"
-            },
-            {
-              "name": "close_adjust_stock",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
-              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
-              "line": 111,
-              "params": ":atom",
-              "kind": "handle_info",
-              "nameKind": "atom"
-            },
-            {
-              "name": "close_edit_modal",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
-              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
-              "line": 103,
-              "params": "_params",
-              "kind": "handle_event",
-              "nameKind": "string"
-            },
-            {
-              "name": "edit_product",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
-              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
-              "line": 91,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            },
-            {
-              "name": "archive_product",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
-              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
-              "line": 67,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            },
-            {
-              "name": "add_product",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
-              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
-              "line": 48,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            },
-            {
-              "name": "adjust_stock",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex",
-              "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.Index",
-              "line": 39,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            }
-          ]
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
-          [
-            {
-              "name": "transition_status",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
-              "moduleName": "SmartKioskWeb.UI.OrdersLive.Show",
-              "line": 252,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            },
-            {
-              "name": "delivery_assigned",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
-              "moduleName": "SmartKioskWeb.UI.OrdersLive.Show",
-              "line": 246,
-              "params": "{delivery_assigned, _payload}",
-              "kind": "handle_info",
-              "nameKind": "atom"
-            },
-            {
-              "name": "location_update",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
-              "moduleName": "SmartKioskWeb.UI.OrdersLive.Show",
-              "line": 242,
-              "params": "{location_update, rider_location}",
-              "kind": "handle_info",
-              "nameKind": "atom"
-            },
-            {
-              "name": "order_updated",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
-              "moduleName": "SmartKioskWeb.UI.OrdersLive.Show",
-              "line": 229,
-              "params": "{order_updated, updated_order}",
-              "kind": "handle_info",
-              "nameKind": "atom"
-            },
-            {
-              "name": "order_updated",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
-              "moduleName": "SmartKioskWeb.UI.OrdersLive.Index",
-              "line": 27,
-              "params": "{order_updated, updated_order}",
-              "kind": "handle_info",
-              "nameKind": "atom"
-            },
-            {
-              "name": "new_order",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex",
-              "moduleName": "SmartKioskWeb.UI.OrdersLive.Index",
-              "line": 23,
-              "params": "{new_order, order}",
-              "kind": "handle_info",
-              "nameKind": "atom"
-            }
-          ]
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/settings_live/index.ex",
-          [
-            {
-              "name": "save",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/settings_live/index.ex",
-              "moduleName": "SmartKioskWeb.UI.SettingsLive.Index",
-              "line": 40,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            },
-            {
-              "name": "validate",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/settings_live/index.ex",
-              "moduleName": "SmartKioskWeb.UI.SettingsLive.Index",
-              "line": 31,
               "params": "%{}",
               "kind": "handle_event",
               "nameKind": "string"
@@ -3111,13 +2905,63 @@
           ]
         ],
         [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_forgot_password_live.ex",
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/settings_live/index.ex",
           [
             {
-              "name": "send_reset_password",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_forgot_password_live.ex",
-              "moduleName": "SmartKioskWeb.UserForgotPasswordLive",
-              "line": 25,
+              "name": "save",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/settings_live/index.ex",
+              "moduleName": "SmartKioskWeb.UI.SettingsLive.Index",
+              "line": 40,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "validate",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/settings_live/index.ex",
+              "moduleName": "SmartKioskWeb.UI.SettingsLive.Index",
+              "line": 31,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            }
+          ]
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/manage_staff_live.ex",
+          [
+            {
+              "name": "save_staff",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/manage_staff_live.ex",
+              "moduleName": "SmartKioskWeb.UI.ManageStaffLive",
+              "line": 61,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "validate_staff",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/manage_staff_live.ex",
+              "moduleName": "SmartKioskWeb.UI.ManageStaffLive",
+              "line": 52,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "reject_rider",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/manage_staff_live.ex",
+              "moduleName": "SmartKioskWeb.UI.ManageStaffLive",
+              "line": 39,
+              "params": "%{}",
+              "kind": "handle_event",
+              "nameKind": "string"
+            },
+            {
+              "name": "approve_rider",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/manage_staff_live.ex",
+              "moduleName": "SmartKioskWeb.UI.ManageStaffLive",
+              "line": 26,
               "params": "%{}",
               "kind": "handle_event",
               "nameKind": "string"
@@ -3193,72 +3037,32 @@
           ]
         ],
         [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_reset_password_live.ex",
-          [
-            {
-              "name": "save",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_reset_password_live.ex",
-              "moduleName": "SmartKioskWeb.UserResetPasswordLive",
-              "line": 54,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            },
-            {
-              "name": "validate",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_reset_password_live.ex",
-              "moduleName": "SmartKioskWeb.UserResetPasswordLive",
-              "line": 47,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            }
-          ]
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex",
-          [
-            {
-              "name": "reject_shop",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex",
-              "moduleName": "SmartKioskWeb.AdminLive",
-              "line": 70,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            },
-            {
-              "name": "approve_shop",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex",
-              "moduleName": "SmartKioskWeb.AdminLive",
-              "line": 47,
-              "params": "%{}",
-              "kind": "handle_event",
-              "nameKind": "string"
-            }
-          ]
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/job_posts.ex",
+          []
         ]
       ],
       "fileHashes": {
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/job_posts.ex": "2b2d85ac84ac0c4d9381577bb48aac57e4f3d933",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/orders.ex": "5c6f9656ab2bd35b1e90fddbd144628041bfae25",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex": "34dafac2c15f5ef5e99005fcdf328c5864efbed3",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/careers_live.ex": "6ca5e44091ee0cdae562971c2b29292b32c5edd3",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_form_live.ex": "dd5322295f5798a66dffaf55b81aaa6446fa2a97",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex": "feb275bd5e0f2d5beb549ee4581fd1594b83bf5a",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/home_live.ex": "968a518220b35b6cea4c04c8c6a5059f8e0a64bd",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex": "e4ce78dfff163c1bc2671e9421c566a86a6f0438",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_detail_live.ex": "64ad4dc59121c737fc6e38d88bb8a8ba7b45b019",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/create_shop_live.ex": "6865781edc9a5aa91253756269a4e128c927f164",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_board_live.ex": "de016b4b08458b8c4a775894b42755226edc3040",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/careers_live.ex": "6ca5e44091ee0cdae562971c2b29292b32c5edd3",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex": "34dafac2c15f5ef5e99005fcdf328c5864efbed3",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex": "73dc6b231c87219ffd6992240c8325d5575b1395",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/home_live.ex": "8a9db1cee3abde65f9c23636c77fa411303b4e95",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_detail_live.ex": "64ad4dc59121c737fc6e38d88bb8a8ba7b45b019",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex": "44b5f371550e89d7ef5e2a3532a60e778a5e506e",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex": "67663d104436a04285e19be1313ac055dc68eeb2",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex": "feb275bd5e0f2d5beb549ee4581fd1594b83bf5a",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex": "2d4ca751780266ebd86648fde3345dee919c5754",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/settings_live/index.ex": "64e472140de80ca86adaee8c67a4e95fa98e7d48",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_registration_live.ex": "eaab9cba4a5d0259c5e51c72eeca2df056c8a3b6",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex": "9b6743f3ceecf05549a4aaa286b2af6033a6dba4",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_forgot_password_live.ex": "8b0bb50401bd646094d71befde735b2204078fdf",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/user_settings_live.ex": "ac601c5a0774d26b09af450ccbfd8a8a7a5a77df",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex": "409a56b957d3f88805691723d59ced8f709a4d89",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex": "5487a51468b67df435102fa60df73db4258f2b2e",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_reset_password_live.ex": "c40f7ac3d25711daec7e780cf3d37729d70797dc",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/admin/admin_live.ex": "409a56b957d3f88805691723d59ced8f709a4d89"
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex": "67663d104436a04285e19be1313ac055dc68eeb2",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_registration_live.ex": "eaab9cba4a5d0259c5e51c72eeca2df056c8a3b6",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/settings_live/index.ex": "64e472140de80ca86adaee8c67a4e95fa98e7d48",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/manage_staff_live.ex": "515336b67be7375ffa0992d1952fdd84ce239c16",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/user_settings_live.ex": "ac601c5a0774d26b09af450ccbfd8a8a7a5a77df",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_core/lib/smart_kiosk_core/job_posts.ex": "2b2d85ac84ac0c4d9381577bb48aac57e4f3d933"
       },
       "workspaceRoot": "/home/dtech/Projects/smartkiosk"
     },
@@ -3607,9 +3411,19 @@
         },
         {
           "verb": "LIVE",
-          "path": "/settings",
+          "path": "/manage-staff",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
           "line": 116,
+          "liveModule": "ManageStaffLive",
+          "helperBase": "manage_staff",
+          "params": [],
+          "isResource": false
+        },
+        {
+          "verb": "LIVE",
+          "path": "/settings",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 117,
           "liveModule": "SettingsLive.Index",
           "liveAction": "Index",
           "helperBase": "setting",
@@ -3620,7 +3434,7 @@
           "verb": "LIVE",
           "path": "/customers",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 117,
+          "line": 118,
           "liveModule": "CustomersLive.Index",
           "liveAction": "Index",
           "helperBase": "customer",
@@ -3631,7 +3445,7 @@
           "verb": "LIVE",
           "path": "/analytics",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 118,
+          "line": 119,
           "liveModule": "AnalyticsLive.Index",
           "liveAction": "Index",
           "helperBase": "analytic",
@@ -3642,7 +3456,7 @@
           "verb": "LIVE",
           "path": "/campaigns",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 119,
+          "line": 120,
           "liveModule": "CampaignsLive.Index",
           "liveAction": "Index",
           "helperBase": "campaign",
@@ -3653,7 +3467,7 @@
           "verb": "LIVE",
           "path": "/admin/",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 129,
+          "line": 130,
           "liveModule": "AdminLive",
           "helperBase": "root",
           "params": [],
@@ -3664,7 +3478,7 @@
           "verb": "POST",
           "path": "/api/mpesa/callback",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 136,
+          "line": 137,
           "controller": "MpesaCallbackController",
           "action": "create",
           "helperBase": "callback",
@@ -3677,7 +3491,7 @@
           "verb": "POST",
           "path": "/api/mpesa/validation",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 137,
+          "line": 138,
           "controller": "MpesaCallbackController",
           "action": "validation",
           "helperBase": "validation",
@@ -3690,7 +3504,7 @@
           "verb": "POST",
           "path": "/api/rider/location",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 143,
+          "line": 144,
           "controller": "RiderStubController",
           "action": "update_location",
           "helperBase": "location",
@@ -3703,7 +3517,7 @@
           "verb": "GET",
           "path": "/api/rider/tasks",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 144,
+          "line": 145,
           "controller": "RiderStubController",
           "action": "list_tasks",
           "helperBase": "task",
@@ -3716,7 +3530,7 @@
           "verb": "POST",
           "path": "/api/rider/tasks/:id/status",
           "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
-          "line": 145,
+          "line": 146,
           "controller": "RiderStubController",
           "action": "update_task_status",
           "helperBase": "task_statu",
@@ -3726,10 +3540,23 @@
           "isResource": false,
           "pipeline": "api",
           "scopePath": "/api/rider"
+        },
+        {
+          "verb": "GET",
+          "path": "/api/search/metrics",
+          "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex",
+          "line": 152,
+          "controller": "SearchMetricsController",
+          "action": "index",
+          "helperBase": "metric",
+          "params": [],
+          "isResource": false,
+          "pipeline": "api",
+          "scopePath": "/api/search"
         }
       ],
       "fileHashes": {
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex": "7d6c10b6371d0aa3f745c77ceec397312480afac"
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/router.ex": "94f29ab086d32b381b51af75c4d914e7f7796a64"
       },
       "workspaceRoot": "/home/dtech/Projects/smartkiosk"
     },
@@ -3741,6 +3568,10 @@
         ],
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/api/rider_stub_controller.ex",
+          []
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/api/search_metrics_controller.ex",
           []
         ],
         [
@@ -3788,7 +3619,8 @@
       ],
       "fileHashes": {
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/api/mpesa_callback_controller.ex": "b7161efce157e04e35fdefddc5da741cdb28ba29",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/api/rider_stub_controller.ex": "abf6cdf61be4e4076fe16a25256e98479b7bad90",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/api/rider_stub_controller.ex": "246068f7d829310dcc20670212dc936555b8d5af",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/api/search_metrics_controller.ex": "66c88f8e856eb414302556d32f1f0af2c4f383f8",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_controller.ex": "00f9a27a73fd600d85082895d81457c8bda70728",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/user_session_controller.ex": "dad6778d5f8f912ba9a1628004694196e7bf681c"
       },
@@ -3804,28 +3636,6 @@
               "name": "home",
               "format": "html",
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_html/home.html.heex"
-            }
-          ]
-        ],
-        [
-          "SmartKioskWeb.UI.POSLive.Index",
-          [
-            {
-              "moduleName": "SmartKioskWeb.UI.POSLive.Index",
-              "name": "render",
-              "format": "html",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex#render"
-            }
-          ]
-        ],
-        [
-          "SmartKioskWeb.UI.DeliveryZoneLive.FormComponent",
-          [
-            {
-              "moduleName": "SmartKioskWeb.UI.DeliveryZoneLive.FormComponent",
-              "name": "render",
-              "format": "html",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/form_component.ex#render"
             }
           ]
         ],
@@ -3854,6 +3664,40 @@
               "name": "merchant_view",
               "format": "html",
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex#merchant_view"
+            },
+            {
+              "moduleName": "SmartKioskWeb.UI.DashboardLive",
+              "name": "delivery_card",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex#delivery_card"
+            },
+            {
+              "moduleName": "SmartKioskWeb.UI.DashboardLive",
+              "name": "rider_view",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex#rider_view"
+            }
+          ]
+        ],
+        [
+          "SmartKioskWeb.UI.DeliveryZoneLive.FormComponent",
+          [
+            {
+              "moduleName": "SmartKioskWeb.UI.DeliveryZoneLive.FormComponent",
+              "name": "render",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/form_component.ex#render"
+            }
+          ]
+        ],
+        [
+          "SmartKioskWeb.UI.POSLive.Index",
+          [
+            {
+              "moduleName": "SmartKioskWeb.UI.POSLive.Index",
+              "name": "render",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex#render"
             }
           ]
         ],
@@ -3865,17 +3709,6 @@
               "name": "render",
               "format": "html",
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/adjust_stock_component.ex#render"
-            }
-          ]
-        ],
-        [
-          "SmartKioskWeb.RiderRegistrationLive",
-          [
-            {
-              "moduleName": "SmartKioskWeb.RiderRegistrationLive",
-              "name": "render",
-              "format": "html",
-              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex#render"
             }
           ]
         ],
@@ -3898,6 +3731,17 @@
               "name": "render",
               "format": "html",
               "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_login.ex#render"
+            }
+          ]
+        ],
+        [
+          "SmartKioskWeb.RiderRegistrationLive",
+          [
+            {
+              "moduleName": "SmartKioskWeb.RiderRegistrationLive",
+              "name": "render",
+              "format": "html",
+              "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex#render"
             }
           ]
         ],
@@ -3935,24 +3779,6 @@
           }
         ],
         [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex#render",
-          {
-            "moduleName": "SmartKioskWeb.UI.POSLive.Index",
-            "name": "render",
-            "format": "html",
-            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex#render"
-          }
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/form_component.ex#render",
-          {
-            "moduleName": "SmartKioskWeb.UI.DeliveryZoneLive.FormComponent",
-            "name": "render",
-            "format": "html",
-            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/form_component.ex#render"
-          }
-        ],
-        [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/index.ex#render",
           {
             "moduleName": "SmartKioskWeb.UI.DeliveryZoneLive.Index",
@@ -3980,21 +3806,48 @@
           }
         ],
         [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex#delivery_card",
+          {
+            "moduleName": "SmartKioskWeb.UI.DashboardLive",
+            "name": "delivery_card",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex#delivery_card"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex#rider_view",
+          {
+            "moduleName": "SmartKioskWeb.UI.DashboardLive",
+            "name": "rider_view",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex#rider_view"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/form_component.ex#render",
+          {
+            "moduleName": "SmartKioskWeb.UI.DeliveryZoneLive.FormComponent",
+            "name": "render",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/form_component.ex#render"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex#render",
+          {
+            "moduleName": "SmartKioskWeb.UI.POSLive.Index",
+            "name": "render",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex#render"
+          }
+        ],
+        [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/adjust_stock_component.ex#render",
           {
             "moduleName": "SmartKioskWeb.UI.Inventory.InventoryLive.AdjustStockComponent",
             "name": "render",
             "format": "html",
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/adjust_stock_component.ex#render"
-          }
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex#render",
-          {
-            "moduleName": "SmartKioskWeb.RiderRegistrationLive",
-            "name": "render",
-            "format": "html",
-            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex#render"
           }
         ],
         [
@@ -4013,6 +3866,15 @@
             "name": "render",
             "format": "html",
             "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_login.ex#render"
+          }
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex#render",
+          {
+            "moduleName": "SmartKioskWeb.RiderRegistrationLive",
+            "name": "render",
+            "format": "html",
+            "filePath": "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex#render"
           }
         ],
         [
@@ -4040,14 +3902,6 @@
           "SmartKioskWeb.PageHTML"
         ],
         [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex",
-          "SmartKioskWeb.UI.POSLive.Index"
-        ],
-        [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/form_component.ex",
-          "SmartKioskWeb.UI.DeliveryZoneLive.FormComponent"
-        ],
-        [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/index.ex",
           "SmartKioskWeb.UI.DeliveryZoneLive.Index"
         ],
@@ -4056,12 +3910,16 @@
           "SmartKioskWeb.UI.DashboardLive"
         ],
         [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/adjust_stock_component.ex",
-          "SmartKioskWeb.UI.Inventory.InventoryLive.AdjustStockComponent"
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/form_component.ex",
+          "SmartKioskWeb.UI.DeliveryZoneLive.FormComponent"
         ],
         [
-          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex",
-          "SmartKioskWeb.RiderRegistrationLive"
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex",
+          "SmartKioskWeb.UI.POSLive.Index"
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/adjust_stock_component.ex",
+          "SmartKioskWeb.UI.Inventory.InventoryLive.AdjustStockComponent"
         ],
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_forgot_password_live.ex",
@@ -4070,6 +3928,10 @@
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_login.ex",
           "SmartKioskWeb.UserLoginLive"
+        ],
+        [
+          "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex",
+          "SmartKioskWeb.RiderRegistrationLive"
         ],
         [
           "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_registration_live.ex",
@@ -4082,14 +3944,14 @@
       ],
       "fileHashes": {
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/controllers/page_html.ex": "36a342058a6f61388314f76709f934a706c42cac",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex": "34dafac2c15f5ef5e99005fcdf328c5864efbed3",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/form_component.ex": "f82d06df1536ed27e6696616f9e74fee2c0eb5b7",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/index.ex": "f4fd4ce48f7130fe4e15ce58a414f4674dff95a3",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex": "73dc6b231c87219ffd6992240c8325d5575b1395",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex": "e4ce78dfff163c1bc2671e9421c566a86a6f0438",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/DeliveryZoneLive/form_component.ex": "f82d06df1536ed27e6696616f9e74fee2c0eb5b7",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex": "34dafac2c15f5ef5e99005fcdf328c5864efbed3",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/adjust_stock_component.ex": "1d4fa9cce01460f7c515326979116e22ea0ae398",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex": "67663d104436a04285e19be1313ac055dc68eeb2",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_forgot_password_live.ex": "8b0bb50401bd646094d71befde735b2204078fdf",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_login.ex": "33bc52e3553bd4bc40449b495dadfec0adf4079f",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex": "67663d104436a04285e19be1313ac055dc68eeb2",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_registration_live.ex": "eaab9cba4a5d0259c5e51c72eeca2df056c8a3b6",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_reset_password_live.ex": "c40f7ac3d25711daec7e780cf3d37729d70797dc"
       },
@@ -4103,12 +3965,13 @@
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_detail_live.ex": "64ad4dc59121c737fc6e38d88bb8a8ba7b45b019",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/Careers/job_form_live.ex": "dd5322295f5798a66dffaf55b81aaa6446fa2a97",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/POS/pos_live.ex": "34dafac2c15f5ef5e99005fcdf328c5864efbed3",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex": "44b5f371550e89d7ef5e2a3532a60e778a5e506e",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/cart_live.ex": "9b6743f3ceecf05549a4aaa286b2af6033a6dba4",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/create_shop_live.ex": "6865781edc9a5aa91253756269a4e128c927f164",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex": "73dc6b231c87219ffd6992240c8325d5575b1395",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/home_live.ex": "8a9db1cee3abde65f9c23636c77fa411303b4e95",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/dashboard_live.ex": "e4ce78dfff163c1bc2671e9421c566a86a6f0438",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/home_live.ex": "968a518220b35b6cea4c04c8c6a5059f8e0a64bd",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/inventory/inventory_live.ex": "feb275bd5e0f2d5beb549ee4581fd1594b83bf5a",
-        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex": "2d4ca751780266ebd86648fde3345dee919c5754",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/manage_staff_live.ex": "515336b67be7375ffa0992d1952fdd84ce239c16",
+        "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/orders_live.ex": "5487a51468b67df435102fa60df73db4258f2b2e",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/rider_registration_live.ex": "67663d104436a04285e19be1313ac055dc68eeb2",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/settings_live/index.ex": "64e472140de80ca86adaee8c67a4e95fa98e7d48",
         "/home/dtech/Projects/smartkiosk/apps/smart_kiosk_web/lib/smart_kiosk_web/live/UI/user_forgot_password_live.ex": "8b0bb50401bd646094d71befde735b2204078fdf",
