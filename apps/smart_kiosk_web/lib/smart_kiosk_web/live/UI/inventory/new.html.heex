@@ -23,6 +23,17 @@
         phx-submit="save"
         class="space-y-6 bg-white/5 border border-white/10 rounded-2xl p-8"
       >
+        <div :if={@form.action == :insert and not Enum.empty?(Keyword.get_values(@form.source.errors, :base))} class="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+          <div class="flex items-center gap-3 text-red-400">
+            <.icon name="hero-exclamation-circle" class="w-5 h-5 flex-shrink-0" />
+            <div class="text-sm font-medium">
+              <%= for {msg, opts} <- Keyword.get_values(@form.source.errors, :base) do %>
+                <p><%= translate_error({msg, opts}) %></p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-2">
             <label class="block text-sm font-medium text-slate-300">Product Name *</label>

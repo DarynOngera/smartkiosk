@@ -55,10 +55,14 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.Index do
         {:noreply,
          socket
          |> assign(:products, updated_products)
-         |> put_flash(:info, "Product \"#{new_product.name}\" added seccessfully!")}
+         |> put_flash(:info, "Product \"#{new_product.name}\" added successfully!")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, socket |> put_flash(:error, inspect(changeset))}
+        # Extract and translate the first error
+        {msg, opts} = List.first(changeset.errors) |> elem(1)
+        error_message = SmartKioskWeb.CoreComponents.translate_error({msg, opts})
+
+        {:noreply, socket |> put_flash(:error, "Failed to add product: #{error_message}")}
     end
   end
 

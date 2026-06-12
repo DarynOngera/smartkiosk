@@ -2,6 +2,11 @@ defmodule SmartKioskCore.Plans do
   @moduledoc """
   Provides canonical plan definitions for the platform. These are in-memory
   representations used by UI and seeds. There is no DB table for plans yet.
+
+  Plan information is centralized here to enable:
+  - Feature gating based on shop plan
+  - Consistent plan references across schemas
+  - Easy extensibility for future plan features
   """
 
   defmodule Plan do
@@ -50,6 +55,17 @@ defmodule SmartKioskCore.Plans do
     }
   ]
 
+  # Legacy plan mappings for backward compatibility
+  @legacy_plans %{
+    "kiosk" => "basic",
+    "duka" => "pro",
+    "biashara" => "enterprise"
+  }
+
+  @canonical_plan_atoms ~w(basic pro enterprise)a
+  @legacy_plan_atoms ~w(kiosk duka biashara)a
+  @all_plan_atoms @canonical_plan_atoms ++ @legacy_plan_atoms
+
   @doc "Returns the list of plan structs."
   def list_plans, do: Enum.map(@plans, &struct(Plan, &1))
 
@@ -57,5 +73,44 @@ defmodule SmartKioskCore.Plans do
   def select_options do
     list_plans()
     |> Enum.map(fn %Plan{slug: slug, name: name} -> {name, slug} end)
+  end
+
+  @doc "Returns canonical plan atoms: [:basic, :pro, :enterprise]"
+  def plan_atoms, do: @canonical_plan_atoms
+
+  @doc "Returns all plan atoms including legacy ones for schema Ecto.Enum"
+  def all_plan_atoms, do: @all_plan_atoms
+
+  @doc "Get a plan by slug. Returns Plan struct or nil."
+  def get_plan_by_slug(slug) when is_atom(slug), do: get_plan_by_slug(Atom.to_string(slug))
+
+  def get_plan_by_slug(slug) when is_binary(slug) do
+    Enum.find(list_plans(), fn plan -> plan.slug == slug end)
+  end
+
+  @doc "Normalize plan value to canonical slug atom."
+  def normalize_plan(nil), do: :basic
+
+  def normalize_plan(plan) when is_atom(plan), do: normalize_plan(Atom.to_string(plan))
+
+  def normalize_plan(plan) when is_binary(plan) do
+    slug = String.downcase(plan)
+    # Check if it's a legacy plan name
+    canonical_slug = Map.get(@legacy_plans, slug, slug)
+    String.to_existing_atom(canonical_slug)
+  rescue
+    _ -> :basic
+  end
+
+  @doc "Check if shop plan has a feature enabled."
+  def has_feature?(plan_slug, feature_key) when is_atom(plan_slug) do
+    plan = get_plan_by_slug(plan_slug)
+    plan && Map.get(plan.features, feature_key, false)
+  end
+
+  @doc "Get plan limit for a given key (e.g., :max_products, :max_staff)."
+  def get_limit(plan_slug, limit_key) when is_atom(plan_slug) do
+    plan = get_plan_by_slug(plan_slug)
+    plan && Map.get(plan, limit_key)
   end
 end

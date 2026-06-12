@@ -122,17 +122,27 @@ defmodule SmartKioskCore.Catalogue do
     plan = SmartKioskCore.Plans.list_plans() |> Enum.find(fn p -> p.slug == plan_slug end)
     max_allowed = (plan && plan.max_products) || nil
 
+    require Logger
+    Logger.debug("Product creation check: shop=#{shop.id}, plan=#{plan_slug}, max_allowed=#{inspect(max_allowed)}")
+
     if is_integer(max_allowed) do
       current_count = count_products(shop)
+      Logger.debug("Current product count: #{current_count}")
 
       if current_count >= max_allowed do
+        upgrade_path =
+          case plan_slug do
+            "basic" -> "Upgrade to Pro or Enterprise to add more products."
+            "pro" -> "Upgrade to Enterprise to add more products."
+            _ -> "Contact support to increase your product limit."
+          end
+
+        message = "You've reached the product limit for your current plan (#{max_allowed} items). #{upgrade_path}"
+
         changeset =
           %Product{shop_id: shop.id}
           |> Product.changeset(attrs)
-          |> Ecto.Changeset.add_error(
-            :base,
-            "product limit reached for your plan (#{max_allowed})"
-          )
+          |> Ecto.Changeset.add_error(:base, message)
 
         {:error, changeset}
       else

@@ -1,6 +1,8 @@
 defmodule SmartKioskWeb.HomeLive do
   @moduledoc """
   Homepage with navbar, category filters sidebar, and product display.
+  Products from higher‑plan shops (Enterprise > Pro > Basic > Free) appear at the top,
+  and products within the same plan tier shuffle randomly every 10 minutes.
   """
   use SmartKioskWeb, :live_view
 
@@ -28,7 +30,30 @@ defmodule SmartKioskWeb.HomeLive do
     {:textiles, "Textiles"},
     {:garage, "Garage"}
   ]
+  @shuffle_interval_ms 2 * 60 * 1000   # 10 minutes
 
+  # ----------------------------------------------------------------------------
+  # Plan priority mapping for product shuffling
+  # ----------------------------------------------------------------------------
+  defp sort_and_shuffle_products(products) do
+    plan_priority = %{
+      enterprise: 3,
+      pro: 2,
+      basic: 1,
+      free: 0
+    }
+
+    products
+    |> Enum.group_by(fn p -> plan_priority[p.shop.plan] || 0 end)
+    |> Enum.sort_by(fn {priority, _} -> -priority end)
+    |> Enum.flat_map(fn {_priority, group} ->
+      Enum.shuffle(group)
+    end)
+  end
+
+  # ----------------------------------------------------------------------------
+  # Lifecycle
+  # ----------------------------------------------------------------------------
   def mount(_params, session, socket) do
     current_user = socket.assigns[:current_user]
     session_id = session["session_id"] || (get_connect_params(socket) || %{})["session_id"]
@@ -44,10 +69,7 @@ defmodule SmartKioskWeb.HomeLive do
     # Get all shop categories for filtering
     shop_categories = Shop.category_labels()
 
-    # Get products grouped by featured categories
-    _products_by_category = fetch_products_by_categories()
-
-    # Get personalized recommendations (global fallback for guests / cold-start)
+    # Get personalised recommendations (global fallback for guests / cold-start)
     recommended_shops = Recommendations.list_recommended_shops_for_user(current_user)
     recommended_products = Recommendations.list_recommended_products_for_user(current_user)
 
@@ -59,25 +81,67 @@ defmodule SmartKioskWeb.HomeLive do
         true -> 0
       end
 
-    {:ok,
-     socket
-     |> assign(:page_title, "SmartKiosk · Local Commerce")
-     |> assign(:shop_categories, shop_categories)
-     |> assign(:selected_category, nil)
-     |> assign(:products_by_category, [])
-     |> assign(:filtered_shops, nil)
-     |> assign(:recommended_shops, recommended_shops)
-     |> assign(:recommended_products, recommended_products)
-     |> assign(:user_shop, user_shop)
-     |> assign(:cart_count, cart_count)
-     |> assign(:session_id, session_id)
-     |> assign(:search_query, "")
-     |> assign(:search_results, [])
-     |> assign(:search_loading, false)
-     |> assign(:page, 1)
-     |> assign(:has_more, false)}
+    # Fetch raw products grouped by category
+    raw_products_by_category = fetch_products_by_categories(page: 1, limit: 12)
+
+    # Apply shuffling to each category's product list
+    shuffled_products_by_category =
+      raw_products_by_category
+      |> Enum.map(fn {category, products} ->
+        {category, sort_and_shuffle_products(products)}
+      end)
+
+    socket =
+      socket
+      |> assign(:page_title, "SmartKiosk · Local Commerce")
+      |> assign(:shop_categories, shop_categories)
+      |> assign(:selected_category, nil)
+      |> assign(:products_by_category, shuffled_products_by_category)
+      |> assign(:filtered_shops, nil)
+      |> assign(:recommended_shops, recommended_shops)
+      |> assign(:recommended_products, recommended_products)
+      |> assign(:user_shop, user_shop)
+      |> assign(:cart_count, cart_count)
+      |> assign(:session_id, session_id)
+      |> assign(:search_query, "")
+      |> assign(:search_results, [])
+      |> assign(:search_loading, false)
+      |> assign(:page, 1)
+      |> assign(:has_more, false)
+      |> schedule_shuffle()
+
+    {:ok, socket}
   end
 
+  defp schedule_shuffle(socket) do
+    if connected?(socket) do
+      Process.send_after(self(), :reshuffle, @shuffle_interval_ms)
+    end
+    socket
+  end
+
+  def handle_info(:reshuffle, socket) do
+    # Get current (already filtered) product lists from assign
+    current_products_by_category = socket.assigns.products_by_category
+
+    # Re‑shuffle each category's products
+    reshuffled =
+      current_products_by_category
+      |> Enum.map(fn {category, products} ->
+        {category, sort_and_shuffle_products(products)}
+      end)
+
+    socket =
+      socket
+      |> assign(:products_by_category, reshuffled)
+      |> schedule_shuffle()
+
+    {:noreply, socket}
+  end
+
+  # ----------------------------------------------------------------------------
+  # URL parameters
+  # ----------------------------------------------------------------------------
   def handle_params(params, _uri, socket) do
     category = params["category"]
     page = String.to_integer(params["page"] || "1")
@@ -105,21 +169,29 @@ defmodule SmartKioskWeb.HomeLive do
          |> assign(:search_query, "")}
       end
     else
-      # Home mode: show products by category with pagination
-      products_by_category = fetch_products_by_categories(page: page, limit: limit)
-      # Simplified check
-      has_more = length(products_by_category) == limit
+      # Home mode: show products by category with pagination, then shuffle
+      raw_products_by_category = fetch_products_by_categories(page: page, limit: limit)
+      shuffled_products_by_category =
+        raw_products_by_category
+        |> Enum.map(fn {category, products} ->
+          {category, sort_and_shuffle_products(products)}
+        end)
+
+      has_more = length(raw_products_by_category) == limit
 
       {:noreply,
        socket
        |> assign(:selected_category, nil)
        |> assign(:filtered_shops, nil)
-       |> assign(:products_by_category, products_by_category)
+       |> assign(:products_by_category, shuffled_products_by_category)
        |> assign(:has_more, has_more)
        |> assign(:search_query, "")}
     end
   end
 
+  # ----------------------------------------------------------------------------
+  # UI events
+  # ----------------------------------------------------------------------------
   def handle_event("load-more", _params, socket) do
     {:noreply, push_patch(socket, to: ~p"/?page=#{socket.assigns.page + 1}")}
   end
@@ -184,8 +256,9 @@ defmodule SmartKioskWeb.HomeLive do
     {:noreply, push_patch(socket, to: ~p"/")}
   end
 
-  # Helper functions
-
+  # ----------------------------------------------------------------------------
+  # Helpers
+  # ----------------------------------------------------------------------------
   defp format_category_name(atom) do
     atom
     |> to_string()
