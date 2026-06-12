@@ -57,6 +57,11 @@ defmodule SmartKioskCore.Schemas.Shop do
     timestamps(type: :utc_datetime)
   end
 
+
+
+
+  
+
   @required ~w(name phone)a
   @optional ~w(slug email address city country lat lng plan status category logo_url description settings delivery_zone owner_id)a
 
@@ -69,7 +74,7 @@ defmodule SmartKioskCore.Schemas.Shop do
     |> validate_length(:name, min: 2, max: 120)
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must be a valid email")
     |> validate_format(:phone, ~r/^\+?[\d\s\-]{9,15}$/, message: "must be a valid phone number")
-    |> foreign_key_constraint(:owner_id) 
+    |> foreign_key_constraint(:owner_id)
     |> put_slug()
     |> unique_constraint(:slug)
     |> unique_constraint(:phone)
