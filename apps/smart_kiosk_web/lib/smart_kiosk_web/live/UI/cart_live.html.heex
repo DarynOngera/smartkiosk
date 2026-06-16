@@ -155,9 +155,14 @@
                         >
                           <.icon name="hero-minus" class="w-4 h-4" />
                         </button>
-                        <span class="w-8 text-center font-semibold tabular-nums">
-                          <%= cart_item.quantity %>
-                        </span>
+                        <input
+                          type="number"
+                          value={cart_item.quantity}
+                          phx-blur="update_quantity"
+                          phx-value-id={cart_item.id}
+                          name="quantity"
+                          class="w-14 h-8 bg-white/5 border border-white/10 rounded-lg text-center font-semibold tabular-nums focus:outline-none focus:border-violet-500 transition-colors"
+                        />
                         <button
                           phx-click="update_quantity"
                           phx-value-id={cart_item.id}

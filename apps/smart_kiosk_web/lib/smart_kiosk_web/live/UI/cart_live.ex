@@ -58,8 +58,14 @@ defmodule SmartKioskWeb.CartLive do
   # ── Events ──────────────────────────────────────────────────────────────────
 
   @impl true
-  def handle_event("update_quantity", %{"id" => id, "quantity" => quantity}, socket) do
-    quantity = String.to_integer(quantity)
+  def handle_event("update_quantity", params, socket) do
+    id = params["id"]
+    quantity_str = params["quantity"] || params["value"]
+
+    quantity = case Integer.parse(to_string(quantity_str)) do
+      {q, _} -> q
+      :error -> 1
+    end
     cart_item = Cart.get_cart_item!(id)
 
     if quantity > 0 do

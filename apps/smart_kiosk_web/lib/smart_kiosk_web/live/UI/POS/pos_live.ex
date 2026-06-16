@@ -2,6 +2,7 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
   use SmartKioskWeb, :live_view
 
   alias SmartKioskCore.Catalogue
+  alias SmartKioskCore.Orders
   import SmartKioskWeb.Navbar
 
   @impl true
@@ -94,6 +95,29 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
   end
 
   @impl true
+  def handle_event("set_quantity", params, socket) do
+    product_id = params["product_id"]
+    quantity_str = params["quantity"] || params["value"]
+    cart = socket.assigns.cart
+
+    qty = case Integer.parse(to_string(quantity_str)) do
+      {q, _} -> max(1, q)
+      :error -> 1
+    end
+
+    new_cart =
+      Enum.map(cart, fn item ->
+        if item.product.id == product_id do
+          %{item | quantity: qty}
+        else
+          item
+        end
+      end)
+
+    {:noreply, assign(socket, cart: new_cart, cart_total: calculate_total(new_cart))}
+  end
+
+  @impl true
   def handle_event("clear_cart", _params, socket) do
     {:noreply, assign(socket, cart: [], cart_total: 0.0)}
   end
@@ -116,23 +140,33 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
     if cart == [] or total == 0.0 do
       {:noreply, put_flash(socket, :error, "Cart is empty. Add items before completing payment.")}
     else
-      case method do
-        "cash" ->
-          received = socket.assigns.cash_received || total
-          change = received - total
+      # Prepare items for Orders.create_order
+      order_items = Enum.map(cart, fn item -> {item.product, item.quantity} end)
 
-          receipt = %{
-            id: "ORD#{:erlang.unique_integer([:positive])}",
-            shop: socket.assigns.shop,
-            items: socket.assigns.cart,
-            total: total,
-            method: "cash",
-            received: received,
-            change: change,
-            inserted_at: DateTime.utc_now()
-          }
+      # Determine final status based on method (for POS, usually immediately confirmed)
+      status = if method == "cash", do: :confirmed, else: :pending
 
-          {:noreply,
+      shop = socket.assigns.shop
+
+      case Orders.create_order(shop, order_items, channel: :pos, status: status) do
+        {:ok, order} ->
+          case method do
+            "cash" ->
+              received = socket.assigns.cash_received || total
+              change = received - total
+
+              receipt = %{
+                id: order.id,
+                shop: shop,
+                items: cart,
+                total: total,
+                method: "cash",
+                received: received,
+                change: change,
+                inserted_at: order.inserted_at
+              }
+
+              {:noreply,
            socket
            |> put_flash(
              :info,
@@ -153,14 +187,14 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
 
         "mpesa" ->
           receipt = %{
-            id: "ORD#{:erlang.unique_integer([:positive])}",
-            shop: socket.assigns.shop,
-            items: socket.assigns.cart,
+            id: order.id,
+            shop: shop,
+            items: cart,
             total: total,
             method: "mpesa",
             received: total,
             change: 0.0,
-            inserted_at: DateTime.utc_now()
+            inserted_at: order.inserted_at
           }
 
           {:noreply,
@@ -182,14 +216,14 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
 
         "card" ->
           receipt = %{
-            id: "ORD#{:erlang.unique_integer([:positive])}",
-            shop: socket.assigns.shop,
-            items: socket.assigns.cart,
+            id: order.id,
+            shop: shop,
+            items: cart,
             total: total,
             method: "card",
             received: total,
             change: 0.0,
-            inserted_at: DateTime.utc_now()
+            inserted_at: order.inserted_at
           }
 
           {:noreply,
@@ -214,14 +248,14 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
 
         _ ->
           receipt = %{
-            id: "ORD#{:erlang.unique_integer([:positive])}",
-            shop: socket.assigns.shop,
-            items: socket.assigns.cart,
+            id: order.id,
+            shop: shop,
+            items: cart,
             total: total,
             method: method,
             received: total,
             change: 0.0,
-            inserted_at: DateTime.utc_now()
+            inserted_at: order.inserted_at
           }
 
           {:noreply,
@@ -240,6 +274,10 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
              receipt: receipt,
              show_receipt: true
            )}
+      end
+
+    {:error, _reason} ->
+      {:noreply, put_flash(socket, :error, "Failed to record sale. Please try again.")}
       end
     end
   end
@@ -919,7 +957,14 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                         >
                           <.icon name="hero-minus" class="w-4 h-4" />
                         </button>
-                        <span class="w-8 text-center font-mono font-bold"><%= item.quantity %></span>
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          phx-blur="set_quantity"
+                          phx-value-product_id={item.product.id}
+                          name="quantity"
+                          class="w-12 h-8 bg-white/5 border border-white/10 rounded-lg text-center font-mono font-bold focus:outline-none focus:border-violet-500 transition-colors"
+                        />
                         <button
                           phx-click="update_quantity"
                           phx-value-product_id={item.product.id}

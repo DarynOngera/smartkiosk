@@ -50,6 +50,16 @@
                 <.icon name="hero-shopping-cart" class="w-5 h-5" /> Browse Shops
               </.link>
             <% end %>
+            <%!-- <%= if @current_user && @current_user.role == :platform_admin do%>
+              <.link
+                navigate="/admin"
+                class="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold transition-all border border-white/10 flex items-center gap-2"
+              >
+                <.icon name="hero-shopping-cart" class="w-5 h-5" /> Admin 
+              </.link>
+
+            <% end %> --%>
+
             <%= if @current_user && @current_user.role == :rider do %>
               <.link
                 navigate="/orders"
@@ -70,7 +80,7 @@
             </div>
           </div>
         </header>
-
+  
         <%!-- Dashboard Content --%>
         <%= if @current_user && @current_user.role == :rider do %>
           <.rider_view
@@ -86,6 +96,7 @@
               inventory_count={@inventory_count}
               pending_orders={@pending_orders}
               products={@products}
+              recent_orders={@recent_orders}
               low_stock_products={@low_stock_products}
             />
           <% else %>

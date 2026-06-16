@@ -33,10 +33,44 @@ defmodule SmartKioskCore.Orders do
   def count_orders_by_status(%Shop{} = shop) do
     Order
     |> scope(shop)
+    |> where([o], o.channel == :online)
     |> group_by([o], o.status)
     |> select([o], {o.status, count(o.id)})
     |> Repo.all()
     |> Map.new()
+  end
+
+  @doc "Gets total sales for today."
+  def get_sales_today(%Shop{} = shop) do
+    today_start = DateTime.utc_now() |> DateTime.to_date() |> DateTime.new!(~T[00:00:00], "Etc/UTC")
+
+    Order
+    |> scope(shop)
+    |> where([o], o.inserted_at >= ^today_start)
+    |> where([o], o.status not in [:cancelled])
+    |> select([o], sum(o.total))
+    |> Repo.one() || Decimal.new("0")
+  end
+
+  @doc "Gets total sales for all time."
+  def get_total_sales(%Shop{} = shop) do
+    Order
+    |> scope(shop)
+    |> where([o], o.status not in [:cancelled])
+    |> select([o], sum(o.total))
+    |> Repo.one() || Decimal.new("0")
+  end
+
+  @doc "Gets recent online orders (non-pending)."
+  def list_recent_orders(%Shop{} = shop, limit \\ 5) do
+    Order
+    |> scope(shop)
+    |> where([o], o.channel == :online)
+    |> where([o], o.status not in [:cancelled, :pending])
+    |> order_by([o], desc: o.inserted_at)
+    |> limit(^limit)
+    |> preload([:customer, items: :product])
+    |> Repo.all()
   end
 
   @doc "Gets a single order, scoped to a shop."
@@ -53,6 +87,7 @@ defmodule SmartKioskCore.Orders do
     Order
     |> scope(shop)
     |> where([o], o.status == :pending)
+    |> where([o], o.channel == :online)
     |> Repo.all()
   end
 
