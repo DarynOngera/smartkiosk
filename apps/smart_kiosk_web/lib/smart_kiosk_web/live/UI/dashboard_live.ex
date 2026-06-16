@@ -47,6 +47,7 @@ defmodule SmartKioskWeb.UI.DashboardLive do
           |> assign(:assigned_deliveries, assigned_deliveries)
           |> assign(:active_delivery_count, active_delivery_count)
           |> assign(:available_deliveries, available_deliveries)
+          |> assign(:recent_sales, [])
 
         shop ->
           if connected?(socket) do
@@ -55,13 +56,17 @@ defmodule SmartKioskWeb.UI.DashboardLive do
 
           products = Catalogue.list_products(shop, limit: 10)
           pending = Orders.get_pending_orders(shop)
+          sales_today = Orders.get_sales_today(shop)
+          recent_orders = Orders.list_recent_orders(shop)
 
           socket
           |> assign(:page_title, "Merchant Dashboard")
-          |> assign(:sales_today, "KES 0.00")
+          |> assign(:sales_today, "KES #{format_money(sales_today)}")
+          |> assign(:total_sales, "KES #{format_money(Orders.get_total_sales(shop))}")
           |> assign(:inventory_count, Catalogue.count_products(shop))
           |> assign(:pending_orders, pending |> Enum.count())
           |> assign(:products, products)
+          |> assign(:recent_orders, recent_orders)
           |> assign(:low_stock_products, Catalogue.list_low_stock_products(shop))
 
         true ->
@@ -69,6 +74,7 @@ defmodule SmartKioskWeb.UI.DashboardLive do
           |> assign(:page_title, "Customer Dashboard")
           |> assign(:total_spent, "KES 0.00")
           |> assign(:orders_count, 0)
+          |> assign(:recent_sales, [])
           |> assign(:loyalty_points, 0)
       end
 
@@ -477,10 +483,13 @@ defmodule SmartKioskWeb.UI.DashboardLive do
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
       <%!-- Inventory List --%>
       <div class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-        <h2 class="text-xl font-bold text-white mb-6">Recent Inventory</h2>
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold text-white">Recent Inventory</h2>
+          <.link navigate="/inventory" class="text-violet-400 text-sm hover:underline">View All</.link>
+        </div>
         <div class="space-y-4">
           <%= for product <- @products do %>
             <.product_card product={product} />
@@ -488,8 +497,49 @@ defmodule SmartKioskWeb.UI.DashboardLive do
         </div>
       </div>
 
+      <%!-- Recent Orders --%>
+      <div class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold text-white">Recent Orders</h2>
+          <.link navigate="/orders" class="text-violet-400 text-sm hover:underline">View All</.link>
+        </div>
+        <div class="space-y-4">
+          <%= if @recent_orders == [] do %>
+            <div class="h-40 flex flex-col items-center justify-center text-slate-500 opacity-50 border-2 border-dashed border-white/10 rounded-2xl">
+              <.icon name="hero-shopping-bag" class="w-8 h-8 mb-2" />
+              <p>No orders yet</p>
+            </div>
+          <% else %>
+            <%= for order <- @recent_orders do %>
+              <div class="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl">
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 bg-violet-500/20 rounded-xl flex items-center justify-center">
+                    <.icon name="hero-shopping-bag" class="w-5 h-5 text-violet-400" />
+                  </div>
+                  <div>
+                    <p class="font-bold text-white">KES <%= format_money(order.total) %></p>
+                    <p class="text-slate-500 text-xs uppercase tracking-wider">
+                      <%= order.channel %> • <%= order.status %>
+                    </p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-slate-300 text-xs">
+                    <%= order.inserted_at |> Calendar.strftime("%H:%M") %>
+                  </p>
+                  <p class="text-slate-500 text-[10px]">
+                    <%= order.inserted_at |> Calendar.strftime("%d %b") %>
+                  </p>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-10">
       <%!-- Quick Actions --%>
-      <div class="space-y-4">
         <h2 class="text-xl font-bold text-white mb-4">Quick Management</h2>
         <div class="grid grid-cols-2 gap-4">
           <.link
@@ -540,7 +590,6 @@ defmodule SmartKioskWeb.UI.DashboardLive do
           </.link>
         </div>
       </div>
-    </div>
 
     <div class="mt-8 bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
       <div class="flex items-center justify-between mb-4">
@@ -737,5 +786,13 @@ defmodule SmartKioskWeb.UI.DashboardLive do
 
   defp directions_url(delivery) do
     "https://www.openstreetmap.org/?mlat=#{delivery.dropoff_lat}&mlon=#{delivery.dropoff_lng}#map=16/#{delivery.dropoff_lat}/#{delivery.dropoff_lng}"
+  end
+
+  defp format_money(nil), do: "0.00"
+
+  defp format_money(amount) do
+    amount
+    |> Decimal.to_float()
+    |> :erlang.float_to_binary(decimals: 2)
   end
 end

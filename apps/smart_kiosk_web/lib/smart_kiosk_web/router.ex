@@ -127,6 +127,9 @@ defmodule SmartKioskWeb.Router do
     live_session :admin,
       on_mount: [{SmartKioskWeb.UserAuth, :ensure_authenticated}] do
       live "/", AdminLive, :index
+      live "/shops", AdminShopsLive, :index
+      live "/shops/:id", AdminShopDetailLive, :show
+      live "/users", AdminUsersLive, :index
     end
   end
 

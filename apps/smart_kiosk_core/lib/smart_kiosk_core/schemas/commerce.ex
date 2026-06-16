@@ -150,12 +150,13 @@ defmodule SmartKioskCore.Schemas.Subscription do
   """
   use Ecto.Schema
   import Ecto.Changeset
+  alias SmartKioskCore.Plans
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
   # include canonical and legacy plan atoms so subscription inserts accept both
-  @plans ~w(basic pro enterprise kiosk duka biashara)a
+  @plans Plans.all_plan_atoms()
   @statuses ~w(trialing active past_due cancelled)a
 
   schema "subscriptions" do

@@ -1,6 +1,7 @@
 defmodule SmartKioskCore.Shops do
   import Ecto.Query
   alias SmartKioskCore.Repo
+  alias SmartKioskCore.Plans
   alias SmartKioskCore.Schemas.{Rider, Role, Shop, Subscription, User, UserRole}
 
   def change_registration(attrs \\ %{}) do
@@ -31,12 +32,17 @@ defmodule SmartKioskCore.Shops do
     )
     |> Ecto.Changeset.validate_inclusion(
       :plan,
-      Enum.map(SmartKioskCore.Plans.list_plans(), & &1.slug)
+      Enum.map(Plans.list_plans(), & &1.slug)
     )
   end
 
   # ── Shop operations ───────────────────────────────────────────────────────────
-  @doc "Creates a shop and assigns the given user as owner in a single transaction."
+  @doc """
+  Creates a shop and assigns the given user as owner in a single transaction.
+
+  The shop's plan determines available features and limits via the Plans module.
+  See SmartKioskCore.Plans for plan details and feature gating.
+  """
   def create_shop_for_user(%User{} = user, shop_attrs) do
     multi =
       Ecto.Multi.new()
@@ -49,12 +55,15 @@ defmodule SmartKioskCore.Shops do
       |> Ecto.Multi.run(:owner_role, fn repo, %{user: updated_user, shop: shop} ->
         assign_system_role(repo, updated_user, "owner", shop)
       end)
-      |> Ecto.Multi.insert(:subscription, fn %{shop: shop} ->
+      |> Ecto.Multi.insert(:plan, fn %{shop: shop} ->
+        # Use Plans module to get canonical plan. This ensures consistency
+        # and enables feature gating based on shop's chosen plan.
+        shop_plan = shop.plan || :basic
+
         %Subscription{}
         |> Subscription.changeset(%{
           shop_id: shop.id,
-          # Respect the shop's chosen plan; fall back to :kiosk if missing
-          plan: shop.plan || :kiosk,
+          plan: shop_plan,
           status: :trialing,
           trial_ends_at: DateTime.add(DateTime.utc_now(), 30, :day) |> DateTime.truncate(:second)
         })
@@ -74,8 +83,11 @@ defmodule SmartKioskCore.Shops do
   Registers a new shop owner and creates their shop in a single transaction.
 
   Accepts:
-    - shop_attrs: %{name: "...", phone: "...", category: "..."}
+    - shop_attrs: %{name: "...", phone: "...", category: "...", plan: "..."}
     - user_attrs: %{full_name: "...", email: "...", password: "...", phone: "..."}
+
+  The shop's plan (from Plans module) determines available features and limits.
+  See SmartKioskCore.Plans for plan details and feature gating.
 
   Returns {:ok, shop, user} or {:error, changeset}.
   """
@@ -99,10 +111,14 @@ defmodule SmartKioskCore.Shops do
         assign_system_role(repo, user, "owner", shop)
       end)
       |> Ecto.Multi.insert(:subscription, fn %{shop: shop} ->
+        # Use Plans module to get canonical plan. This ensures consistency
+        # and enables feature gating based on shop's chosen plan.
+        shop_plan = shop.plan || :basic
+
         %Subscription{}
         |> Subscription.changeset(%{
           shop_id: shop.id,
-          plan: shop.plan || :kiosk,
+          plan: shop_plan,
           status: :trialing,
           trial_ends_at: DateTime.add(DateTime.utc_now(), 30, :day) |> DateTime.truncate(:second)
         })
@@ -427,7 +443,7 @@ defmodule SmartKioskCore.Shops do
   def register_rider(%Shop{} = shop, user_attrs, rider_attrs) do
     # 1. Enforce plan limits
     plan_slug = shop.plan |> SmartKioskCore.Schemas.Shop.canonical_plan() |> Atom.to_string()
-    plan = SmartKioskCore.Plans.list_plans() |> Enum.find(fn p -> p.slug == plan_slug end)
+    plan = Plans.get_plan_by_slug(plan_slug)
     max_allowed = (plan && plan.max_riders) || 1
 
     current_count = count_riders(shop)

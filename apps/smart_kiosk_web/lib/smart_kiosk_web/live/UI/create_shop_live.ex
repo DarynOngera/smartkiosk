@@ -11,7 +11,10 @@ defmodule SmartKioskWeb.UI.CreateShopLive do
       General: :general_shop,
       Electronics: :electronics,
       Groceries: :groceries,
-      Pharmacy: :pharmacy
+      Pharmacy: :pharmacy,
+      Fashion: :fashion,
+      Bakery: :bakery,
+
     ]
 
     # Pre-fill user details if available

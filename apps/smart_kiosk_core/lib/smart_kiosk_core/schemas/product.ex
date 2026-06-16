@@ -24,7 +24,7 @@ defmodule SmartKioskCore.Schemas.Product do
     field(:price, :decimal)
     field(:cost_price, :decimal)
     field(:stock_qty, :integer, default: 0)
-    field(:low_stock_threshold, :integer, default: 5)
+    field(:low_stock_threshold, :integer, default: 20)
     field(:attributes, :map, default: %{})
     field(:status, Ecto.Enum, values: @statuses, default: :active)
     field(:is_featured, :boolean, default: false)

@@ -10,7 +10,7 @@ defmodule SmartKioskCore.Accounts do
 
   import Ecto.Query
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Schemas.{Shop, User, UserToken}
+  alias SmartKioskCore.Schemas.{Shop, User, UserToken, User_Role}
 
   # ── User queries ─────────────────────────────────────────────────────────────
 
@@ -21,7 +21,7 @@ defmodule SmartKioskCore.Accounts do
 
   @doc "Gets a user by email."
   def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
+    Repo.get_by(User, email: email) |> Repo.preload(:user_roles)
   end
 
   @doc "Gets a user by email and password. Returns nil if credentials invalid."

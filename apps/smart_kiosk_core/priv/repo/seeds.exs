@@ -214,13 +214,13 @@ if Mix.env() == :dev do
         city: "Nairobi",
         lat: -1.2833,
         lng: 36.8172,
-        plan: :duka,
+        plan: :basic,
         status: :active
       })
       |> Repo.insert()
 
     %Subscription{}
-    |> Subscription.changeset(%{shop_id: shop.id, plan: :duka, status: :active})
+    |> Subscription.changeset(%{shop_id: shop.id, plan: :basic, status: :active})
     |> Repo.insert!()
 
     %User{}

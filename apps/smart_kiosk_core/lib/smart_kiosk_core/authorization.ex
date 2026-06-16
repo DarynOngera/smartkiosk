@@ -134,6 +134,9 @@ defmodule SmartKioskCore.Authorization do
     |> UserRole.changeset(%{user_id: user_id, role_id: role_id, shop_id: shop_id})
     |> Repo.insert()
   end
+def get_role_by_name(slug) when is_binary(slug) do
+  Repo.get_by(Role, slug: slug)
+end
 
   @doc "Revokes a role from a user."
   @spec revoke_role(User.t(), Role.t(), Shop.t() | nil) :: :ok | {:error, :not_found}

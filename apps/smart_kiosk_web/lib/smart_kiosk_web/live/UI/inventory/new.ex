@@ -57,6 +57,17 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.New do
          |> push_navigate(to: ~p"/inventory")}
 
       {:error, changeset} ->
+        # Check for base errors (like plan limits) and show them via flash
+        socket =
+          case Keyword.get(changeset.errors, :base) do
+            {msg, opts} ->
+              error_message = SmartKioskWeb.CoreComponents.translate_error({msg, opts})
+              put_flash(socket, :error, error_message)
+
+            _ ->
+              socket
+          end
+
         form = to_form(changeset, as: "product", action: :insert)
         {:noreply, assign(socket, form: form)}
     end

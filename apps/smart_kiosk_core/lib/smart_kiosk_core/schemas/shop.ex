@@ -7,12 +7,13 @@ defmodule SmartKioskCore.Schemas.Shop do
   """
   use Ecto.Schema
   import Ecto.Changeset
+  alias SmartKioskCore.Plans
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
   # include legacy plan atoms so existing DB rows can be loaded
-  @plans ~w(basic pro enterprise kiosk duka biashara)a
+  @plans Plans.all_plan_atoms()
   @statuses ~w(pending_review active suspended closed)a
   @categories ~w(
     electronics general_shop vegetables fruits groceries
@@ -52,13 +53,17 @@ defmodule SmartKioskCore.Schemas.Shop do
     has_many(:campaigns, SmartKioskCore.Schemas.Campaign)
     has_many(:invoices, SmartKioskCore.Schemas.Invoice)
     has_many(:job_posts, SmartKioskCore.Schemas.JobPost)
-    has_one(:subscription, SmartKioskCore.Schemas.Subscription)
 
     timestamps(type: :utc_datetime)
   end
 
+
+
+
+  
+
   @required ~w(name phone)a
-  @optional ~w(slug email address city country lat lng plan status category logo_url description settings delivery_zone)a
+  @optional ~w(slug email address city country lat lng plan status category logo_url description settings delivery_zone owner_id)a
 
   def changeset(shop, attrs) do
     attrs = normalize_attrs(attrs)
@@ -69,18 +74,22 @@ defmodule SmartKioskCore.Schemas.Shop do
     |> validate_length(:name, min: 2, max: 120)
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must be a valid email")
     |> validate_format(:phone, ~r/^\+?[\d\s\-]{9,15}$/, message: "must be a valid phone number")
+    |> foreign_key_constraint(:owner_id)
     |> put_slug()
     |> unique_constraint(:slug)
     |> unique_constraint(:phone)
   end
 
   defp normalize_attrs(attrs) when is_map(attrs) do
-    plan_val = Map.get(attrs, "plan") || Map.get(attrs, :plan)
+    cond do
+      Map.has_key?(attrs, "plan") ->
+        Map.put(attrs, "plan", canonical_plan(attrs["plan"]))
 
-    if plan_val do
-      Map.put(attrs, "plan", canonical_plan(plan_val))
-    else
-      attrs
+      Map.has_key?(attrs, :plan) ->
+        Map.put(attrs, :plan, canonical_plan(attrs.plan))
+
+      true ->
+        attrs
     end
   end
 
@@ -94,36 +103,7 @@ defmodule SmartKioskCore.Schemas.Shop do
     canonical_plan(:duka) => :pro
     canonical_plan("biashara") => :enterprise
   """
-  def canonical_plan(plan) when is_atom(plan), do: canonical_plan(Atom.to_string(plan))
-
-  def canonical_plan(plan) when is_binary(plan) do
-    case String.downcase(plan) do
-      "kiosk" ->
-        :basic
-
-      "duka" ->
-        :pro
-
-      "biashara" ->
-        :enterprise
-
-      "basic" ->
-        :basic
-
-      "pro" ->
-        :pro
-
-      "enterprise" ->
-        :enterprise
-
-      other ->
-        try do
-          String.to_existing_atom(other)
-        rescue
-          _ -> :basic
-        end
-    end
-  end
+  def canonical_plan(plan), do: Plans.normalize_plan(plan)
 
   @doc "Returns the list of available shop categories."
   def categories, do: @categories
