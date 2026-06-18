@@ -279,7 +279,7 @@ defmodule SmartKioskWeb.HomeLive do
 
   defp safe_category_atom(_), do: nil
 
-  defp fetch_products_by_categories(opts \\ []) do
+  defp fetch_products_by_categories(opts) do
     page = opts[:page] || 1
     limit = opts[:limit] || 12
     offset = (page - 1) * limit

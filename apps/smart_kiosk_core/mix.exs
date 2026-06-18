@@ -53,7 +53,9 @@ defmodule SmartKioskCore.MixProject do
 
       # Telemetry
       {:telemetry_metrics, "~> 1.0"},
-      {:telemetry_poller, "~> 1.0"}
+      {:telemetry_poller, "~> 1.0"},
+      #the pdf generater
+       {:pdf_generator, "~> 0.6.2"}
     ]
   end
 

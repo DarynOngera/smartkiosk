@@ -42,7 +42,7 @@ defmodule SmartKioskWeb.Router do
       # Shop public storefront (accessed by consumers)
       live "/shop/:slug", StorefrontLive.Index, :index
       live "/shop/:slug/product/:id", StorefrontLive.Show, :show
-      live "/shop/:slug/job/apply", RiderRegistrationLive, :new
+      live "/shop/:slug/rider/register", RiderRegistrationLive, :new
       live "/shop/:slug/rider/thanks", RiderApplicationThanksLive, :show
 
       # Job board (public access for job seekers)

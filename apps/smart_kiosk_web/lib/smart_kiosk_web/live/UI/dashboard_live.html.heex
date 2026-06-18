@@ -80,7 +80,7 @@
             </div>
           </div>
         </header>
-  
+
         <%!-- Dashboard Content --%>
         <%= if @current_user && @current_user.role == :rider do %>
           <.rider_view
@@ -97,6 +97,7 @@
               pending_orders={@pending_orders}
               products={@products}
               recent_orders={@recent_orders}
+              recent_reports={@recent_reports}
               low_stock_products={@low_stock_products}
             />
           <% else %>

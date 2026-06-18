@@ -87,7 +87,7 @@ defmodule SmartKioskWeb.Careers.JobDetailLive do
 
               <div class="border-t border-slate-200 pt-6">
                 <.link
-                  navigate={~p"/shop/#{if @job_post.shop, do: @job_post.shop.slug, else: ""}/job/apply?job_id=#{@job_post.id}"}
+                  navigate={~p"/shop/#{if @job_post.shop, do: @job_post.shop.slug, else: ""}/rider/register?job_id=#{@job_post.id}"}
                   class="inline-flex items-center justify-center rounded-xl bg-violet-600 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
                 >
                   Apply for this Position

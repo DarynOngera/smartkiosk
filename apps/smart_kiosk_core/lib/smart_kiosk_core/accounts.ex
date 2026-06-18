@@ -10,7 +10,7 @@ defmodule SmartKioskCore.Accounts do
 
   import Ecto.Query
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Schemas.{Shop, User, UserToken, User_Role}
+  alias SmartKioskCore.Schemas.{Shop, User, UserToken}
 
   # ── User queries ─────────────────────────────────────────────────────────────
 
