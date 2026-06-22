@@ -12,6 +12,10 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
 
     products = if shop, do: Catalogue.list_products(shop, status: :active), else: []
 
+    if connected?(socket) and shop do
+      Phoenix.PubSub.subscribe(SmartKiosk.PubSub, "shop:#{shop.id}:orders")
+    end
+
     {:ok,
      socket
      |> assign(:page_title, "POS")
@@ -36,7 +40,8 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
      |> assign(:mpesa_modal_open, false)
      |> assign(:mpesa_pending, false)
      |> assign(:mpesa_phone, nil)
-     |> assign(:mpesa_result, nil)}
+     |> assign(:mpesa_result, nil)
+     |> assign_revenue_stats()}
   end
 
   # ── Events ──────────────────────────────────────────────────────────────────
@@ -95,29 +100,6 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
   end
 
   @impl true
-  def handle_event("set_quantity", params, socket) do
-    product_id = params["product_id"]
-    quantity_str = params["quantity"] || params["value"]
-    cart = socket.assigns.cart
-
-    qty = case Integer.parse(to_string(quantity_str)) do
-      {q, _} -> max(1, q)
-      :error -> 1
-    end
-
-    new_cart =
-      Enum.map(cart, fn item ->
-        if item.product.id == product_id do
-          %{item | quantity: qty}
-        else
-          item
-        end
-      end)
-
-    {:noreply, assign(socket, cart: new_cart, cart_total: calculate_total(new_cart))}
-  end
-
-  @impl true
   def handle_event("clear_cart", _params, socket) do
     {:noreply, assign(socket, cart: [], cart_total: 0.0)}
   end
@@ -140,144 +122,73 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
     if cart == [] or total == 0.0 do
       {:noreply, put_flash(socket, :error, "Cart is empty. Add items before completing payment.")}
     else
-      # Prepare items for Orders.create_order
-      order_items = Enum.map(cart, fn item -> {item.product, item.quantity} end)
+      case method do
+        "cash" ->
+          received = socket.assigns.cash_received || total
+          change = received - total
+          persist_result = persist_pos_sale(socket, :cash, total)
 
-      # Determine final status based on method (for POS, usually immediately confirmed)
-      status = if method == "cash", do: :confirmed, else: :pending
-
-      shop = socket.assigns.shop
-
-      case Orders.create_order(shop, order_items, channel: :pos, status: status) do
-        {:ok, order} ->
-          case method do
-            "cash" ->
-              received = socket.assigns.cash_received || total
-              change = received - total
-
-              receipt = %{
-                id: order.id,
-                shop: shop,
-                items: cart,
-                total: total,
-                method: "cash",
-                received: received,
-                change: change,
-                inserted_at: order.inserted_at
-              }
+          case persist_result do
+            {:ok, %{order: order}} ->
+              receipt = build_receipt(order, socket.assigns.shop, socket.assigns.cart, total, "cash", received, change)
 
               {:noreply,
-           socket
-           |> put_flash(
-             :info,
-             "Cash payment recorded. Received: KES #{:erlang.float_to_binary(received, decimals: 2)}#{if change > 0, do: ", Change: KES #{:erlang.float_to_binary(change, decimals: 2)}", else: ""}"
-           )
-           |> assign(
-             cart: [],
-             cart_total: 0.0,
-             show_payment: false,
-             mobile_cart_open: false,
-             cart_open: false,
-             mpesa_modal_open: false,
-             cash_received: 0.0,
-             cash_change: 0.0,
-             receipt: receipt,
-             show_receipt: true
-           )}
+               socket
+               |> put_flash(
+                 :info,
+                 "Cash payment recorded. Received: KES #{:erlang.float_to_binary(received, decimals: 2)}#{if change > 0, do: ", Change: KES #{:erlang.float_to_binary(change, decimals: 2)}", else: ""}"
+               )
+               |> assign(
+                 cart: [],
+                 cart_total: 0.0,
+                 show_payment: false,
+                 mobile_cart_open: false,
+                 cart_open: false,
+                 mpesa_modal_open: false,
+                 cash_received: 0.0,
+                 cash_change: 0.0,
+                 receipt: receipt,
+                 show_receipt: true
+               )
+               |> assign_revenue_stats()}
+
+            {:error, reason} ->
+              {:noreply, put_flash(socket, :error, "Payment failed to save: #{inspect(reason)}")}
+          end
 
         "mpesa" ->
-          receipt = %{
-            id: order.id,
-            shop: shop,
-            items: cart,
-            total: total,
-            method: "mpesa",
-            received: total,
-            change: 0.0,
-            inserted_at: order.inserted_at
-          }
-
-          {:noreply,
-           socket
-           |> put_flash(
-             :info,
-             "Mpesa payment initiated. Amount: KES #{:erlang.float_to_binary(total, decimals: 2)}"
-           )
-           |> assign(
-             cart: [],
-             cart_total: 0.0,
-             show_payment: false,
-             mobile_cart_open: false,
-             cart_open: false,
-             mpesa_modal_open: false,
-             receipt: receipt,
-             show_receipt: true
-           )}
+          # M-PESA is handled async via the STK modal — show the modal instead
+          {:noreply, assign(socket, :mpesa_modal_open, true)}
 
         "card" ->
-          receipt = %{
-            id: order.id,
-            shop: shop,
-            items: cart,
-            total: total,
-            method: "card",
-            received: total,
-            change: 0.0,
-            inserted_at: order.inserted_at
-          }
-
-          {:noreply,
-           socket
-           |> put_flash(
-             :info,
-             "Card payment processed. Amount: KES #{:erlang.float_to_binary(total, decimals: 2)}"
-           )
-           |> assign(
-             cart: [],
-             cart_total: 0.0,
-             show_payment: false,
-             mobile_cart_open: false,
-             cart_open: false,
-             mpesa_modal_open: false,
-             card_modal_open: false,
-             card_pending: false,
-             card_result: %{status: :success, amount: total},
-             receipt: receipt,
-             show_receipt: true
-           )}
+          # Card is handled async via the card modal
+          {:noreply, assign(socket, :card_modal_open, true)}
 
         _ ->
-          receipt = %{
-            id: order.id,
-            shop: shop,
-            items: cart,
-            total: total,
-            method: method,
-            received: total,
-            change: 0.0,
-            inserted_at: order.inserted_at
-          }
+          persist_result = persist_pos_sale(socket, :cash, total)
 
-          {:noreply,
-           socket
-           |> put_flash(
-             :info,
-             "Payment completed. Amount: KES #{:erlang.float_to_binary(total, decimals: 2)}"
-           )
-           |> assign(
-             cart: [],
-             cart_total: 0.0,
-             show_payment: false,
-             mobile_cart_open: false,
-             cart_open: false,
-             mpesa_modal_open: false,
-             receipt: receipt,
-             show_receipt: true
-           )}
-      end
+          case persist_result do
+            {:ok, %{order: order}} ->
+              receipt = build_receipt(order, socket.assigns.shop, socket.assigns.cart, total, method, total, 0.0)
 
-    {:error, _reason} ->
-      {:noreply, put_flash(socket, :error, "Failed to record sale. Please try again.")}
+              {:noreply,
+               socket
+               |> put_flash(:info, "Payment completed. Amount: KES #{:erlang.float_to_binary(total, decimals: 2)}")
+               |> assign(
+                 cart: [],
+                 cart_total: 0.0,
+                 show_payment: false,
+                 mobile_cart_open: false,
+                 cart_open: false,
+                 mpesa_modal_open: false,
+                 receipt: receipt,
+                 show_receipt: true
+               )
+               |> assign_revenue_stats()}
+
+            {:error, reason} ->
+              {:noreply, put_flash(socket, :error, "Payment failed to save: #{inspect(reason)}")}
+          end
       end
     end
   end
@@ -379,6 +290,60 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
   end
 
   @impl true
+  def handle_event("view_order_receipt", %{"order_id" => order_id}, socket) do
+    shop = socket.assigns.shop
+
+    try do
+      order = Orders.get_order!(shop, order_id)
+      transaction = List.first(order.transactions)
+      method = if transaction, do: to_string(transaction.type), else: "cash"
+
+      cart =
+        Enum.map(order.items, fn item ->
+          %{product: item.product, quantity: item.quantity}
+        end)
+
+      total_float = Decimal.to_float(order.total)
+
+      receipt = %{
+        id: "POS-#{String.slice(order.id, 0, 8) |> String.upcase()}",
+        shop: shop,
+        items: cart,
+        total: total_float,
+        method: method,
+        received: total_float,
+        change: 0.0,
+        inserted_at: order.inserted_at
+      }
+
+      {:noreply,
+       socket
+       |> assign(receipt: receipt, show_receipt: true, cart_open: false, mobile_cart_open: false)}
+    rescue
+      _ -> {:noreply, put_flash(socket, :error, "Order receipt not found")}
+    end
+  end
+
+  @impl true
+  def handle_event("set_quantity", %{"product_id" => product_id, "quantity" => quantity_str}, socket) do
+    qty =
+      case Integer.parse(quantity_str || "") do
+        {q, _} when q > 0 -> q
+        _ -> 1
+      end
+
+    cart = socket.assigns.cart
+
+    new_cart =
+      case Enum.find_index(cart, fn item -> item.product.id == product_id end) do
+        nil -> cart
+        index -> List.update_at(cart, index, fn item -> %{item | quantity: qty} end)
+      end
+
+    {:noreply, assign(socket, cart: new_cart, cart_total: calculate_total(new_cart))}
+  end
+
+  @impl true
   def handle_event("search", %{"query" => query}, socket) do
     products = Catalogue.list_products(socket.assigns.shop, status: :active, search: query)
 
@@ -403,6 +368,63 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
     |> Enum.reduce(0.0, fn item, acc ->
       acc + Decimal.to_float(item.product.price) * item.quantity
     end)
+  end
+
+  defp assign_revenue_stats(socket) do
+    shop = socket.assigns.shop
+    user = socket.assigns.user
+
+    if shop do
+      pos_revenue_today = Orders.get_pos_sales_today(shop)
+      pos_orders_today = Orders.list_pos_orders_today(shop, limit: 15)
+      pos_cashier_sales_today = Orders.get_pos_sales_today_by_cashier(shop)
+      my_stats_today = Orders.get_cashier_pos_stats_today(shop, user.id)
+
+      socket
+      |> assign(:pos_revenue_today, pos_revenue_today)
+      |> assign(:pos_orders_today, pos_orders_today)
+      |> assign(:pos_cashier_sales_today, pos_cashier_sales_today)
+      |> assign(:my_stats_today, my_stats_today)
+    else
+      socket
+      |> assign(:pos_revenue_today, Decimal.new("0"))
+      |> assign(:pos_orders_today, [])
+      |> assign(:pos_cashier_sales_today, [])
+      |> assign(:my_stats_today, %{total: Decimal.new("0"), count: 0})
+    end
+  end
+
+  # Persists a POS sale to the database via Orders.process_pos_payment/4.
+  # Returns {:ok, order} or {:error, reason}.
+  defp persist_pos_sale(socket, payment_method, amount) do
+    shop = socket.assigns.shop
+    user = socket.assigns.user
+    cart = socket.assigns.cart
+
+    # Convert cart items to the {product, qty} format expected by the orders context
+    items = Enum.map(cart, fn %{product: product, quantity: qty} -> {product, qty} end)
+
+    payment_attrs = %{
+      payment_method: payment_method,
+      amount: Decimal.from_float(amount),
+      user_id: user.id
+    }
+
+    Orders.process_pos_payment(shop, items, payment_attrs)
+  end
+
+  # Builds the in-memory receipt map shown on the receipt screen.
+  defp build_receipt(order, shop, cart, total, method, received, change) do
+    %{
+      id: "POS-#{String.slice(order.id, 0, 8) |> String.upcase()}",
+      shop: shop,
+      items: cart,
+      total: total,
+      method: method,
+      received: received,
+      change: change,
+      inserted_at: order.inserted_at
+    }
   end
 
   defp build_text_receipt(nil), do: ""
@@ -444,36 +466,37 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
     if success do
       receipt_ref = "MPESA#{:erlang.unique_integer([:positive])}"
 
-      receipt = %{
-        id: receipt_ref,
-        shop: socket.assigns.shop,
-        items: socket.assigns.cart,
-        total: amount,
-        method: "mpesa",
-        received: amount,
-        change: 0.0,
-        inserted_at: DateTime.utc_now()
-      }
+      case persist_pos_sale(socket, :mpesa_stk, amount) do
+        {:ok, %{order: order}} ->
+          receipt = build_receipt(order, socket.assigns.shop, socket.assigns.cart, amount, "mpesa", amount, 0.0)
 
-      {:noreply,
-       socket
-       |> put_flash(
-         :info,
-         "STK Push confirmed for #{phone}. Ref: #{receipt_ref}. Amount: KES #{:erlang.float_to_binary(amount, decimals: 2)}"
-       )
-       |> assign(
-         mpesa_pending: false,
-         mpesa_modal_open: false,
-         mpesa_phone: nil,
-         mpesa_result: %{status: :success, ref: receipt_ref, amount: amount},
-         cart: [],
-         cart_total: 0.0,
-         show_payment: false,
-         mobile_cart_open: false,
-         cart_open: false,
-         receipt: receipt,
-         show_receipt: true
-       )}
+          {:noreply,
+           socket
+           |> put_flash(
+             :info,
+             "STK Push confirmed for #{phone}. Ref: #{receipt_ref}. Amount: KES #{:erlang.float_to_binary(amount, decimals: 2)}"
+           )
+           |> assign(
+             mpesa_pending: false,
+             mpesa_modal_open: false,
+             mpesa_phone: nil,
+             mpesa_result: %{status: :success, ref: receipt_ref, amount: amount},
+             cart: [],
+             cart_total: 0.0,
+             show_payment: false,
+             mobile_cart_open: false,
+             cart_open: false,
+             receipt: receipt,
+             show_receipt: true
+           )
+           |> assign_revenue_stats()}
+
+        {:error, reason} ->
+          {:noreply,
+           socket
+           |> put_flash(:error, "M-PESA confirmed but failed to save order: #{inspect(reason)}")
+           |> assign(mpesa_pending: false, mpesa_modal_open: false)}
+      end
     else
       {:noreply,
        socket
@@ -492,42 +515,48 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
     success = :rand.uniform() <= 0.9
 
     if success do
-      receipt = %{
-        id: "ORD#{:erlang.unique_integer([:positive])}",
-        shop: socket.assigns.shop,
-        items: socket.assigns.cart,
-        total: amount,
-        method: "card",
-        received: amount,
-        change: 0.0,
-        inserted_at: DateTime.utc_now()
-      }
+      case persist_pos_sale(socket, :card, amount) do
+        {:ok, %{order: order}} ->
+          receipt = build_receipt(order, socket.assigns.shop, socket.assigns.cart, amount, "card", amount, 0.0)
 
-      {:noreply,
-       socket
-       |> put_flash(
-         :info,
-         "Card payment processed. Amount: KES #{:erlang.float_to_binary(amount, decimals: 2)}"
-       )
-       |> assign(
-         cart: [],
-         cart_total: 0.0,
-         show_payment: false,
-         mobile_cart_open: false,
-         cart_open: false,
-         mpesa_modal_open: false,
-         card_modal_open: false,
-         card_pending: false,
-         card_result: %{status: :success, amount: amount},
-         receipt: receipt,
-         show_receipt: true
-       )}
+          {:noreply,
+           socket
+           |> put_flash(
+             :info,
+             "Card payment processed. Amount: KES #{:erlang.float_to_binary(amount, decimals: 2)}"
+           )
+           |> assign(
+             cart: [],
+             cart_total: 0.0,
+             show_payment: false,
+             mobile_cart_open: false,
+             cart_open: false,
+             mpesa_modal_open: false,
+             card_modal_open: false,
+             card_pending: false,
+             card_result: %{status: :success, amount: amount},
+             receipt: receipt,
+             show_receipt: true
+           )
+           |> assign_revenue_stats()}
+
+        {:error, reason} ->
+          {:noreply,
+           socket
+           |> put_flash(:error, "Card approved but failed to save order: #{inspect(reason)}")
+           |> assign(card_pending: false, card_modal_open: false)}
+      end
     else
       {:noreply,
        socket
        |> put_flash(:error, "Card processing failed. Please try again.")
        |> assign(card_pending: false, card_modal_open: true, card_result: %{status: :failed})}
     end
+  end
+
+  @impl true
+  def handle_info({:new_order, _order}, socket) do
+    {:noreply, assign_revenue_stats(socket)}
   end
 
   # ── Render ──────────────────────────────────────────────────────────────────
@@ -660,6 +689,29 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
               </button>
             </nav>
           </div>
+
+          <%!-- ── Active Cashier Card ── --%>
+          <div class="mx-4 mt-4 p-4 bg-violet-500/10 border border-violet-500/20 rounded-2xl">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 bg-violet-500/30 rounded-full flex items-center justify-center flex-shrink-0">
+                <.icon name="hero-user-circle" class="w-5 h-5 text-violet-300" />
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-violet-300 uppercase tracking-wider">Active Cashier</p>
+                <p class="text-sm font-bold text-white truncate"><%= @user.full_name || @user.email %></p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+              <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse flex-shrink-0"></span>
+              <span class="truncate"><%= @user.email %></span>
+            </div>
+            <div class="mt-3 pt-3 border-t border-violet-500/20">
+              <p class="text-xs text-slate-500 uppercase tracking-wider font-medium mb-1">POS Revenue Today</p>
+              <p class="text-lg font-bold text-emerald-400">
+                KES <%= Decimal.to_string(@pos_revenue_today, :normal) %>
+              </p>
+            </div>
+          </div>
         </aside>
 
         <%!-- Main Content Area --%>
@@ -708,52 +760,250 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
             </div>
           </header>
 
-          <%= if @active_tab == "products" do %>
-            <div class="p-6 flex-1 overflow-y-auto">
-              <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <%= for product <- @products do %>
-                  <button
-                    type="button"
-                    phx-click="add_to_cart"
-                    phx-value-product_id={product.id}
-                    class="bg-white/5 border border-white/10 rounded-2xl p-4 hover:border-violet-500/30 transition-all text-left group"
-                  >
-                    <div class="w-full h-32 bg-slate-800 rounded-lg mb-3 flex items-center justify-center overflow-hidden relative">
-                      <img
-                        :if={Enum.any?(product.images)}
-                        src={List.first(product.images).url}
-                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      <.icon
-                        :if={Enum.empty?(product.images)}
-                        name="hero-shopping-bag"
-                        class="w-10 h-10 text-slate-600"
-                      />
-                      <div class="absolute top-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[10px] font-mono text-slate-300 border border-white/5">
-                        <%= product.sku || "NO-SKU" %>
+          <%= cond do %>
+            <% @active_tab == "products" -> %>
+              <div class="p-6 flex-1 overflow-y-auto">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <%= for product <- @products do %>
+                    <button
+                      type="button"
+                      phx-click="add_to_cart"
+                      phx-value-product_id={product.id}
+                      class="bg-white/5 border border-white/10 rounded-2xl p-4 hover:border-violet-500/30 transition-all text-left group"
+                    >
+                      <div class="w-full h-32 bg-slate-800 rounded-lg mb-3 flex items-center justify-center overflow-hidden relative">
+                        <img
+                          :if={Enum.any?(product.images)}
+                          src={List.first(product.images).url}
+                          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <.icon
+                          :if={Enum.empty?(product.images)}
+                          name="hero-shopping-bag"
+                          class="w-10 h-10 text-slate-600"
+                        />
+                        <div class="absolute top-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[10px] font-mono text-slate-300 border border-white/5">
+                          <%= product.sku || "NO-SKU" %>
+                        </div>
+                      </div>
+                      <h3 class="font-semibold text-sm truncate text-slate-200"><%= product.name %></h3>
+                      <div class="flex items-center justify-between mt-1">
+                        <p class="text-violet-400 font-bold">KES <%= product.price %></p>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wider">
+                          <%= product.stock_qty %> left
+                        </span>
+                      </div>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+
+            <% @active_tab == "sales" -> %>
+              <div class="p-6 flex-1 overflow-y-auto space-y-6">
+                <%!-- 1. Stats Cards Grid --%>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <%!-- Today's POS Revenue --%>
+                  <div class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-8 -mt-8 group-hover:bg-emerald-500/20 transition-all duration-500"></div>
+                    <div class="flex items-center gap-4">
+                      <div class="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center">
+                        <.icon name="hero-banknotes" class="w-6 h-6 text-emerald-400" />
+                      </div>
+                      <div>
+                        <p class="text-slate-500 text-sm font-medium">POS Revenue Today</p>
+                        <p class="text-3xl font-black text-white mt-1">
+                          KES <%= Decimal.to_string(@pos_revenue_today, :normal) %>
+                        </p>
                       </div>
                     </div>
-                    <h3 class="font-semibold text-sm truncate text-slate-200"><%= product.name %></h3>
-                    <div class="flex items-center justify-between mt-1">
-                      <p class="text-violet-400 font-bold">KES <%= product.price %></p>
-                      <span class="text-[10px] text-slate-500 uppercase tracking-wider">
-                        <%= product.stock_qty %> left
-                      </span>
+                  </div>
+
+                  <%!-- Personal Cashier Contribution --%>
+                  <div class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-violet-500/10 rounded-full blur-3xl -mr-8 -mt-8 group-hover:bg-violet-500/20 transition-all duration-500"></div>
+                    <div class="flex items-center gap-4">
+                      <div class="w-12 h-12 bg-violet-500/20 rounded-2xl flex items-center justify-center">
+                        <.icon name="hero-user" class="w-6 h-6 text-violet-400" />
+                      </div>
+                      <div>
+                        <p class="text-slate-500 text-sm font-medium">My Sales Contribution</p>
+                        <p class="text-3xl font-black text-white mt-1">
+                          KES <%= Decimal.to_string(@my_stats_today.total, :normal) %>
+                        </p>
+                        <p class="text-xs text-slate-400 mt-1">
+                          <%= @my_stats_today.count %> transactions completed
+                        </p>
+                      </div>
                     </div>
-                  </button>
-                <% end %>
+                  </div>
+
+                  <%!-- Total POS Orders today --%>
+                  <div class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-8 -mt-8 group-hover:bg-blue-500/20 transition-all duration-500"></div>
+                    <div class="flex items-center gap-4">
+                      <div class="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center">
+                        <.icon name="hero-shopping-bag" class="w-6 h-6 text-blue-400" />
+                      </div>
+                      <div>
+                        <p class="text-slate-500 text-sm font-medium">POS Transactions Count</p>
+                        <p class="text-3xl font-black text-white mt-1">
+                          <%= length(@pos_orders_today) %>
+                        </p>
+                        <p class="text-xs text-slate-400 mt-1">Across all active cashiers</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <%!-- 2. Detail Columns --%>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <%!-- Cashier Performance --%>
+                  <div class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                    <div class="flex items-center justify-between mb-6">
+                      <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <.icon name="hero-users" class="w-5 h-5 text-violet-400" /> Cashier Performance
+                      </h2>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                      <table class="w-full text-left border-collapse">
+                        <thead>
+                          <tr class="border-b border-white/10 text-xs text-slate-500 uppercase tracking-wider font-semibold">
+                            <th class="py-3">Cashier</th>
+                            <th class="py-3 text-center">Sales count</th>
+                            <th class="py-3 text-right">Total Revenue</th>
+                          </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                          <%= if @pos_cashier_sales_today == [] do %>
+                            <tr>
+                              <td colspan="3" class="py-6 text-center text-slate-500 text-sm">
+                                No sales data recorded today.
+                              </td>
+                            </tr>
+                          <% else %>
+                            <%= for c <- @pos_cashier_sales_today do %>
+                              <tr class={[
+                                "text-sm",
+                                c.user_id == @user.id && "bg-violet-500/5 font-semibold text-white"
+                              ]}>
+                                <td class="py-4">
+                                  <div class="flex items-center gap-2">
+                                    <div class={[
+                                      "w-2 h-2 rounded-full",
+                                      if(c.user_id == @user.id, do: "bg-emerald-400 animate-pulse", else: "bg-slate-500")
+                                    ]}></div>
+                                    <div>
+                                      <p class={if(c.user_id == @user.id, do: "text-violet-300 font-bold", else: "text-slate-200")}>
+                                        <%= c.full_name || c.email %>
+                                      </p>
+                                      <p class="text-xs text-slate-500"><%= c.email %></p>
+                                    </div>
+                                    <span :if={c.user_id == @user.id} class="text-[10px] px-2 py-0.5 bg-violet-500/20 text-violet-300 border border-violet-500/30 rounded-full font-normal">
+                                      You
+                                    </span>
+                                  </div>
+                                </td>
+                                <td class="py-4 text-center font-mono text-slate-300">
+                                  <%= c.count %>
+                                </td>
+                                <td class="py-4 text-right font-mono font-bold text-emerald-400">
+                                  KES <%= Decimal.to_string(c.total, :normal) %>
+                                </td>
+                              </tr>
+                            <% end %>
+                          <% end %>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <%!-- Today's POS Sales History --%>
+                  <div class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                    <div class="flex items-center justify-between mb-6">
+                      <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <.icon name="hero-list-bullet" class="w-5 h-5 text-blue-400" /> Today's POS Sales
+                      </h2>
+                    </div>
+
+                    <div class="space-y-4 max-h-[450px] overflow-y-auto pr-2">
+                      <%= if @pos_orders_today == [] do %>
+                        <div class="h-40 flex flex-col items-center justify-center text-slate-500 opacity-50 border-2 border-dashed border-white/10 rounded-2xl">
+                          <.icon name="hero-shopping-bag" class="w-8 h-8 mb-2" />
+                          <p>No POS sales completed today.</p>
+                        </div>
+                      <% else %>
+                        <%= for order <- @pos_orders_today do %>
+                          <div class="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:border-violet-500/30 transition-all">
+                            <div class="min-w-0">
+                              <div class="flex items-center gap-2">
+                                <span class="font-mono text-sm font-bold text-white">
+                                  POS-<%= String.slice(order.id, 0, 8) |> String.upcase() %>
+                                </span>
+                                <%
+                                  transaction = List.first(order.transactions)
+                                  method_str = if transaction, do: to_string(transaction.type), else: "cash"
+                                  {badge_bg, badge_text, method_label} = case method_str do
+                                    "mpesa" -> {"bg-yellow-500/10 border-yellow-500/20", "text-yellow-400", "M-PESA"}
+                                    "mpesa_stk" -> {"bg-yellow-500/10 border-yellow-500/20", "text-yellow-400", "M-PESA"}
+                                    "card" -> {"bg-blue-500/10 border-blue-500/20", "text-blue-400", "Card"}
+                                    _ -> {"bg-green-500/10 border-green-500/20", "text-green-400", "Cash"}
+                                  end
+                                %>
+                                <span class={["text-[10px] px-2 py-0.5 border rounded-full font-medium", badge_bg, badge_text]}>
+                                  <%= method_label %>
+                                </span>
+                              </div>
+                              <div class="flex items-center gap-2 mt-1">
+                                <p class="text-xs text-slate-500">
+                                  <%= Calendar.strftime(order.inserted_at, "%I:%M %p") %>
+                                </p>
+                                <span class="text-slate-600 text-xs">•</span>
+                                <p class="text-xs text-slate-400 truncate">
+                                  Cashier: <%= if transaction && transaction.user_id do %>
+                                    <%= if transaction.user_id == @user.id do %>
+                                      You
+                                    <% else %>
+                                      <%= Enum.find(@pos_cashier_sales_today, fn c -> c.user_id == transaction.user_id end) |> then(fn c -> if c, do: c.full_name || c.email, else: "Other" end) %>
+                                    <% end %>
+                                  <% else %>
+                                    System
+                                  <% end %>
+                                </p>
+                              </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                              <span class="font-mono font-bold text-white">
+                                KES <%= Decimal.to_string(order.total, :normal) %>
+                              </span>
+                              <button
+                                type="button"
+                                phx-click="view_order_receipt"
+                                phx-value-order_id={order.id}
+                                class="p-2 bg-white/5 hover:bg-violet-500/20 border border-white/10 rounded-xl text-slate-400 hover:text-white transition-all"
+                                title="View Receipt"
+                              >
+                                <.icon name="hero-receipt-percent" class="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          <% else %>
-            <div class="flex-1 flex items-center justify-center">
-              <div class="text-center">
-                <.icon name="hero-cube" class="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                <h2 class="text-xl font-semibold text-slate-400">
-                  <%= String.capitalize(@active_tab) %>
-                </h2>
-                <p class="text-slate-500 mt-2">Coming soon</p>
+
+            <% true -> %>
+              <div class="flex-1 flex items-center justify-center">
+                <div class="text-center">
+                  <.icon name="hero-cube" class="w-16 h-16 text-slate-600 mx-auto mb-4" />
+                  <h2 class="text-xl font-semibold text-slate-400">
+                    <%= String.capitalize(@active_tab) %>
+                  </h2>
+                  <p class="text-slate-500 mt-2">Coming soon</p>
+                </div>
               </div>
-            </div>
           <% end %>
         </main>
 
@@ -943,35 +1193,42 @@ defmodule SmartKioskWeb.UI.POSLive.Index do
                   </div>
                 <% else %>
                   <%= for item <- @cart do %>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-3">
                       <div class="flex-1 min-w-0">
-                        <p class="font-semibold truncate"><%= item.product.name %></p>
-                        <p class="text-slate-400 text-sm">KES <%= item.product.price %></p>
+                        <p class="font-semibold truncate text-sm"><%= item.product.name %></p>
+                        <p class="text-slate-400 text-xs">
+                          KES <%= item.product.price %> &times; <%= item.quantity %> =
+                          <span class="text-violet-300 font-semibold">
+                            KES <%= :erlang.float_to_binary(Decimal.to_float(item.product.price) * item.quantity, decimals: 2) %>
+                          </span>
+                        </p>
                       </div>
-                      <div class="flex items-center gap-2">
+                      <div class="flex items-center gap-1.5">
                         <button
                           phx-click="update_quantity"
                           phx-value-product_id={item.product.id}
                           phx-value-delta="-1"
-                          class="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center"
+                          class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center transition-colors"
                         >
-                          <.icon name="hero-minus" class="w-4 h-4" />
+                          <.icon name="hero-minus" class="w-3.5 h-3.5" />
                         </button>
                         <input
+                          id={"qty-input-#{item.product.id}"}
                           type="number"
+                          min="1"
                           value={item.quantity}
                           phx-blur="set_quantity"
                           phx-value-product_id={item.product.id}
                           name="quantity"
-                          class="w-12 h-8 bg-white/5 border border-white/10 rounded-lg text-center font-mono font-bold focus:outline-none focus:border-violet-500 transition-colors"
+                          class="w-12 h-7 bg-slate-900 border border-white/10 rounded-lg text-center text-sm font-mono font-bold text-white focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                         />
                         <button
                           phx-click="update_quantity"
                           phx-value-product_id={item.product.id}
                           phx-value-delta="1"
-                          class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center"
+                          class="w-7 h-7 bg-violet-600 hover:bg-violet-500 rounded-lg flex items-center justify-center transition-colors"
                         >
-                          <.icon name="hero-plus" class="w-4 h-4" />
+                          <.icon name="hero-plus" class="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>

@@ -368,54 +368,72 @@ defmodule SmartKioskCore.Shops do
     |> Repo.all()
   end
 
-  @doc "Lists rider applications for a shop, optionally filtered by status."
-  def list_rider_applications(%Shop{id: shop_id}, status \\ nil) do
+  @doc "Lists job applications for a shop, optionally filtered by status."
+  def list_job_applications(%Shop{id: shop_id}, status \\ nil) do
     Rider
     |> join(:inner, [r], u in User, on: r.user_id == u.id)
     |> where([r, u], u.shop_id == ^shop_id)
     |> filter_rider_application_status(status)
     |> order_by([r, u], desc: r.inserted_at)
-    |> preload([:user])
+    |> preload([:user, :job_post])
     |> Repo.all()
   end
 
-  @doc "Approves a rider application and grants the rider shop role."
-  def approve_rider_application(%Shop{} = shop, rider_id) do
-    with %Rider{} = rider <- get_rider_application(shop, rider_id) do
+  def list_rider_applications(shop, status \\ nil), do: list_job_applications(shop, status)
+
+  @doc "Approves a job application and grants the job post's shop role."
+  def approve_job_application(%Shop{} = shop, application_id) do
+    with %Rider{} = rider <- get_job_application(shop, application_id) do
       Repo.transaction(fn ->
+        role = application_role(rider)
+
         rider =
           rider
           |> Rider.changeset(%{verification_status: :verified, status: :available})
           |> Repo.update()
           |> unwrap_or_rollback()
 
-        assign_system_role(Repo, rider.user, "rider", shop)
+        user =
+          rider.user
+          |> User.assign_to_shop_changeset(shop, role)
+          |> Repo.update()
+          |> unwrap_or_rollback()
+
+        assign_system_role(Repo, user, to_string(role), shop)
         |> unwrap_or_rollback()
 
-        rider
+        %{rider | user: user}
       end)
     else
       nil -> {:error, :not_found}
     end
   end
 
-  @doc "Rejects a rider application and removes the rider shop role if it exists."
-  def reject_rider_application(%Shop{} = shop, rider_id) do
-    with %Rider{} = rider <- get_rider_application(shop, rider_id) do
+  def approve_rider_application(shop, application_id),
+    do: approve_job_application(shop, application_id)
+
+  @doc "Rejects a job application and removes the job post's shop role if it exists."
+  def reject_job_application(%Shop{} = shop, application_id) do
+    with %Rider{} = rider <- get_job_application(shop, application_id) do
       Repo.transaction(fn ->
+        role = application_role(rider)
+
         rider =
           rider
           |> Rider.changeset(%{verification_status: :rejected, status: :offline})
           |> Repo.update()
           |> unwrap_or_rollback()
 
-        revoke_system_role(Repo, rider.user, "rider", shop)
+        revoke_system_role(Repo, rider.user, to_string(role), shop)
         rider
       end)
     else
       nil -> {:error, :not_found}
     end
   end
+
+  def reject_rider_application(shop, application_id),
+    do: reject_job_application(shop, application_id)
 
   defp assign_system_role(repo, %User{id: user_id}, role_slug, shop) when is_binary(role_slug) do
     case repo.get_by(Role, slug: role_slug) do
@@ -482,13 +500,16 @@ defmodule SmartKioskCore.Shops do
     |> Repo.aggregate(:count, :id)
   end
 
-  defp get_rider_application(%Shop{id: shop_id}, rider_id) do
+  defp get_job_application(%Shop{id: shop_id}, application_id) do
     Rider
     |> join(:inner, [r], u in User, on: r.user_id == u.id)
-    |> where([r, u], r.id == ^rider_id and u.shop_id == ^shop_id)
-    |> preload([:user])
+    |> where([r, u], r.id == ^application_id and u.shop_id == ^shop_id)
+    |> preload([:user, :job_post])
     |> Repo.one()
   end
+
+  defp application_role(%Rider{job_post: %{role: role}}) when not is_nil(role), do: role
+  defp application_role(_rider), do: :rider
 
   defp filter_rider_application_status(query, nil), do: query
 

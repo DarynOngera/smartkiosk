@@ -8,11 +8,13 @@ defmodule SmartKioskCore.Schemas.JobPost do
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
+  @roles ~w(rider cashier supplier)a
   schema "job_posts" do
     field(:title, :string)
     field(:description, :string)
     field(:requirements, :string)
     field(:status, :string, default: "active")
+    field(:role, Ecto.Enum, values: @roles)
 
     belongs_to(:shop, SmartKioskCore.Schemas.Shop, type: :binary_id)
 
@@ -22,8 +24,8 @@ defmodule SmartKioskCore.Schemas.JobPost do
   @doc false
   def changeset(job_post, attrs) do
     job_post
-    |> cast(attrs, [:title, :description, :requirements, :status, :shop_id])
-    |> validate_required([:title, :description, :requirements, :status, :shop_id])
+    |> cast(attrs, [:title, :description, :requirements, :status, :shop_id, :role])
+    |> validate_required([:title, :description, :requirements, :status, :shop_id, :role])
     |> assoc_constraint(:shop)
   end
 end

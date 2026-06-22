@@ -24,15 +24,15 @@ defmodule SmartKioskWeb.Sidebar do
     <div class="lg:hidden border-b border-white/5 bg-[#0B0F1A]">
       <div class="px-4 py-3">
         <div class="flex items-center gap-2 overflow-x-auto overscroll-x-contain touch-pan-x scroll-smooth pb-2 pr-4 snap-x snap-mandatory scrollbar-thin">
-        <.mobile_category_chip cat_key={nil} label="All" is_selected={is_nil(@selected_category)} />
+          <.mobile_category_chip cat_key={nil} label="All" is_selected={is_nil(@selected_category)} />
 
-        <%= for {cat_key, label} <- @shop_categories do %>
-          <.mobile_category_chip
-            cat_key={cat_key}
-            label={label}
-            is_selected={@selected_category == cat_key}
-          />
-        <% end %>
+          <%= for {cat_key, label} <- @shop_categories do %>
+            <.mobile_category_chip
+              cat_key={cat_key}
+              label={label}
+              is_selected={@selected_category == cat_key}
+            />
+          <% end %>
         </div>
       </div>
     </div>

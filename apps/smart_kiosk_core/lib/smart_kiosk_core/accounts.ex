@@ -98,6 +98,47 @@ defmodule SmartKioskCore.Accounts do
     |> Repo.insert()
   end
 
+  @doc "Delivers an account setup link for an accepted job applicant."
+  def deliver_job_acceptance_instructions(%User{} = user, job_post, shop, invite_url_fun)
+      when is_function(invite_url_fun, 1) do
+    {encoded_token, user_token} = UserToken.build_email_token(user, "job_invite")
+    Repo.insert!(user_token)
+
+    SmartKioskCore.UserNotifier.deliver_job_acceptance_instructions(
+      user,
+      job_post,
+      shop,
+      invite_url_fun.(encoded_token)
+    )
+  end
+
+  @doc "Gets the user from an accepted job invite token."
+  def get_user_by_job_invite_token(token) do
+    with {:ok, query} <- UserToken.verify_job_invite_token_query(token),
+         %User{} = user <- Repo.one(query) do
+      user
+    else
+      _ -> nil
+    end
+  end
+
+  @doc "Completes account setup for an accepted job applicant."
+  def accept_job_invite(%User{} = user, attrs) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:user, User.password_changeset(User.confirm_changeset(user), attrs))
+    |> Ecto.Multi.delete_all(
+      :tokens,
+      from(t in UserToken,
+        where: t.user_id == ^user.id and t.context in ["job_invite", "reset_password", "confirm"]
+      )
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user}} -> {:ok, user}
+      {:error, :user, changeset, _} -> {:error, changeset}
+    end
+  end
+
   # ── Session tokens ────────────────────────────────────────────────────────────
 
   @doc "Generates a session token. Returns the raw token (stored in browser cookie)."
@@ -288,7 +329,12 @@ defmodule SmartKioskCore.Accounts do
 
   @doc "Lists all staff for a given shop."
   def list_shop_users(%Shop{id: shop_id}) do
-    from(u in User, where: u.shop_id == ^shop_id, order_by: [asc: u.role, asc: u.full_name])
+    from(u in User,
+      where:
+        u.shop_id == ^shop_id and
+          u.role in [:owner, :manager, :staff, :rider, :cashier, :supplier],
+      order_by: [asc: u.role, asc: u.full_name]
+    )
     |> Repo.all()
   end
 end

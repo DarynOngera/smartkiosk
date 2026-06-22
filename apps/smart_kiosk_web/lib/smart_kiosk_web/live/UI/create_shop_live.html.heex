@@ -12,7 +12,28 @@
       </p>
 
       <div class="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl shadow-2xl">
-        <.form for={@form} phx-submit="save" class="space-y-6">
+        <.form for={@form} id="create-shop-form" phx-submit="save" class="space-y-6">
+          <%= if @form.errors != [] do %>
+            <div
+              id="create-shop-errors"
+              class="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-100"
+            >
+              <p class="font-semibold text-rose-50">Shop could not be created</p>
+              <ul class="mt-2 list-disc space-y-1 pl-5">
+                <%= for {field, errors} <- @form.errors do %>
+                  <%= for error <- List.wrap(errors) do %>
+                    <li>
+                      <span class="capitalize">
+                        <%= field |> to_string() |> String.replace("_", " ") %>
+                      </span>
+                      <%= translate_error(error) %>
+                    </li>
+                  <% end %>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-1.5">
               <label class="text-sm font-medium text-slate-300">Shop Name</label>

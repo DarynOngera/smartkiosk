@@ -123,7 +123,10 @@ defmodule SmartKioskCore.Catalogue do
     max_allowed = (plan && plan.max_products) || nil
 
     require Logger
-    Logger.debug("Product creation check: shop=#{shop.id}, plan=#{plan_slug}, max_allowed=#{inspect(max_allowed)}")
+
+    Logger.debug(
+      "Product creation check: shop=#{shop.id}, plan=#{plan_slug}, max_allowed=#{inspect(max_allowed)}"
+    )
 
     if is_integer(max_allowed) do
       current_count = count_products(shop)
@@ -137,7 +140,8 @@ defmodule SmartKioskCore.Catalogue do
             _ -> "Contact support to increase your product limit."
           end
 
-        message = "You've reached the product limit for your current plan (#{max_allowed} items). #{upgrade_path}"
+        message =
+          "You've reached the product limit for your current plan (#{max_allowed} items). #{upgrade_path}"
 
         changeset =
           %Product{shop_id: shop.id}

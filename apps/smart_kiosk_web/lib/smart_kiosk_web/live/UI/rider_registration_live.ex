@@ -66,11 +66,11 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
              |> put_flash(
                :info,
                success_message(shop, job_post)
-              )
+             )
              |> push_navigate(to: thanks_path(shop, job_post))}
 
           {:error, %Ecto.Changeset{} = changeset} ->
-            {:noreply, assign_form(socket, changeset)}
+            {:noreply, handle_application_changeset_error(socket, changeset)}
 
           {:error, reason} when is_binary(reason) ->
             {:noreply, put_flash(socket, :error, reason)}
@@ -91,7 +91,7 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
              |> push_navigate(to: thanks_path(shop, job_post))}
 
           {:error, %Ecto.Changeset{} = changeset} ->
-            {:noreply, assign_form(socket, changeset)}
+            {:noreply, handle_application_changeset_error(socket, changeset)}
 
           {:error, reason} when is_binary(reason) ->
             {:noreply, put_flash(socket, :error, reason)}
@@ -127,8 +127,23 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
     assign(socket, :form, to_form(changeset))
   end
 
+  defp handle_application_changeset_error(socket, changeset) do
+    socket
+    |> assign_form(Map.put(changeset, :action, :insert))
+    |> put_flash(:error, application_error_message(changeset))
+  end
+
+  defp application_error_message(%Ecto.Changeset{} = changeset) do
+    case Keyword.get(changeset.errors, :base) do
+      {message, _opts} -> message
+      nil -> "Could not submit application. Check the highlighted fields."
+    end
+  end
+
   defp maybe_allow_upload(socket, _name, false), do: socket
-  defp maybe_allow_upload(socket, name, true), do: allow_upload(socket, name, accept: ~w(.pdf), max_entries: 1)
+
+  defp maybe_allow_upload(socket, name, true),
+    do: allow_upload(socket, name, accept: ~w(.pdf), max_entries: 1)
 
   defp load_job_post(_shop, nil), do: nil
 
@@ -197,6 +212,31 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
               phx-change="validate"
               class="space-y-6"
             >
+              <%= if @form.errors != [] do %>
+                <div
+                  id="rider-application-errors"
+                  class="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-100"
+                >
+                  <p class="font-semibold text-rose-50">Application could not be submitted</p>
+                  <ul class="mt-2 list-disc space-y-1 pl-5">
+                    <%= for {field, errors} <- @form.errors do %>
+                      <%= for error <- List.wrap(errors) do %>
+                        <li>
+                          <%= if field == :base do %>
+                            <%= translate_error(error) %>
+                          <% else %>
+                            <span class="capitalize">
+                              <%= field |> to_string() |> String.replace("_", " ") %>
+                            </span>
+                            <%= translate_error(error) %>
+                          <% end %>
+                        </li>
+                      <% end %>
+                    <% end %>
+                  </ul>
+                </div>
+              <% end %>
+
               <div class="space-y-4">
                 <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">
                   Personal Information
@@ -227,7 +267,9 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
               </div>
 
               <div class="space-y-4 pt-6 border-t border-white/5">
-                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Documents</h3>
+                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                  Documents
+                </h3>
 
                 <div>
                   <label class="block text-sm font-medium text-slate-300 mb-2">National ID</label>
@@ -250,7 +292,9 @@ defmodule SmartKioskWeb.RiderRegistrationLive do
 
                 <%= if @requires_license do %>
                   <div class="pt-4">
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Driving License</label>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                      Driving License
+                    </label>
                     <div class="relative border-2 border-dashed border-white/10 rounded-xl p-4 text-center hover:border-violet-500/50 transition-all">
                       <.live_file_input
                         upload={@uploads.license}

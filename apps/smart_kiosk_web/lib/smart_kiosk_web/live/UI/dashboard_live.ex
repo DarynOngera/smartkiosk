@@ -6,7 +6,6 @@ defmodule SmartKioskWeb.UI.DashboardLive do
 
   alias SmartKioskCore.Catalogue
   alias SmartKioskCore.Orders
-  alias SmartKioskCore.Reports
   alias SmartKioskCore.Shops
   alias SmartKioskCore.Deliveries
   alias SmartKioskCore.Repo
@@ -53,13 +52,13 @@ defmodule SmartKioskWeb.UI.DashboardLive do
         shop ->
           if connected?(socket) do
             Phoenix.PubSub.subscribe(SmartKiosk.PubSub, "shop:#{shop.id}:inventory")
+            Phoenix.PubSub.subscribe(SmartKiosk.PubSub, "shop:#{shop.id}:orders")
           end
 
           products = Catalogue.list_products(shop, limit: 10)
           pending = Orders.get_pending_orders(shop)
           sales_today = Orders.get_sales_today(shop)
           recent_orders = Orders.list_recent_orders(shop)
-          recent_reports = Reports.list_reports(shop, limit: 5)
 
           socket
           |> assign(:page_title, "Merchant Dashboard")
@@ -69,7 +68,6 @@ defmodule SmartKioskWeb.UI.DashboardLive do
           |> assign(:pending_orders, pending |> Enum.count())
           |> assign(:products, products)
           |> assign(:recent_orders, recent_orders)
-          |> assign(:recent_reports, recent_reports)
           |> assign(:low_stock_products, Catalogue.list_low_stock_products(shop))
 
         true ->
@@ -90,11 +88,24 @@ defmodule SmartKioskWeb.UI.DashboardLive do
   end
 
   def handle_info({:new_order, _order}, socket) do
-    if socket.assigns.current_user.role == :rider and
-         verified_rider?(socket.assigns[:rider_profile]) do
-      {:noreply, refresh_rider_deliveries(socket)}
-    else
-      {:noreply, socket}
+    cond do
+      socket.assigns.current_user.role == :rider &&
+          verified_rider?(socket.assigns[:rider_profile]) ->
+        {:noreply, refresh_rider_deliveries(socket)}
+
+      socket.assigns[:current_shop] != nil ->
+        # Refresh sales stats for merchant dashboard whenever any order arrives
+        shop = socket.assigns.current_shop
+
+        {:noreply,
+         socket
+         |> assign(:sales_today, "KES #{format_money(Orders.get_sales_today(shop))}")
+         |> assign(:total_sales, "KES #{format_money(Orders.get_total_sales(shop))}")
+         |> assign(:pending_orders, Orders.get_pending_orders(shop) |> Enum.count())
+         |> assign(:recent_orders, Orders.list_recent_orders(shop))}
+
+      true ->
+        {:noreply, socket}
     end
   end
 
@@ -229,18 +240,6 @@ defmodule SmartKioskWeb.UI.DashboardLive do
     else
       {:noreply, put_flash(socket, :error, "No shop selected")}
     end
-  end
-
-  def handle_event("generate_report", %{"period" => period}, socket) do
-    generate_shop_report(socket, period, "Report generated")
-  end
-
-  def handle_event("close_shop", _params, socket) do
-    generate_shop_report(
-      socket,
-      "daily",
-      "Daily report generated. Shop closing summary is ready."
-    )
   end
 
   defp extract_geometry_from_geojson(nil), do: {:error, "no payload"}
@@ -555,113 +554,6 @@ defmodule SmartKioskWeb.UI.DashboardLive do
       </div>
     </div>
 
-    <section class="mb-10 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-      <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-        <div class="flex items-center gap-3">
-          <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-500/15">
-            <.icon name="hero-document-chart-bar" class="h-6 w-6 text-rose-300" />
-          </div>
-          <div>
-            <h2 class="text-xl font-bold text-white">Sales Reports</h2>
-            <p class="mt-1 text-sm text-slate-500">
-              POS and online sales are combined, with each channel broken out.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap gap-3">
-          <button
-            id="close-shop-report-button"
-            type="button"
-            phx-click="close_shop"
-            class="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/20 transition hover:bg-rose-400"
-          >
-            <.icon name="hero-lock-closed" class="h-4 w-4" /> Close shop
-          </button>
-          <button
-            id="generate-weekly-report-button"
-            type="button"
-            phx-click="generate_report"
-            phx-value-period="weekly"
-            class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
-          >
-            <.icon name="hero-calendar-days" class="h-4 w-4" /> Weekly
-          </button>
-          <button
-            id="generate-monthly-report-button"
-            type="button"
-            phx-click="generate_report"
-            phx-value-period="monthly"
-            class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
-          >
-            <.icon name="hero-calendar" class="h-4 w-4" /> Monthly
-          </button>
-        </div>
-      </div>
-
-      <div id="reports-list" class="mt-6 grid gap-3">
-        <%= if @recent_reports == [] do %>
-          <div class="rounded-2xl border border-dashed border-white/10 p-6 text-sm text-slate-500">
-            No generated reports yet.
-          </div>
-        <% else %>
-          <%= for report <- @recent_reports do %>
-            <div
-              id={"report-#{report.id}"}
-              class="grid gap-4 rounded-2xl border border-white/10 bg-slate-950/40 p-4 md:grid-cols-[1fr_auto] md:items-center"
-            >
-              <div>
-                <div class="flex flex-wrap items-center gap-2">
-                  <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-300">
-                    <%= report.period %>
-                  </span>
-                  <span class="text-xs text-slate-500">
-                    <%= Calendar.strftime(report.starts_at, "%d %b %Y") %> - <%= Calendar.strftime(
-                      report.ends_at,
-                      "%d %b %Y"
-                    ) %>
-                  </span>
-                </div>
-                <div class="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-                  <div>
-                    <p class="text-slate-500">Revenue</p>
-                    <p class="font-semibold text-white">
-                      KES <%= format_money(report.total_revenue) %>
-                    </p>
-                  </div>
-                  <div>
-                    <p class="text-slate-500">Orders</p>
-                    <p class="font-semibold text-white"><%= report.total_orders %></p>
-                  </div>
-                  <div>
-                    <p class="text-slate-500">POS</p>
-                    <p class="font-semibold text-white">
-                      <%= report.pos_orders || 0 %> / KES <%= report_channel_revenue(
-                        report,
-                        "pos_revenue"
-                      ) %>
-                    </p>
-                  </div>
-                  <div>
-                    <p class="text-slate-500">Online</p>
-                    <p class="font-semibold text-white">
-                      <%= report.online_orders || 0 %> / KES <%= report_channel_revenue(
-                        report,
-                        "online_revenue"
-                      ) %>
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <span class="justify-self-start rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300 md:justify-self-end">
-                <%= report.status %>
-              </span>
-            </div>
-          <% end %>
-        <% end %>
-      </div>
-    </section>
-
     <div class="mb-10">
       <%!-- Quick Actions --%>
       <h2 class="text-xl font-bold text-white mb-4">Quick Management</h2>
@@ -831,35 +723,6 @@ defmodule SmartKioskWeb.UI.DashboardLive do
     )
   end
 
-  defp generate_shop_report(socket, period, message) do
-    shop = socket.assigns[:current_shop]
-    user = socket.assigns[:current_user]
-
-    cond do
-      is_nil(shop) ->
-        {:noreply, put_flash(socket, :error, "No shop selected")}
-
-      is_nil(user) or user.role != :owner ->
-        {:noreply, put_flash(socket, :error, "Only shop owners can generate reports")}
-
-      true ->
-        case Reports.generate_report(shop, period) do
-          {:ok, _report} ->
-            {:noreply,
-             socket
-             |> assign(:recent_reports, Reports.list_reports(shop, limit: 5))
-             |> put_flash(:info, message)}
-
-          {:error, :invalid_period} ->
-            {:noreply,
-             put_flash(socket, :error, "Choose daily, weekly, or monthly report period")}
-
-          {:error, _reason} ->
-            {:noreply, put_flash(socket, :error, "Could not generate report")}
-        end
-    end
-  end
-
   defp verified_rider?(%{verification_status: :verified}), do: true
   defp verified_rider?(_rider_profile), do: false
 
@@ -948,13 +811,4 @@ defmodule SmartKioskWeb.UI.DashboardLive do
     |> Decimal.to_float()
     |> :erlang.float_to_binary(decimals: 2)
   end
-
-  defp report_channel_revenue(%{metadata: metadata}, key) when is_map(metadata) do
-    metadata
-    |> Map.get(key, "0")
-    |> Decimal.new()
-    |> format_money()
-  end
-
-  defp report_channel_revenue(_report, _key), do: "0.00"
 end

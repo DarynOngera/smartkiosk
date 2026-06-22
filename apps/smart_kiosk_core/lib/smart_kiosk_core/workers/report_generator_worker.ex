@@ -6,7 +6,14 @@ defmodule SmartKioskCore.Workers.ReportGeneratorWorker do
   alias SmartKioskCore.Schemas.Shop
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"shop_id" => shop_id, "period" => period, "starts_at" => starts, "ends_at" => ends}}) do
+  def perform(%Oban.Job{
+        args: %{
+          "shop_id" => shop_id,
+          "period" => period,
+          "starts_at" => starts,
+          "ends_at" => ends
+        }
+      }) do
     shop = Repo.get(Shop, shop_id)
     starts_at = parse_datetime(starts)
     ends_at = parse_datetime(ends)
@@ -14,10 +21,14 @@ defmodule SmartKioskCore.Workers.ReportGeneratorWorker do
     summary = Reports.generate_sales_summary(shop, starts_at, ends_at)
     {:ok, report} = Reports.create_report(shop, period, starts_at, ends_at, summary)
 
-    # PDF generate by the way
-    # Reports.gen_pdf(report)
+    # Generate the PDF file for the report
+    case Reports.generate_pdf(report) do
+      {:ok, updated_report} ->
+        {:ok, %{report_id: updated_report.id, file_path: updated_report.file_path}}
 
-    {:ok, %{report_id: report.id}}
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
   defp parse_datetime(dt) when is_binary(dt) do
@@ -28,6 +39,4 @@ defmodule SmartKioskCore.Workers.ReportGeneratorWorker do
   end
 
   defp parse_datetime(dt), do: dt
-
-
 end

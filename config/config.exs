@@ -29,10 +29,16 @@ config :smart_kiosk_core, Oban,
        # Search index batch processing every 30 seconds
        {"*/1 * * * *", SmartKioskCore.Workers.SearchIndexBatchWorker},
        # Periodic index rebuild for consistency
-       {"0 2 * * *", SmartKioskCore.Workers.SearchRebuildWorker}
+       {"0 2 * * *", SmartKioskCore.Workers.SearchRebuildWorker},
+
+       # this is FOr the report generation
+       {"5 0 * * 1", SmartKioskCore.Workers.PeriodicReportGeneratorWorker,
+        args: %{period: "weekly"}},
+       {"10 0 1 * *", SmartKioskCore.Workers.PeriodicReportGeneratorWorker,
+        args: %{period: "monthly"}}
      ]}
   ],
-  queues: [default: 10, mailer: 5, search_index: 5]
+  queues: [default: 10, mailer: 5, search_index: 5, reports: 5]
 
 # Configure the mailer
 #
@@ -42,6 +48,8 @@ config :smart_kiosk_core, Oban,
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
 config :smart_kiosk_web, SmartKioskWeb.Mailer, adapter: Swoosh.Adapters.Local
+
+config :smart_kiosk_core, :user_notifier, SmartKioskWeb.UserNotifier
 
 config :smart_kiosk_web,
   ecto_repos: [SmartKioskCore.Repo],
@@ -86,6 +94,10 @@ config :logger, :default_formatter,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+# Configure PDF Generator
+config :pdf_generator,
+  wkhtml_path: "/usr/local/bin/wkhtmltopdf"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

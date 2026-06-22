@@ -42,6 +42,12 @@
               >
                 <.icon name="hero-cog" class="w-5 h-5" /> Settings
               </.link>
+              <.link
+                navigate="/reports"
+                class="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold transition-all border border-white/10 flex items-center gap-2"
+              >
+                <.icon name="hero-flag" class="w-5 h-5" /> Reports
+              </.link>
             <% else %>
               <.link
                 navigate="/"
@@ -97,7 +103,6 @@
               pending_orders={@pending_orders}
               products={@products}
               recent_orders={@recent_orders}
-              recent_reports={@recent_reports}
               low_stock_products={@low_stock_products}
             />
           <% else %>

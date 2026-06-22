@@ -3,20 +3,17 @@ defmodule SmartKioskWeb.AdminShopsLive do
   alias SmartKioskCore.Shops
   use SmartKioskWeb, :live_view
 
-
   def mount(_params, _session, socket) do
-
     list_shops = Shops.list_shops()
+
     socket =
       socket
       |> assign(:shops, list_shops)
       |> assign(:page_title, "Admin - Shops")
       |> assign(:cart_count, 0)
 
-     {:ok, socket}
-
+    {:ok, socket}
   end
-
 
   def render(assigns) do
     ~H"""
@@ -51,5 +48,4 @@ defmodule SmartKioskWeb.AdminShopsLive do
     </div>
     """
   end
-
 end

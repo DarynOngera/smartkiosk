@@ -4,6 +4,7 @@ defmodule SmartKioskCore.Schemas.UserRole do
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
+  @foreign_key_type :binary_id
 
   schema "user_roles" do
     belongs_to(:user, SmartKioskCore.Schemas.User)

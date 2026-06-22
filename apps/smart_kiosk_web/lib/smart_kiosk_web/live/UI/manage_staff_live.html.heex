@@ -18,21 +18,22 @@
             </.link>
             <h1 class="mt-4 text-3xl font-bold tracking-tight">Manage Staff</h1>
             <p class="mt-2 text-slate-400">
-              Review rider applications and manage team access for <span class="font-semibold text-violet-300"><%= @current_shop.name %></span>.
+              Review job applications and manage team access for <span class="font-semibold text-violet-300"><%= @current_shop.name %></span>.
             </p>
           </div>
         </header>
 
         <nav class="inline-flex rounded-2xl border border-white/10 bg-white/5 p-1">
           <.link
-            patch={~p"/manage-staff?tab=riders"}
+            patch={~p"/manage-staff?tab=applications"}
             class={[
               "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition",
-              @active_tab == :riders && "bg-violet-500 text-white shadow-lg shadow-violet-500/20",
-              @active_tab != :riders && "text-slate-400 hover:text-white"
+              @active_tab == :applications &&
+                "bg-violet-500 text-white shadow-lg shadow-violet-500/20",
+              @active_tab != :applications && "text-slate-400 hover:text-white"
             ]}
           >
-            <.icon name="hero-rider" class="w-4 h-4" /> Rider Applications
+            <.icon name="hero-briefcase" class="w-4 h-4" /> Applications
           </.link>
           <.link
             patch={~p"/manage-staff?tab=staff"}
@@ -46,72 +47,82 @@
           </.link>
         </nav>
 
-        <%= if @active_tab == :riders do %>
+        <%= if @active_tab == :applications do %>
           <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
             <div class="xl:col-span-2 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
               <div class="flex items-center justify-between gap-4 mb-5">
-                <h2 class="text-xl font-bold">Rider Applications</h2>
+                <h2 class="text-xl font-bold">Job Applications</h2>
                 <span class="text-sm text-slate-400">
-                  <%= length(@rider_applications) %> total
+                  <%= length(@job_applications) %> total
                 </span>
               </div>
 
-              <%= if @rider_applications == [] do %>
+              <%= if @job_applications == [] do %>
                 <div class="rounded-2xl border border-dashed border-white/10 p-10 text-center text-slate-500">
-                  No rider applications yet.
+                  No job applications yet.
                 </div>
               <% else %>
                 <div class="space-y-4">
                   <article
-                    :for={rider <- @rider_applications}
-                    id={"rider-application-#{rider.id}"}
+                    :for={application <- @job_applications}
+                    id={"job-application-#{application.id}"}
                     class="rounded-2xl border border-white/10 bg-slate-950/50 p-5"
                   >
                     <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
                       <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                          <h3 class="text-lg font-semibold"><%= rider.user.full_name %></h3>
+                          <h3 class="text-lg font-semibold"><%= application.user.full_name %></h3>
                           <span class={[
                             "rounded-full px-2.5 py-1 text-xs font-semibold",
-                            rider.verification_status == :pending &&
+                            application.verification_status == :pending &&
                               "bg-amber-500/15 text-amber-300",
-                            rider.verification_status == :verified &&
+                            application.verification_status == :verified &&
                               "bg-emerald-500/15 text-emerald-300",
-                            rider.verification_status == :rejected &&
+                            application.verification_status == :rejected &&
                               "bg-rose-500/15 text-rose-300"
                           ]}>
-                            <%= rider.verification_status |> to_string() |> String.capitalize() %>
+                            <%= application.verification_status
+                            |> to_string()
+                            |> String.capitalize() %>
+                          </span>
+                          <span class="rounded-full bg-violet-500/15 px-2.5 py-1 text-xs font-semibold text-violet-200">
+                            <%= application_role_label(application) %>
                           </span>
                         </div>
+                        <p class="mt-2 text-sm font-medium text-slate-300">
+                          <%= application_title(application) %>
+                        </p>
                         <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-400">
                           <p>
-                            <span class="text-slate-500">Email:</span> <%= rider.user.email %>
+                            <span class="text-slate-500">Email:</span> <%= application.user.email %>
                           </p>
                           <p>
-                            <span class="text-slate-500">Phone:</span> <%= rider.user.phone ||
+                            <span class="text-slate-500">Phone:</span> <%= application.user.phone ||
                               "Not provided" %>
                           </p>
                           <p>
-                            <span class="text-slate-500">Vehicle:</span> <%= rider.vehicle ||
-                              "Not provided" %>
+                            <span class="text-slate-500">Role:</span> <%= application_role_label(
+                              application
+                            ) %>
                           </p>
                           <p>
                             <span class="text-slate-500">Applied:</span> <%= Calendar.strftime(
-                              rider.inserted_at,
+                              application.inserted_at,
                               "%Y-%m-%d %H:%M"
                             ) %>
                           </p>
                         </div>
                         <div class="mt-4 flex flex-wrap gap-3 text-sm">
                           <a
-                            href={rider.license_url}
+                            :if={application.license_url}
+                            href={application.license_url}
                             target="_blank"
                             class="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 font-semibold text-slate-200 hover:bg-white/10"
                           >
                             <.icon name="hero-document-text" class="w-4 h-4" /> License
                           </a>
                           <a
-                            href={rider.national_id_url}
+                            href={application.national_id_url}
                             target="_blank"
                             class="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 font-semibold text-slate-200 hover:bg-white/10"
                           >
@@ -120,19 +131,22 @@
                         </div>
                       </div>
 
-                      <div :if={rider.verification_status == :pending} class="flex shrink-0 gap-2">
+                      <div
+                        :if={application.verification_status == :pending}
+                        class="flex shrink-0 gap-2"
+                      >
                         <button
-                          id={"approve-rider-#{rider.id}"}
-                          phx-click="approve_rider"
-                          phx-value-id={rider.id}
+                          id={"approve-application-#{application.id}"}
+                          phx-click="approve_application"
+                          phx-value-id={application.id}
                           class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
                         >
                           <.icon name="hero-check" class="w-4 h-4" /> Approve
                         </button>
                         <button
-                          id={"reject-rider-#{rider.id}"}
-                          phx-click="reject_rider"
-                          phx-value-id={rider.id}
+                          id={"reject-application-#{application.id}"}
+                          phx-click="reject_application"
+                          phx-value-id={application.id}
                           class="inline-flex items-center gap-2 rounded-xl bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-400"
                         >
                           <.icon name="hero-x-mark" class="w-4 h-4" /> Reject
@@ -149,15 +163,15 @@
               <div class="mt-5 space-y-4 text-sm text-slate-400">
                 <p class="flex gap-3">
                   <.icon name="hero-shield-check" class="mt-0.5 w-5 h-5 text-emerald-300" />
-                  Riders stay pending until you approve their documents.
+                  Applicants stay pending until you approve their documents.
                 </p>
                 <p class="flex gap-3">
                   <.icon name="hero-key" class="mt-0.5 w-5 h-5 text-violet-300" />
-                  Approval grants the rider shop role and unlocks delivery tasks.
+                  Approval grants the role attached to the job post and sends an account setup email.
                 </p>
                 <p class="flex gap-3">
                   <.icon name="hero-no-symbol" class="mt-0.5 w-5 h-5 text-rose-300" />
-                  Rejection removes rider access for this shop.
+                  Rejection removes any role access granted for that application.
                 </p>
               </div>
             </aside>
