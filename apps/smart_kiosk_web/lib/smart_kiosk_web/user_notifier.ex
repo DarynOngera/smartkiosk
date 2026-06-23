@@ -60,6 +60,30 @@ defmodule SmartKioskWeb.UserNotifier do
   end
 
   # ---------------------------------------------------------------------------
+  # Accepted job application
+  # ---------------------------------------------------------------------------
+
+  @doc "Sends an account setup link after a shop accepts a job application."
+  def deliver_job_acceptance_instructions(user, job_post, shop, url) do
+    role = job_post_role(job_post, user)
+    job_title = job_post_title(job_post, role)
+
+    deliver(user.email, "Your #{shop.name} application was accepted", """
+    Hi #{user.full_name || user.email},
+
+    Good news - #{shop.name} accepted your application for #{job_title}.
+
+    Create your SmartKiosk account password using this secure link:
+
+        #{url}
+
+    This account will be linked to #{shop.name} with the #{role} role.
+
+    If you did not apply for this role, you can safely ignore this email.
+    """)
+  end
+
+  # ---------------------------------------------------------------------------
   # Private
   # ---------------------------------------------------------------------------
 
@@ -75,4 +99,15 @@ defmodule SmartKioskWeb.UserNotifier do
       {:ok, email}
     end
   end
+
+  defp job_post_role(%{role: role}, _user) when not is_nil(role),
+    do: role |> to_string() |> String.replace("_", " ")
+
+  defp job_post_role(_job_post, %{role: role}) when not is_nil(role),
+    do: role |> to_string() |> String.replace("_", " ")
+
+  defp job_post_role(_job_post, _user), do: "staff"
+
+  defp job_post_title(%{title: title}, _role) when is_binary(title) and title != "", do: title
+  defp job_post_title(_job_post, role), do: role
 end

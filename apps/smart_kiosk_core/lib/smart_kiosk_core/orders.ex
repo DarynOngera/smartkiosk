@@ -42,7 +42,8 @@ defmodule SmartKioskCore.Orders do
 
   @doc "Gets total sales for today."
   def get_sales_today(%Shop{} = shop) do
-    today_start = DateTime.utc_now() |> DateTime.to_date() |> DateTime.new!(~T[00:00:00], "Etc/UTC")
+    today_start =
+      DateTime.utc_now() |> DateTime.to_date() |> DateTime.new!(~T[00:00:00], "Etc/UTC")
 
     Order
     |> scope(shop)
@@ -50,6 +51,90 @@ defmodule SmartKioskCore.Orders do
     |> where([o], o.status not in [:cancelled])
     |> select([o], sum(o.total))
     |> Repo.one() || Decimal.new("0")
+  end
+
+  @doc "Gets POS-only sales total for today."
+  def get_pos_sales_today(%Shop{} = shop) do
+    today_start =
+      DateTime.utc_now() |> DateTime.to_date() |> DateTime.new!(~T[00:00:00], "Etc/UTC")
+
+    Order
+    |> scope(shop)
+    |> where([o], o.channel == :pos)
+    |> where([o], o.inserted_at >= ^today_start)
+    |> where([o], o.status not in [:cancelled])
+    |> select([o], sum(o.total))
+    |> Repo.one() || Decimal.new("0")
+  end
+
+  @doc "Gets POS sales for today broken down by cashier (user_id)."
+  def get_pos_sales_today_by_cashier(%Shop{} = shop) do
+    today_start =
+      DateTime.utc_now() |> DateTime.to_date() |> DateTime.new!(~T[00:00:00], "Etc/UTC")
+
+    alias SmartKioskCore.Schemas.{Transaction, User}
+
+    from(t in Transaction,
+      join: u in User,
+      on: u.id == t.user_id,
+      where: t.shop_id == ^shop.id,
+      where: t.type == :pos_payment,
+      where: t.status == :completed,
+      where: t.inserted_at >= ^today_start,
+      group_by: [t.user_id, u.full_name, u.email],
+      select: %{
+        user_id: t.user_id,
+        full_name: u.full_name,
+        email: u.email,
+        total: sum(t.amount),
+        count: count(t.id)
+      }
+    )
+    |> Repo.all()
+  end
+
+  @doc "Gets today's POS stats for a specific cashier: total revenue and transaction count."
+  def get_cashier_pos_stats_today(%Shop{} = shop, user_id) do
+    today_start =
+      DateTime.utc_now() |> DateTime.to_date() |> DateTime.new!(~T[00:00:00], "Etc/UTC")
+
+    alias SmartKioskCore.Schemas.Transaction
+
+    from(t in Transaction,
+      where: t.shop_id == ^shop.id,
+      where: t.user_id == ^user_id,
+      where: t.type == :pos_payment,
+      where: t.status == :completed,
+      where: t.inserted_at >= ^today_start,
+      select: %{
+        total: sum(t.amount),
+        count: count(t.id)
+      }
+    )
+    |> Repo.one()
+    |> case do
+      nil -> %{total: Decimal.new("0"), count: 0}
+      %{total: nil, count: 0} -> %{total: Decimal.new("0"), count: 0}
+      result -> result
+    end
+  end
+
+  @doc "Lists today's POS orders for a shop, most recent first."
+  def list_pos_orders_today(%Shop{} = shop, opts \\ []) do
+    today_start =
+      DateTime.utc_now() |> DateTime.to_date() |> DateTime.new!(~T[00:00:00], "Etc/UTC")
+
+    limit = Keyword.get(opts, :limit, 50)
+
+    Order
+    |> scope(shop)
+    |> where([o], o.channel == :pos)
+    |> where([o], o.inserted_at >= ^today_start)
+    |> where([o], o.status not in [:cancelled])
+    |> order_by([o], desc: o.inserted_at)
+    |> limit(^limit)
+    |> preload(items: :product, transactions: [])
+    |> Repo.all()
   end
 
   @doc "Gets total sales for all time."
@@ -77,7 +162,7 @@ defmodule SmartKioskCore.Orders do
   def get_order!(%Shop{} = shop, id) do
     Order
     |> scope(shop)
-    |> preload([:customer, delivery: [:rider], items: :product, transactions: []])
+    |> preload([:customer, delivery: [:rider], items: :product, transactions: [:user]])
     |> Repo.get!(id)
   end
 
@@ -320,9 +405,11 @@ defmodule SmartKioskCore.Orders do
           {:error, reason} -> Repo.rollback(reason)
         end
 
-      # 2. Prepare transaction attributes
-      # For now, cash is completed immediately, others start as pending
-      txn_status = if payment_attrs[:payment_method] == :cash, do: :completed, else: :pending
+      txn_status =
+        payment_attrs[:status] ||
+          if payment_attrs[:payment_method] in [:cash, :mpesa_stk, :card],
+            do: :completed,
+            else: :pending
 
       txn_attrs =
         payment_attrs

@@ -13,8 +13,7 @@ defmodule SmartKioskWeb.UI.CreateShopLive do
       Groceries: :groceries,
       Pharmacy: :pharmacy,
       Fashion: :fashion,
-      Bakery: :bakery,
-
+      Bakery: :bakery
     ]
 
     # Pre-fill user details if available
@@ -59,7 +58,10 @@ defmodule SmartKioskWeb.UI.CreateShopLive do
          |> push_navigate(to: ~p"/dashboard")}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, form: to_form(changeset))}
+        {:noreply,
+         socket
+         |> assign(form: to_form(changeset, as: :shop, action: :insert))
+         |> put_flash(:error, "Could not create shop. Check the highlighted fields.")}
     end
   end
 end

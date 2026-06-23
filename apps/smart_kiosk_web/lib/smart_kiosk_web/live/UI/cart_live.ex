@@ -62,10 +62,12 @@ defmodule SmartKioskWeb.CartLive do
     id = params["id"]
     quantity_str = params["quantity"] || params["value"]
 
-    quantity = case Integer.parse(to_string(quantity_str)) do
-      {q, _} -> q
-      :error -> 1
-    end
+    quantity =
+      case Integer.parse(to_string(quantity_str)) do
+        {q, _} -> q
+        :error -> 1
+      end
+
     cart_item = Cart.get_cart_item!(id)
 
     if quantity > 0 do

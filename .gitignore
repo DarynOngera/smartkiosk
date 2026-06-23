@@ -23,12 +23,7 @@ erl_crash.dump
 /tmp/
 
 /config
-.vscode/.phoenix-pulse-cache.json
-.vscode/.phoenix-pulse-cache.json
+.vscode/
 apps/smart_kiosk_core/priv/search_index.bin
-apps/smart_kiosk_web/priv/static/uploads/riders/live_view_upload-1780384925-264048254565-3.pdf
-apps/smart_kiosk_web/priv/static/uploads/riders/live_view_upload-1780384943-912700325486-3.pdf
-apps/smart_kiosk_web/priv/static/uploads/riders/live_view_upload-1780385806-860364789459-1.pdf
-apps/smart_kiosk_web/priv/static/uploads/riders/live_view_upload-1780384943-782693501526-3.pdf
-apps/smart_kiosk_web/priv/static/uploads/riders/live_view_upload-1780384925-542373434787-2.pdf
-.vscode/.phoenix-pulse-cache.json
+apps/smart_kiosk_web/priv/static/uploads/
+apps/smart_kiosk_web/priv/static/reports/

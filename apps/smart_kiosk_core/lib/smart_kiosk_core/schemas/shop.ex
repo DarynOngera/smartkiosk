@@ -57,11 +57,6 @@ defmodule SmartKioskCore.Schemas.Shop do
     timestamps(type: :utc_datetime)
   end
 
-
-
-
-  
-
   @required ~w(name phone)a
   @optional ~w(slug email address city country lat lng plan status category logo_url description settings delivery_zone owner_id)a
 

@@ -52,6 +52,7 @@ defmodule SmartKioskWeb.UI.DashboardLive do
         shop ->
           if connected?(socket) do
             Phoenix.PubSub.subscribe(SmartKiosk.PubSub, "shop:#{shop.id}:inventory")
+            Phoenix.PubSub.subscribe(SmartKiosk.PubSub, "shop:#{shop.id}:orders")
           end
 
           products = Catalogue.list_products(shop, limit: 10)
@@ -87,11 +88,24 @@ defmodule SmartKioskWeb.UI.DashboardLive do
   end
 
   def handle_info({:new_order, _order}, socket) do
-    if socket.assigns.current_user.role == :rider and
-         verified_rider?(socket.assigns[:rider_profile]) do
-      {:noreply, refresh_rider_deliveries(socket)}
-    else
-      {:noreply, socket}
+    cond do
+      socket.assigns.current_user.role == :rider &&
+          verified_rider?(socket.assigns[:rider_profile]) ->
+        {:noreply, refresh_rider_deliveries(socket)}
+
+      socket.assigns[:current_shop] != nil ->
+        # Refresh sales stats for merchant dashboard whenever any order arrives
+        shop = socket.assigns.current_shop
+
+        {:noreply,
+         socket
+         |> assign(:sales_today, "KES #{format_money(Orders.get_sales_today(shop))}")
+         |> assign(:total_sales, "KES #{format_money(Orders.get_total_sales(shop))}")
+         |> assign(:pending_orders, Orders.get_pending_orders(shop) |> Enum.count())
+         |> assign(:recent_orders, Orders.list_recent_orders(shop))}
+
+      true ->
+        {:noreply, socket}
     end
   end
 
@@ -488,7 +502,9 @@ defmodule SmartKioskWeb.UI.DashboardLive do
       <div class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-xl font-bold text-white">Recent Inventory</h2>
-          <.link navigate="/inventory" class="text-violet-400 text-sm hover:underline">View All</.link>
+          <.link navigate="/inventory" class="text-violet-400 text-sm hover:underline">
+            View All
+          </.link>
         </div>
         <div class="space-y-4">
           <%= for product <- @products do %>
@@ -540,56 +556,56 @@ defmodule SmartKioskWeb.UI.DashboardLive do
 
     <div class="mb-10">
       <%!-- Quick Actions --%>
-        <h2 class="text-xl font-bold text-white mb-4">Quick Management</h2>
-        <div class="grid grid-cols-2 gap-4">
-          <.link
-            navigate="/inventory"
-            class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
-          >
-            <.icon
-              name="hero-plus-circle"
-              class="w-8 h-8 text-violet-400 mb-3 group-hover:scale-110 transition-transform"
-            />
-            <p class="font-bold text-white">Add/Remove Stock</p>
-            <p class="text-slate-500 text-xs mt-1">Manage your inventory levels</p>
-          </.link>
+      <h2 class="text-xl font-bold text-white mb-4">Quick Management</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <.link
+          navigate="/inventory"
+          class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
+        >
+          <.icon
+            name="hero-plus-circle"
+            class="w-8 h-8 text-violet-400 mb-3 group-hover:scale-110 transition-transform"
+          />
+          <p class="font-bold text-white">Add/Remove Stock</p>
+          <p class="text-slate-500 text-xs mt-1">Manage your inventory levels</p>
+        </.link>
 
-          <.link
-            navigate="/orders"
-            class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
-          >
-            <.icon
-              name="hero-truck"
-              class="w-8 h-8 text-indigo-400 mb-3 group-hover:scale-110 transition-transform"
-            />
-            <p class="font-bold text-white">Orders & Deliveries</p>
-            <p class="text-slate-500 text-xs mt-1">Track customer shipments</p>
-          </.link>
+        <.link
+          navigate="/orders"
+          class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
+        >
+          <.icon
+            name="hero-truck"
+            class="w-8 h-8 text-indigo-400 mb-3 group-hover:scale-110 transition-transform"
+          />
+          <p class="font-bold text-white">Orders & Deliveries</p>
+          <p class="text-slate-500 text-xs mt-1">Track customer shipments</p>
+        </.link>
 
-          <.link
-            navigate="/delivery-zones"
-            class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
-          >
-            <.icon
-              name="hero-map"
-              class="w-8 h-8 text-emerald-400 mb-3 group-hover:scale-110 transition-transform"
-            />
-            <p class="font-bold text-white">Delivery Zones</p>
-            <p class="text-slate-500 text-xs mt-1">Manage geographic boundaries</p>
-          </.link>
-          <.link
-            navigate="/manage-staff"
-            class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
-          >
-            <.icon
-              name="hero-users"
-              class="w-8 h-8 text-emerald-400 mb-3 group-hover:scale-110 transition-transform"
-            />
-            <p class="font-bold text-white">Manage Staff</p>
-            <p class="text-slate-500 text-xs mt-1">Manage Your Staff</p>
-          </.link>
-        </div>
+        <.link
+          navigate="/delivery-zones"
+          class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
+        >
+          <.icon
+            name="hero-map"
+            class="w-8 h-8 text-emerald-400 mb-3 group-hover:scale-110 transition-transform"
+          />
+          <p class="font-bold text-white">Delivery Zones</p>
+          <p class="text-slate-500 text-xs mt-1">Manage geographic boundaries</p>
+        </.link>
+        <.link
+          navigate="/manage-staff"
+          class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
+        >
+          <.icon
+            name="hero-users"
+            class="w-8 h-8 text-emerald-400 mb-3 group-hover:scale-110 transition-transform"
+          />
+          <p class="font-bold text-white">Manage Staff</p>
+          <p class="text-slate-500 text-xs mt-1">Manage Your Staff</p>
+        </.link>
       </div>
+    </div>
 
     <div class="mt-8 bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
       <div class="flex items-center justify-between mb-4">

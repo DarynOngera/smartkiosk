@@ -30,7 +30,8 @@ defmodule SmartKioskWeb.HomeLive do
     {:textiles, "Textiles"},
     {:garage, "Garage"}
   ]
-  @shuffle_interval_ms 2 * 60 * 1000   # 10 minutes
+  # 10 minutes
+  @shuffle_interval_ms 2 * 60 * 1000
 
   # ----------------------------------------------------------------------------
   # Plan priority mapping for product shuffling
@@ -117,6 +118,7 @@ defmodule SmartKioskWeb.HomeLive do
     if connected?(socket) do
       Process.send_after(self(), :reshuffle, @shuffle_interval_ms)
     end
+
     socket
   end
 
@@ -171,6 +173,7 @@ defmodule SmartKioskWeb.HomeLive do
     else
       # Home mode: show products by category with pagination, then shuffle
       raw_products_by_category = fetch_products_by_categories(page: page, limit: limit)
+
       shuffled_products_by_category =
         raw_products_by_category
         |> Enum.map(fn {category, products} ->
@@ -279,7 +282,7 @@ defmodule SmartKioskWeb.HomeLive do
 
   defp safe_category_atom(_), do: nil
 
-  defp fetch_products_by_categories(opts \\ []) do
+  defp fetch_products_by_categories(opts) do
     page = opts[:page] || 1
     limit = opts[:limit] || 12
     offset = (page - 1) * limit

@@ -20,6 +20,7 @@ defmodule SmartKioskCore.Schemas.UserToken do
   @confirm_validity_in_days 1
   @reset_password_validity_in_minutes 10
   @change_email_validity_in_days 7
+  @job_invite_validity_in_days 7
 
   schema "users_tokens" do
     field(:token, :binary)
@@ -125,6 +126,28 @@ defmodule SmartKioskCore.Schemas.UserToken do
             where: t.context == ^context,
             where: t.inserted_at > ago(@change_email_validity_in_days, "day"),
             select: {u, t.sent_to}
+          )
+
+        {:ok, query}
+
+      :error ->
+        :error
+    end
+  end
+
+  @doc "Verifies an accepted job invite token."
+  def verify_job_invite_token_query(token) do
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded} ->
+        hashed = :crypto.hash(@hash_algorithm, decoded)
+
+        query =
+          from(t in __MODULE__,
+            join: u in assoc(t, :user),
+            where: t.token == ^hashed,
+            where: t.context == "job_invite",
+            where: t.inserted_at > ago(@job_invite_validity_in_days, "day"),
+            select: u
           )
 
         {:ok, query}

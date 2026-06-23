@@ -84,6 +84,33 @@ defmodule SmartKioskWeb.UserAuth do
     end
   end
 
+  # =============================================
+  # THIS IS FOR THE CASHIER BUSINESS
+  # ===================================
+
+  def on_mount(:require_cashier_only, _params, _session, socket) do
+    user = socket.assigns[:current_user]
+    shop = socket.assigns[:current_shop]
+
+    # Allow cashiers AND shop owners (anyone associated with a shop) to use the POS
+    if user && (user.role == :cashier || shop != nil) do
+      {:cont, socket}
+    else
+      {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/dashboard")}
+    end
+  end
+
+  def on_mount(:restrict_cashier, _params, _session, socket) do
+    user = socket.assigns[:current_user]
+
+    if user && user.role == :cashier do
+      # Cashier trying to access non‑POS page – redirect to POS
+      {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/pos")}
+    else
+      {:cont, socket}
+    end
+  end
+
   # ---------------------------------------------------------------------------
   # LiveView on_mount hooks
   # ---------------------------------------------------------------------------
@@ -149,14 +176,15 @@ defmodule SmartKioskWeb.UserAuth do
   # ---------------------------------------------------------------------------
 
   @doc "Logs in a user by writing the session token to the cookie."
-  def log_in_user(conn, user, _params \\ %{}) do
+  def log_in_user(conn, user, opts \\ []) do
     token = Accounts.generate_user_session_token(user)
     user_return_to = get_session(conn, :user_return_to)
+    redirect_to = Keyword.get(opts, :redirect_to, user_return_to || signed_in_path(conn))
 
     conn
     |> renew_session()
     |> put_token_in_session(token)
-    |> redirect(to: user_return_to || signed_in_path(conn))
+    |> redirect(to: redirect_to)
   end
 
   @doc "Logs out the current user and deletes the session token."
@@ -214,5 +242,18 @@ defmodule SmartKioskWeb.UserAuth do
     |> clear_session()
   end
 
-  defp signed_in_path(_conn_or_socket), do: ~p"/dashboard"
+  defp signed_in_path(conn_or_socket) do
+    current_user =
+      case conn_or_socket do
+        %Plug.Conn{} = conn -> conn.assigns[:current_user]
+        %Phoenix.LiveView.Socket{} = socket -> socket.assigns[:current_user]
+        _ -> nil
+      end
+
+    if current_user && current_user.role == :cashier do
+      ~p"/pos"
+    else
+      ~p"/dashboard"
+    end
+  end
 end

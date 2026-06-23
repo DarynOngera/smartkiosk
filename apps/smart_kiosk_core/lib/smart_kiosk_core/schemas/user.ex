@@ -9,6 +9,8 @@ defmodule SmartKioskCore.Schemas.User do
     :manager         — Delegated shop management.
     :staff           — Cashier / stock clerk. Limited access.
     :rider           — Delivery rider. No shop access; has a Rider profile.
+    :cashier         — Shop cashier. Limited access to the POS .
+    :supplier        — Supplier user. Limited access.
 
   phx.gen.auth generates the token tables and confirmation plumbing
   alongside this schema. The hashed_password field lives here.
@@ -19,7 +21,8 @@ defmodule SmartKioskCore.Schemas.User do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @roles ~w(platform_admin customer owner manager staff rider)a
+  @roles ~w(platform_admin customer owner manager staff rider cashier supplier)a
+  @shop_roles ~w(owner manager staff rider cashier supplier)a
 
   schema "users" do
     field(:email, :string)
@@ -83,7 +86,7 @@ defmodule SmartKioskCore.Schemas.User do
   or when promoting/demoting users within a shop.
   """
   def assign_to_shop_changeset(%__MODULE__{} = user, %SmartKioskCore.Schemas.Shop{} = shop, role)
-      when role in [:owner, :manager, :staff] do
+      when role in @shop_roles do
     user
     |> change(shop_id: shop.id, role: role)
     |> validate_role_shop_consistency()
@@ -182,7 +185,7 @@ defmodule SmartKioskCore.Schemas.User do
       role in [:platform_admin, :customer] && shop_id != nil ->
         add_error(changeset, :shop_id, "this user role must not belong to a shop")
 
-      role in [:owner, :manager, :staff, :rider] && shop_id == nil ->
+      role in @shop_roles && shop_id == nil ->
         add_error(changeset, :shop_id, "this user role must belong to a shop")
 
       true ->

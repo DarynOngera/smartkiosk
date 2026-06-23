@@ -1,6 +1,5 @@
 defmodule SmartKioskWeb.Components.ProductCard do
-  use Phoenix.Component
-  import SmartKioskWeb.CoreComponents
+  use SmartKioskWeb, :html
 
   @doc """
   Renders a product card for the dashboard or storefront.
@@ -41,13 +40,14 @@ defmodule SmartKioskWeb.Components.ProductCard do
             <%= @product.stock_qty %> in stock
           </p>
         </div>
-        <button
-          phx-click={@on_add}
-          phx-value-product_id={@product.id}
-          class="p-2 bg-white/5 hover:bg-violet-500 rounded-lg transition-colors"
-        >
-          <.icon name="hero-plus" class="w-4 h-4 text-white" />
-        </button>
+        <.link navigate={~p"/inventory?edit=#{@product.id}"}>
+          <button
+            phx-value-product_id={@product.id}
+            class="p-2 bg-white/5 hover:bg-violet-500 rounded-lg transition-colors"
+          >
+            <.icon name="hero-plus" class="w-4 h-4 text-white" />
+          </button>
+        </.link>
       </div>
     </div>
     """

@@ -52,12 +52,10 @@ defmodule SmartKioskWeb.Layouts do
       <.navbar current_user={@current_user} user_shop={@current_shop} cart_count={@cart_count} />
     <% end %>
 
-    <main class="pb-12">
+    <main>
       <.flash_group flash={@flash} />
       <%= render_slot(@inner_block) %>
     </main>
-
-    <.footer current_user={@current_user} />
     """
   end
 
@@ -138,126 +136,6 @@ defmodule SmartKioskWeb.Layouts do
         <.icon name="hero-moon-micro" class="size-4 opacity-75 hover:opacity-100" />
       </button>
     </div>
-    """
-  end
-
-  @doc """
-  SmartKiosk public footer.
-  """
-  attr :current_user, :any, default: nil, doc: "the currently signed-in user"
-
-  def footer(assigns) do
-    ~H"""
-    <footer class="border-t border-slate-200 bg-slate-950 text-slate-300">
-      <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-          <div class="space-y-4">
-            <div class="flex items-center gap-3">
-              <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-600/15 text-violet-400">
-                <.icon name="hero-shopping-bag" class="h-5 w-5" />
-              </div>
-              <div>
-                <p class="text-lg font-semibold text-white">SmartKiosk</p>
-                <p class="text-xs uppercase tracking-[0.25em] text-slate-500">Local commerce platform</p>
-              </div>
-            </div>
-            <p class="max-w-sm text-sm leading-6 text-slate-400">
-              SmartKiosk helps shops manage orders, staff, deliveries, careers, and payments from one place.
-            </p>
-            <div class="space-y-2 text-sm">
-              <p class="text-slate-500">Email</p>
-              <.link
-                href="mailto:hello@smartkiosk.co.ke"
-                class="text-slate-300 transition-colors hover:text-violet-300"
-              >
-                hello@smartkiosk.co.ke
-              </.link>
-            </div>
-          </div>
-
-          <div>
-            <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-white">Valuable Links</h3>
-            <ul class="mt-4 space-y-3 text-sm">
-              <li>
-                <.link navigate={~p"/"} class="transition-colors hover:text-violet-300">
-                  Home
-                </.link>
-              </li>
-              <li>
-                <.link navigate={~p"/dashboard"} class="transition-colors hover:text-violet-300">
-                  Dashboard
-                </.link>
-              </li>
-              <li>
-                <.link navigate={~p"/cart"} class="transition-colors hover:text-violet-300">
-                  Cart
-                </.link>
-              </li>
-              <li>
-                <.link navigate={~p"/jobs"} class="transition-colors hover:text-violet-300">
-                  Job Board
-                </.link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-white">Job Links</h3>
-            <ul class="mt-4 space-y-3 text-sm">
-              <li>
-                <.link navigate={~p"/jobs"} class="transition-colors hover:text-violet-300">
-                  Browse Jobs
-                </.link>
-              </li>
-              <li>
-                <.link navigate={~p"/careers"} class="transition-colors hover:text-violet-300">
-                  Manage Job Posts
-                </.link>
-              </li>
-              <li>
-                <.link navigate={~p"/"} class="transition-colors hover:text-violet-300">
-                  Shop Directory
-                </.link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-white">For Partners</h3>
-            <ul class="mt-4 space-y-3 text-sm">
-              <li>
-                <.link href="mailto:suppliers@smartkiosk.co.ke" class="transition-colors hover:text-violet-300">
-                  Supplier Link
-                </.link>
-              </li>
-              <li>
-                <.link navigate={~p"/pos"} class="transition-colors hover:text-violet-300">
-                  POS
-                </.link>
-              </li>
-              <li>
-                <.link navigate={~p"/create-shop"} class="transition-colors hover:text-violet-300">
-                  Open a Shop
-                </.link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="mt-10 border-t border-white/10 pt-6 text-sm text-slate-500">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p>© <%= Date.utc_today().year %> SmartKiosk. All rights reserved.</p>
-            <p>
-              <%= if @current_user do %>
-                Signed in as <span class="text-slate-300"><%= @current_user.full_name || @current_user.email %></span>
-              <% else %>
-                Built for shops, riders, suppliers, and customers.
-              <% end %>
-            </p>
-          </div>
-        </div>
-      </div>
-    </footer>
     """
   end
 end

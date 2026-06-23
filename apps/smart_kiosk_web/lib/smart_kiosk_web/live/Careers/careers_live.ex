@@ -74,7 +74,9 @@ defmodule SmartKioskWeb.Careers.CareersLive do
 
   @impl true
   def handle_event("validate", %{"job_post" => job_post_params}, socket) do
-    job_post = socket.assigns.job_post || %JobPost{shop_id: socket.assigns.current_shop.id, status: "active"}
+    job_post =
+      socket.assigns.job_post ||
+        %JobPost{shop_id: socket.assigns.current_shop.id, status: "active"}
 
     changeset =
       JobPosts.change_job_post(job_post, job_post_params)
@@ -170,7 +172,12 @@ defmodule SmartKioskWeb.Careers.CareersLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_path="/careers" current_user={@current_user} current_shop={@current_shop}>
+    <Layouts.app
+      flash={@flash}
+      current_path="/careers"
+      current_user={@current_user}
+      current_shop={@current_shop}
+    >
       <div class="min-h-screen bg-slate-50">
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
           <div class="mb-8">
@@ -205,8 +212,7 @@ defmodule SmartKioskWeb.Careers.CareersLive do
                     patch={~p"/careers/new"}
                     class="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-violet-600/20 transition-all hover:bg-violet-700"
                   >
-                    <.icon name="hero-plus" class="h-4 w-4" />
-                    Create your first job post
+                    <.icon name="hero-plus" class="h-4 w-4" /> Create your first job post
                   </.link>
                 </div>
               <% else %>
@@ -220,11 +226,15 @@ defmodule SmartKioskWeb.Careers.CareersLive do
                               <.icon name="hero-briefcase" class="h-5 w-5 text-violet-600" />
                             </div>
                             <div>
-                              <h3 class="text-lg font-semibold leading-tight text-slate-900"><%= job_post.title %></h3>
+                              <h3 class="text-lg font-semibold leading-tight text-slate-900">
+                                <%= job_post.title %>
+                              </h3>
                               <p class="text-xs uppercase tracking-wider text-slate-400">Job post</p>
                             </div>
                           </div>
-                          <p class="mb-4 max-w-3xl text-sm text-slate-600 line-clamp-2"><%= job_post.description %></p>
+                          <p class="mb-4 max-w-3xl text-sm text-slate-600 line-clamp-2">
+                            <%= job_post.description %>
+                          </p>
                           <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500">
                             <span class="rounded-full bg-slate-100 px-3 py-1">
                               Posted <%= Calendar.strftime(job_post.inserted_at, "%B %d, %Y") %>
@@ -233,7 +243,8 @@ defmodule SmartKioskWeb.Careers.CareersLive do
                               "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold",
                               job_post.status == "active" && "bg-emerald-50 text-emerald-700",
                               job_post.status == "overdue" && "bg-amber-50 text-amber-700",
-                              job_post.status not in ["active", "overdue"] && "bg-slate-100 text-slate-700"
+                              job_post.status not in ["active", "overdue"] &&
+                                "bg-slate-100 text-slate-700"
                             ]}>
                               <%= job_post.status %>
                             </span>
@@ -245,8 +256,7 @@ defmodule SmartKioskWeb.Careers.CareersLive do
                             navigate={~p"/jobs/#{job_post.id}/edit"}
                             class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
                           >
-                            <.icon name="hero-pencil-square" class="h-4 w-4" />
-                            Edit
+                            <.icon name="hero-pencil-square" class="h-4 w-4" /> Edit
                           </.link>
                           <button
                             phx-click="toggle_status"
@@ -254,7 +264,9 @@ defmodule SmartKioskWeb.Careers.CareersLive do
                             class="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50"
                           >
                             <.icon name="hero-arrow-path" class="h-4 w-4" />
-                            <%= if job_post.status == "active", do: "Mark Overdue", else: "Mark Active" %>
+                            <%= if job_post.status == "active",
+                              do: "Mark Overdue",
+                              else: "Mark Active" %>
                           </button>
                           <button
                             phx-click="delete"
@@ -262,8 +274,7 @@ defmodule SmartKioskWeb.Careers.CareersLive do
                             class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50"
                             data-confirm="Are you sure you want to delete this job post?"
                           >
-                            <.icon name="hero-trash" class="h-4 w-4" />
-                            Delete
+                            <.icon name="hero-trash" class="h-4 w-4" /> Delete
                           </button>
                         </div>
                       </div>
@@ -273,8 +284,12 @@ defmodule SmartKioskWeb.Careers.CareersLive do
               <% end %>
             <% else %>
               <div class="rounded-3xl border border-slate-200 bg-slate-50 p-12 text-center">
-                <div class="text-xl font-semibold text-slate-900">You need to be logged in as a shop owner to manage job posts</div>
-                <p class="mt-2 text-slate-500">Sign in with a shop account to create and manage your roles.</p>
+                <div class="text-xl font-semibold text-slate-900">
+                  You need to be logged in as a shop owner to manage job posts
+                </div>
+                <p class="mt-2 text-slate-500">
+                  Sign in with a shop account to create and manage your roles.
+                </p>
                 <%= if @current_user do %>
                   <.link
                     navigate={~p"/create-shop"}
@@ -294,11 +309,24 @@ defmodule SmartKioskWeb.Careers.CareersLive do
           <div class="p-1">
             <div class="mb-6">
               <h2 class="text-2xl font-bold text-slate-900">Create Job Post</h2>
-              <p class="mt-1 text-sm text-slate-500">Publish a new role for your shop without leaving this page.</p>
+              <p class="mt-1 text-sm text-slate-500">
+                Publish a new role for your shop without leaving this page.
+              </p>
             </div>
 
-            <.form for={@form} id="job-post-form" phx-change="validate" phx-submit="save" class="space-y-5">
-              <.input field={@form[:title]} type="text" label="Job Title" placeholder="e.g., Delivery Rider" />
+            <.form
+              for={@form}
+              id="job-post-form"
+              phx-change="validate"
+              phx-submit="save"
+              class="space-y-5"
+            >
+              <.input
+                field={@form[:title]}
+                type="text"
+                label="Job Title"
+                placeholder="e.g., Delivery Rider"
+              />
               <.input
                 field={@form[:description]}
                 type="textarea"
@@ -321,10 +349,16 @@ defmodule SmartKioskWeb.Careers.CareersLive do
               />
 
               <div class="flex items-center justify-end gap-3 pt-2">
-                <.link patch={~p"/careers"} class="rounded-xl border border-slate-200 px-4 py-2 text-slate-700 hover:bg-slate-50">
+                <.link
+                  patch={~p"/careers"}
+                  class="rounded-xl border border-slate-200 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                >
                   Cancel
                 </.link>
-                <button type="submit" class="rounded-xl bg-violet-600 px-4 py-2 font-semibold text-white hover:bg-violet-700">
+                <button
+                  type="submit"
+                  class="rounded-xl bg-violet-600 px-4 py-2 font-semibold text-white hover:bg-violet-700"
+                >
                   Create Job Post
                 </button>
               </div>

@@ -281,8 +281,16 @@ system_roles = [
     scope: "shop",
     description: "Delivery rider — delivery task access only",
     is_system: true
-  }
+  },
+   %{name: "Cashier", slug: "cashier", scope: "shop", description: "Cashier role for POS and order handling"},
 ]
+# for attrs <- roles do
+#   unless Repo.get_by(Role, slug: attrs.slug) do
+#     %Role{}
+#     |> Role.changeset(attrs)
+#     |> Repo.insert!()
+#   end
+# end
 
 roles_by_slug =
   Map.new(system_roles, fn attrs ->

@@ -17,7 +17,12 @@ defmodule SmartKioskWeb.Careers.JobBoardLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_path="/jobs" current_user={@current_user} current_shop={@current_shop}>
+    <Layouts.app
+      flash={@flash}
+      current_path="/jobs"
+      current_user={@current_user}
+      current_shop={@current_shop}
+    >
       <div class="bg-slate-50">
         <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
           <div class="mb-8">
@@ -36,7 +41,9 @@ defmodule SmartKioskWeb.Careers.JobBoardLive do
                 <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-50">
                   <.icon name="hero-briefcase" class="h-7 w-7 text-violet-600" />
                 </div>
-                <div class="text-xl font-semibold text-slate-900">No active job postings at the moment</div>
+                <div class="text-xl font-semibold text-slate-900">
+                  No active job postings at the moment
+                </div>
                 <p class="mx-auto mt-2 max-w-md text-sm text-slate-500">
                   Check back later for new opportunities from shops near you.
                 </p>
@@ -50,7 +57,9 @@ defmodule SmartKioskWeb.Careers.JobBoardLive do
                   >
                     <div class="mb-4 flex items-start justify-between gap-4">
                       <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-slate-900 group-hover:text-violet-700"><%= job_post.title %></h3>
+                        <h3 class="text-lg font-semibold text-slate-900 group-hover:text-violet-700">
+                          <%= job_post.title %>
+                        </h3>
                         <p class="mt-1 text-sm text-slate-500">
                           <%= if job_post.shop do %>
                             <%= job_post.shop.name %>
@@ -64,7 +73,9 @@ defmodule SmartKioskWeb.Careers.JobBoardLive do
                       </span>
                     </div>
 
-                    <p class="mb-5 line-clamp-3 text-sm leading-6 text-slate-600"><%= job_post.description %></p>
+                    <p class="mb-5 line-clamp-3 text-sm leading-6 text-slate-600">
+                      <%= job_post.description %>
+                    </p>
 
                     <div class="flex items-center justify-between text-xs text-slate-500">
                       <span>Posted <%= Calendar.strftime(job_post.inserted_at, "%B %d, %Y") %></span>

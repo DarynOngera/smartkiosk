@@ -142,48 +142,57 @@
                           class="block"
                           aria-label={"View #{product.name}"}
                         >
-                          <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
-                          <%= if product.images != [] && List.first(product.images) do %>
-                            <img
-                              src={List.first(product.images).url}
-                              alt={product.name}
-                              class="w-full h-full object-cover"
-                            />
-                          <% else %>
-                            <.icon name="hero-photo" class="w-12 h-12 text-slate-600" />
-                          <% end %>
-                          <%= if product.stock_qty == 0 do %>
-                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                              <span class="px-3 py-1 bg-red-500/80 text-white text-xs font-bold rounded-full">
-                                Out of Stock
-                              </span>
-                            </div>
-                          <% end %>
-                          <%= if product.is_featured do %>
-                            <div class="absolute top-2 left-2 px-2 py-0.5 bg-amber-500/80 text-white text-[10px] font-bold uppercase rounded-full">
-                              Featured
-                            </div>
-                          <% end %>
-                          </div>
-                          <div class="p-2.5">
-                          <h4 class="text-xs font-medium text-white truncate">
-                            <%= product.name %>
-                          </h4>
-                          <p class="text-[10px] text-slate-500 truncate"><%= product.shop.name %></p>
-                          <div class="flex items-center justify-between mt-2">
-                            <span class="text-violet-400 font-bold text-xs">
-                              Ksh <%= product.price %>
-                            </span>
-                            <%= if product.stock_qty > 0 do %>
-                              <button
-                                phx-click="add_to_cart"
-                                phx-value-product_id={product.id}
-                                class="p-1 bg-violet-500/20 hover:bg-violet-500 text-violet-400 hover:text-white rounded-lg transition-all"
-                              >
-                                <.icon name="hero-plus" class="w-3.5 h-3.5" />
-                              </button>
+                          <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden relative">
+                            <%= if product.images != [] && List.first(product.images) do %>
+                              <img
+                                src={List.first(product.images).url}
+                                alt={product.name}
+                                class="w-full h-full object-cover"
+                              />
+                            <% else %>
+                              <.icon name="hero-photo" class="w-12 h-12 text-slate-600" />
+                            <% end %>
+                            <%= if product.stock_qty == 0 do %>
+                              <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                <span class="px-3 py-1 bg-red-500/80 text-white text-xs font-bold rounded-full">
+                                  Out of Stock
+                                </span>
+                              </div>
+                            <% end %>
+                            <%= if product.stock_qty <= product.low_stock_threshold do %>
+                              <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                <span class="px-3 py-1 bg-orange-500/80 text-white text-xs font-bold rounded-full">
+                                  Few units in Stock
+                                </span>
+                              </div>
+                            <% end %>
+                            <%= if product.is_featured do %>
+                              <div class="absolute top-2 left-2 px-2 py-0.5 bg-amber-500/80 text-white text-[10px] font-bold uppercase rounded-full">
+                                Featured
+                              </div>
                             <% end %>
                           </div>
+                          <div class="p-2.5">
+                            <h4 class="text-xs font-medium text-white truncate">
+                              <%= product.name %>
+                            </h4>
+                            <p class="text-[10px] text-slate-500 truncate">
+                              <%= product.shop.name %>
+                            </p>
+                            <div class="flex items-center justify-between mt-2">
+                              <span class="text-violet-400 font-bold text-xs">
+                                Ksh <%= product.price %>
+                              </span>
+                              <%= if product.stock_qty > 0 do %>
+                                <button
+                                  phx-click="add_to_cart"
+                                  phx-value-product_id={product.id}
+                                  class="p-1 bg-violet-500/20 hover:bg-violet-500 text-violet-400 hover:text-white rounded-lg transition-all"
+                                >
+                                  <.icon name="hero-plus" class="w-3.5 h-3.5" />
+                                </button>
+                              <% end %>
+                            </div>
                           </div>
                         </a>
                       </div>
@@ -225,43 +234,45 @@
                           class="block"
                           aria-label={"View #{product.name}"}
                         >
-                          <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
-                          <%= if product.images != [] && List.first(product.images) do %>
-                            <img
-                              src={List.first(product.images).url}
-                              alt={product.name}
-                              class="w-full h-full object-cover"
-                            />
-                          <% else %>
-                            <.icon name="hero-photo" class="w-12 h-12 text-slate-600" />
-                          <% end %>
-                          <%= if product.stock_qty == 0 do %>
-                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                              <span class="px-3 py-1 bg-red-500/80 text-white text-xs font-bold rounded-full">
-                                Out of Stock
-                              </span>
-                            </div>
-                          <% end %>
-                          </div>
-                          <div class="p-2.5">
-                          <h4 class="text-xs font-medium text-white truncate">
-                            <%= product.name %>
-                          </h4>
-                          <p class="text-[10px] text-slate-500 truncate"><%= product.shop.name %></p>
-                          <div class="flex items-center justify-between mt-2">
-                            <span class="text-violet-400 font-bold text-xs">
-                              Ksh <%= product.price %>
-                            </span>
-                            <%= if product.stock_qty > 0 do %>
-                              <button
-                                phx-click="add_to_cart"
-                                phx-value-product_id={product.id}
-                                class="p-1 bg-violet-500/20 hover:bg-violet-500 text-violet-400 hover:text-white rounded-lg transition-all"
-                              >
-                                <.icon name="hero-plus" class="w-3.5 h-3.5" />
-                              </button>
+                          <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden relative">
+                            <%= if product.images != [] && List.first(product.images) do %>
+                              <img
+                                src={List.first(product.images).url}
+                                alt={product.name}
+                                class="w-full h-full object-cover"
+                              />
+                            <% else %>
+                              <.icon name="hero-photo" class="w-12 h-12 text-slate-600" />
+                            <% end %>
+                            <%= if product.stock_qty == 0 do %>
+                              <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                <span class="px-3 py-1 bg-red-500/80 text-white text-xs font-bold rounded-full">
+                                  Out of Stock
+                                </span>
+                              </div>
                             <% end %>
                           </div>
+                          <div class="p-2.5">
+                            <h4 class="text-xs font-medium text-white truncate">
+                              <%= product.name %>
+                            </h4>
+                            <p class="text-[10px] text-slate-500 truncate">
+                              <%= product.shop.name %>
+                            </p>
+                            <div class="flex items-center justify-between mt-2">
+                              <span class="text-violet-400 font-bold text-xs">
+                                Ksh <%= product.price %>
+                              </span>
+                              <%= if product.stock_qty > 0 do %>
+                                <button
+                                  phx-click="add_to_cart"
+                                  phx-value-product_id={product.id}
+                                  class="p-1 bg-violet-500/20 hover:bg-violet-500 text-violet-400 hover:text-white rounded-lg transition-all"
+                                >
+                                  <.icon name="hero-plus" class="w-3.5 h-3.5" />
+                                </button>
+                              <% end %>
+                            </div>
                           </div>
                         </a>
                       </div>

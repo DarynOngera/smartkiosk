@@ -21,6 +21,14 @@ defmodule SmartKioskCore.UserNotifier do
   @callback deliver_update_email_instructions(user :: map(), url :: String.t()) ::
               {:ok, term()} | {:error, term()}
 
+  @callback deliver_job_acceptance_instructions(
+              user :: map(),
+              job_post :: map() | nil,
+              shop :: map(),
+              url :: String.t()
+            ) ::
+              {:ok, term()} | {:error, term()}
+
   # ---------------------------------------------------------------------------
   # Delegation helpers called by Accounts context
   # ---------------------------------------------------------------------------
@@ -35,6 +43,10 @@ defmodule SmartKioskCore.UserNotifier do
 
   def deliver_update_email_instructions(user, url) do
     impl().deliver_update_email_instructions(user, url)
+  end
+
+  def deliver_job_acceptance_instructions(user, job_post, shop, url) do
+    impl().deliver_job_acceptance_instructions(user, job_post, shop, url)
   end
 
   # ---------------------------------------------------------------------------
@@ -67,6 +79,16 @@ defmodule SmartKioskCore.UserNotifier do
 
     def deliver_update_email_instructions(user, url) do
       Logger.warning("[UserNotifier] update-email not sent to #{user.email} — url: #{url}")
+      {:ok, :noop}
+    end
+
+    def deliver_job_acceptance_instructions(user, job_post, shop, url) do
+      role = if job_post, do: job_post.role, else: user.role
+
+      Logger.warning(
+        "[UserNotifier] job acceptance email not sent to #{user.email} for #{shop.name} / #{role} - url: #{url}"
+      )
+
       {:ok, :noop}
     end
   end

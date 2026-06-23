@@ -159,7 +159,7 @@ defmodule SmartKioskWeb.UI.OrdersLive.Index do
 
   defp assign_orders(socket, status) do
     shop = socket.assigns.current_shop
-    opts = [channel: :online] ++ (if is_nil(status), do: [], else: [status: status])
+    opts = [channel: :online] ++ if is_nil(status), do: [], else: [status: status]
     order_counts = Orders.count_orders_by_status(shop)
 
     socket

@@ -28,7 +28,12 @@ defmodule SmartKioskWeb.Careers.JobDetailLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_path="/jobs" current_user={@current_user} current_shop={@current_shop}>
+    <Layouts.app
+      flash={@flash}
+      current_path="/jobs"
+      current_user={@current_user}
+      current_shop={@current_shop}
+    >
       <div class="bg-slate-50">
         <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
           <div class="mb-8">
@@ -51,7 +56,9 @@ defmodule SmartKioskWeb.Careers.JobDetailLive do
             <div class="border-b border-slate-200 bg-slate-50 p-6 sm:p-8">
               <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h1 class="text-2xl font-bold tracking-tight text-slate-900"><%= @job_post.title %></h1>
+                  <h1 class="text-2xl font-bold tracking-tight text-slate-900">
+                    <%= @job_post.title %>
+                  </h1>
                   <div class="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500">
                     <span>
                       <%= if @job_post.shop do %>
@@ -87,7 +94,9 @@ defmodule SmartKioskWeb.Careers.JobDetailLive do
 
               <div class="border-t border-slate-200 pt-6">
                 <.link
-                  navigate={~p"/shop/#{if @job_post.shop, do: @job_post.shop.slug, else: ""}/job/apply?job_id=#{@job_post.id}"}
+                  navigate={
+                    ~p"/shop/#{if @job_post.shop, do: @job_post.shop.slug, else: ""}/rider/register?job_id=#{@job_post.id}"
+                  }
                   class="inline-flex items-center justify-center rounded-xl bg-violet-600 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
                 >
                   Apply for this Position
