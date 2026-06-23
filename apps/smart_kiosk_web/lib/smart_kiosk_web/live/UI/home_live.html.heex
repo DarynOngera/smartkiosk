@@ -142,7 +142,7 @@
                           class="block"
                           aria-label={"View #{product.name}"}
                         >
-                          <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
+                          <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden relative">
                             <%= if product.images != [] && List.first(product.images) do %>
                               <img
                                 src={List.first(product.images).url}
@@ -156,6 +156,13 @@
                               <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
                                 <span class="px-3 py-1 bg-red-500/80 text-white text-xs font-bold rounded-full">
                                   Out of Stock
+                                </span>
+                              </div>
+                            <% end %>
+                            <%= if product.stock_qty <= product.low_stock_threshold do %>
+                              <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                <span class="px-3 py-1 bg-orange-500/80 text-white text-xs font-bold rounded-full">
+                                  Few units in Stock
                                 </span>
                               </div>
                             <% end %>
@@ -227,7 +234,7 @@
                           class="block"
                           aria-label={"View #{product.name}"}
                         >
-                          <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
+                          <div class="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden relative">
                             <%= if product.images != [] && List.first(product.images) do %>
                               <img
                                 src={List.first(product.images).url}

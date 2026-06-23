@@ -133,7 +133,7 @@ defmodule SmartKioskCore.Orders do
     |> where([o], o.status not in [:cancelled])
     |> order_by([o], desc: o.inserted_at)
     |> limit(^limit)
-    |> preload([items: :product, transactions: []])
+    |> preload(items: :product, transactions: [])
     |> Repo.all()
   end
 
@@ -162,7 +162,7 @@ defmodule SmartKioskCore.Orders do
   def get_order!(%Shop{} = shop, id) do
     Order
     |> scope(shop)
-    |> preload([:customer, delivery: [:rider], items: :product, transactions: []])
+    |> preload([:customer, delivery: [:rider], items: :product, transactions: [:user]])
     |> Repo.get!(id)
   end
 
@@ -407,11 +407,9 @@ defmodule SmartKioskCore.Orders do
 
       txn_status =
         payment_attrs[:status] ||
-          (if payment_attrs[:payment_method] in [:cash, :mpesa_stk, :card],
-             do: :completed,
-             else: :pending
-           )
-
+          if payment_attrs[:payment_method] in [:cash, :mpesa_stk, :card],
+            do: :completed,
+            else: :pending
 
       txn_attrs =
         payment_attrs

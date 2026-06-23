@@ -108,7 +108,7 @@ defmodule SmartKioskWeb.Router do
       ] do
       live("/inventory", Inventory.InventoryLive.Index, :index)
       live("/inventory/new", Inventory.InventoryLive.New, :new)
-      live("/inventory/:id/edit", Inventory.InventoryLive.EditModalLive, :edit)
+      live("/inventory/:id/edit", Inventory.InventoryLive.Index, :edit)
       live("/orders", OrdersLive.Index, :index)
       live("/orders/:id", OrdersLive.Show, :show)
 

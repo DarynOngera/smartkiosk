@@ -243,11 +243,12 @@ defmodule SmartKioskWeb.UserAuth do
   end
 
   defp signed_in_path(conn_or_socket) do
-    current_user = case conn_or_socket do
-      %Plug.Conn{} = conn -> conn.assigns[:current_user]
-      %Phoenix.LiveView.Socket{} = socket -> socket.assigns[:current_user]
-      _ -> nil
-    end
+    current_user =
+      case conn_or_socket do
+        %Plug.Conn{} = conn -> conn.assigns[:current_user]
+        %Phoenix.LiveView.Socket{} = socket -> socket.assigns[:current_user]
+        _ -> nil
+      end
 
     if current_user && current_user.role == :cashier do
       ~p"/pos"

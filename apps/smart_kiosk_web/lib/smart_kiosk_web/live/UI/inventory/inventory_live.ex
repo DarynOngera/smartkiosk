@@ -18,8 +18,7 @@ defmodule SmartKioskWeb.UI.Inventory.InventoryLive.Index do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    # or params["id"] if you used "/inventory/#{id}/edit"
-    edit_id = params["edit"]
+    edit_id = params["edit"] || params["id"]
     shop = socket.assigns.current_shop
 
     edit_product =
