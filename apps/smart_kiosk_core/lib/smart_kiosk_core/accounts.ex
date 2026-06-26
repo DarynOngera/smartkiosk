@@ -10,7 +10,7 @@ defmodule SmartKioskCore.Accounts do
 
   import Ecto.Query
   alias SmartKioskCore.Repo
-  alias SmartKioskCore.Schemas.{Shop, User, UserToken}
+  alias SmartKioskCore.Schemas.{Shop, User, UserToken, Rider}
 
   # ── User queries ─────────────────────────────────────────────────────────────
 
@@ -278,6 +278,22 @@ defmodule SmartKioskCore.Accounts do
     else
       _ -> {:error, :invalid_token}
     end
+  end
+
+
+  #getting all the riders
+  def get_riders do
+    query = from(r in Rider,
+      join: u in User, on: u.id == r.user_id,
+      where: u.role == :rider,
+      preload: [user: u]
+    )
+    
+    Repo.paginate(query)
+  end
+  def get_cashiers do
+    from(u in User, where: u.role == :cashier)
+    |> Repo.all()
   end
 
   defp wrap_with_user(%User{} = user), do: {user, nil}

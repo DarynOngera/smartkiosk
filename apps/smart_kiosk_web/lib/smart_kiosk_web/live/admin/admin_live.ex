@@ -2,24 +2,26 @@ defmodule SmartKioskWeb.AdminLive do
   use SmartKioskWeb, :live_view
 
   alias SmartKioskCore.Shops
+  alias SmartKioskCore.Accounts
+
+  @default_page_size 10
 
   @impl true
   def mount(_params, _session, socket) do
     current_user = socket.assigns[:current_user]
     current_shop = current_user && Shops.get_shop_for_user(current_user)
 
-    pending_approval = Shops.get_pending_status()
-    shops = Shops.list_shops()
+    shops_page = Shops.list_shops(page: 1, page_size: @default_page_size)
+    pending_page = Shops.get_pending_status(page: 1, page_size: @default_page_size)
 
-    # Calculate stats
-    total_shops = length(shops)
-    active_shops = Enum.count(shops, fn s -> s.status == :active end)
-    pending_count = length(pending_approval)
+    total_shops = Shops.count_shops()
+    active_shops = Shops.count_shops(status: :active)
 
     # Placeholder data for features not yet implemented
     # TODO: Replace with actual queries when schemas are created
     # TODO: Shops.list_riders()
-    riders = []
+    riders = Accounts.get_riders()
+    cashiers = Accounts.get_cashiers()
     # TODO: Shops.list_customer_reports()
     customer_reports = []
     # TODO: Shops.list_pickup_points()
@@ -30,12 +32,13 @@ defmodule SmartKioskWeb.AdminLive do
     {:ok,
      socket
      |> assign(:current_shop, current_shop)
-     |> assign(:shops, shops)
-     |> assign(:pending, pending_approval)
+     |> assign(:shops, shops_page.entries)
+     |> assign(:pending, pending_page.entries)
      |> assign(:total_shops, total_shops)
      |> assign(:active_shops, active_shops)
-     |> assign(:pending_count, pending_count)
+     |> assign(:pending_count, pending_page.total_entries)
      |> assign(:riders, riders)
+     |> assign(:cashiers, cashiers)
      |> assign(:customer_reports, customer_reports)
      |> assign(:pickup_points, pickup_points)
      |> assign(:hotspots, hotspots)
@@ -49,16 +52,18 @@ defmodule SmartKioskWeb.AdminLive do
 
     case Shops.approve_shop(shop) do
       {:ok, _shop} ->
-        pending_approval = Shops.get_pending_status()
-        shops = Shops.list_shops()
+        shops_page = Shops.list_shops(page: 1, page_size: @default_page_size)
+        pending_page = Shops.get_pending_status(page: 1, page_size: @default_page_size)
+        total_shops = Shops.count_shops()
+        active_shops = Shops.count_shops(status: :active)
 
         {:noreply,
          socket
-         |> assign(:shops, shops)
-         |> assign(:pending, pending_approval)
-         |> assign(:total_shops, length(shops))
-         |> assign(:active_shops, Enum.count(shops, fn s -> s.status == :active end))
-         |> assign(:pending_count, length(pending_approval))
+         |> assign(:shops, shops_page.entries)
+         |> assign(:pending, pending_page.entries)
+         |> assign(:total_shops, total_shops)
+         |> assign(:active_shops, active_shops)
+         |> assign(:pending_count, pending_page.total_entries)
          |> put_flash(:info, "Shop approved successfully")}
 
       {:error, _changeset} ->
@@ -72,14 +77,18 @@ defmodule SmartKioskWeb.AdminLive do
 
     case Shops.reject_shop(shop) do
       {:ok, _shop} ->
-        pending_approval = Shops.get_pending_status()
-        shops = Shops.list_shops()
+        shops_page = Shops.list_shops(page: 1, page_size: @default_page_size)
+        pending_page = Shops.get_pending_status(page: 1, page_size: @default_page_size)
+        total_shops = Shops.count_shops()
+        active_shops = Shops.count_shops(status: :active)
 
         {:noreply,
          socket
-         |> assign(:shops, shops)
-         |> assign(:pending, pending_approval)
-         |> assign(:pending_count, length(pending_approval))
+         |> assign(:shops, shops_page.entries)
+         |> assign(:pending, pending_page.entries)
+         |> assign(:total_shops, total_shops)
+         |> assign(:active_shops, active_shops)
+         |> assign(:pending_count, pending_page.total_entries)
          |> put_flash(:info, "Shop rejected")}
 
       {:error, _changeset} ->

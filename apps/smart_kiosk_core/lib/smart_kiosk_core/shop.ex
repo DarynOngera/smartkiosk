@@ -134,6 +134,7 @@ defmodule SmartKioskCore.Shops do
     end
   end
 
+  @spec register_shop_user(%SmartKioskCore.Schemas.Shop{}, any()) :: any()
   @doc "Registers a staff user under an existing shop."
   def register_shop_user(%Shop{} = shop, attrs) do
     Repo.transaction(fn ->
@@ -163,9 +164,19 @@ defmodule SmartKioskCore.Shops do
     |> tap(&enqueue_search_indexing(&1, "shop"))
   end
 
-  @doc "Lists all shops."
-  def list_shops do
-    Repo.all(Shop)
+  @doc """
+  Lists shops with pagination.
+
+  Returns a `%Scrivener.Page{}` struct with entries and pagination metadata.
+
+  Options:
+    - page: integer (default 1)
+    - page_size: integer (default 20)
+  """
+  def list_shops(opts \\ []) do
+    Shop
+    |> order_by([s], desc: s.inserted_at)
+    |> Repo.paginate(opts)
   end
 
   @doc "Gets multiple shops by their IDs."
@@ -280,8 +291,16 @@ defmodule SmartKioskCore.Shops do
   @doc "Gets a shop by slug (used for public storefront URLs)."
   def get_shop_by_slug(slug), do: Repo.get_by(Shop, slug: slug, status: :active)
 
-  @doc "Searches shops by name or description."
-  def search_shops(query) do
+  @doc """
+  Searches shops by name or description with pagination.
+
+  Returns a `%Scrivener.Page{}` struct with entries and pagination metadata.
+
+  Options:
+    - page: integer (default 1)
+    - page_size: integer (default 20)
+  """
+  def search_shops(query, opts \\ []) do
     term = "%#{query}%"
 
     from(s in Shop,
@@ -289,7 +308,7 @@ defmodule SmartKioskCore.Shops do
       where: s.status == :active,
       order_by: [desc: s.inserted_at]
     )
-    |> Repo.all()
+    |> Repo.paginate(opts)
   end
 
   defp point_in_ring?(ring, point_x, point_y) when is_list(ring) do
@@ -324,10 +343,11 @@ defmodule SmartKioskCore.Shops do
 
   # =================for admin side =========================
   # check for status:pending review
-  def get_pending_status do
+  def get_pending_status(opts \\ []) do
     Shop
     |> where([s], s.status == :pending_review)
-    |> Repo.all()
+    |> order_by([s], desc: s.inserted_at)
+    |> Repo.paginate(opts)
   end
 
   # approve the shop
@@ -358,25 +378,60 @@ defmodule SmartKioskCore.Shops do
   # end
 
   # =================HELPERS=================
-  @doc "Lists all staff for a given shop."
-  def list_shop_users(%Shop{id: shop_id}) do
+
+  @doc """
+  Counts shops, optionally filtered by status.
+
+  Options:
+    - status: atom or nil
+  """
+  def count_shops(opts \\ []) do
+    Shop
+    |> filter_by_status(opts[:status])
+    |> Repo.aggregate(:count, :id)
+  end
+
+  defp filter_by_status(query, nil), do: query
+
+  defp filter_by_status(query, status) when is_atom(status) do
+    where(query, [s], s.status == ^status)
+  end
+
+  @doc """
+  Lists all staff for a given shop with pagination.
+
+  Returns a `%Scrivener.Page{}` struct with entries and pagination metadata.
+
+  Options:
+    - page: integer (default 1)
+    - page_size: integer (default 20)
+  """
+  def list_shop_users(%Shop{id: shop_id}, opts \\ []) do
     from(u in User,
       where: u.shop_id == ^shop_id and u.role in [:owner, :manager, :staff, :rider],
       order_by: [asc: u.role, asc: u.full_name],
       preload: [:rider_profile]
     )
-    |> Repo.all()
+    |> Repo.paginate(opts)
   end
 
-  @doc "Lists job applications for a shop, optionally filtered by status."
-  def list_job_applications(%Shop{id: shop_id}, status \\ nil) do
+  @doc """
+  Lists job applications for a shop, optionally filtered by status, with pagination.
+
+  Returns a `%Scrivener.Page{}` struct with entries and pagination metadata.
+
+  Options:
+    - page: integer (default 1)
+    - page_size: integer (default 20)
+  """
+  def list_job_applications(%Shop{id: shop_id}, status \\ nil, opts \\ []) do
     Rider
     |> join(:inner, [r], u in User, on: r.user_id == u.id)
     |> where([r, u], u.shop_id == ^shop_id)
     |> filter_rider_application_status(status)
     |> order_by([r, u], desc: r.inserted_at)
     |> preload([:user, :job_post])
-    |> Repo.all()
+    |> Repo.paginate(opts)
   end
 
   def list_rider_applications(shop, status \\ nil), do: list_job_applications(shop, status)
@@ -489,6 +544,9 @@ defmodule SmartKioskCore.Shops do
       end
     end
   end
+
+
+  
 
   @doc "Counts active riders for a shop."
   def count_riders(%Shop{id: shop_id}) do

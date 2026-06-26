@@ -60,6 +60,15 @@
           </div>
           <p class="text-3xl font-bold"><%= length(@riders) %></p>
         </div>
+        <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 bg-violet-500/20 rounded-lg flex items-center justify-center">
+              <.icon name="hero-users" class="w-5 h-5 text-violet-400" />
+            </div>
+            <span class="text-slate-400 text-sm">Cashiers</span>
+          </div>
+          <p class="text-3xl font-bold"><%= length(@cashiers) %></p>
+        </div>
       </div>
 
       <%!-- Main Dashboard Content --%>
@@ -154,7 +163,7 @@
                   </tr>
                 </thead>
                 <tbody class="text-sm">
-                  <%= for shop <- Enum.take(@shops, 10) do %>
+                  <%= for shop <- @shops do %>
                     <tr class="border-b border-white/5 last:border-0">
                       <td class="py-3">
                         <div class="flex items-center gap-2">
@@ -184,11 +193,14 @@
               </table>
             </div>
 
-            <%= if length(@shops) > 10 do %>
-              <p class="text-center text-slate-500 text-sm mt-4">
-                And <%= length(@shops) - 10 %> more shops...
-              </p>
-            <% end %>
+            <div class="text-center mt-4">
+              <.link
+                navigate="/admin/shops"
+                class="text-sm text-blue-400 hover:text-blue-300 underline underline-offset-2"
+              >
+                View all shops →
+              </.link>
+            </div>
           </section>
         </div>
 
@@ -218,8 +230,8 @@
                       <.icon name="hero-user" class="w-5 h-5 text-violet-400" />
                     </div>
                     <div>
-                      <p class="font-medium"><%= rider.name %></p>
-                      <p class="text-slate-400 text-sm"><%= rider.phone %></p>
+                      <p class="font-medium"><%= rider.user.full_name %></p>
+                      <p class="text-slate-400 text-sm"><%= rider.user.phone %></p>
                     </div>
                     <span class={[
                       "ml-auto px-2 py-1 rounded-full text-xs font-semibold",

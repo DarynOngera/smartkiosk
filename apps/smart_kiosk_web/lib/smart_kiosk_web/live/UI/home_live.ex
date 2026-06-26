@@ -123,7 +123,7 @@ defmodule SmartKioskWeb.HomeLive do
   end
 
   def handle_info(:reshuffle, socket) do
-    # Get current (already filtered) product lists from assign
+    # Get current (already filtered] product lists from assign
     current_products_by_category = socket.assigns.products_by_category
 
     # Re‑shuffle each category's products
